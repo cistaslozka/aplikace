@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cistaslozka.cz | Fakturační a právní systém</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           1. BAREVNÝ SYSTÉM PODLE LOGA CISTASLOZKA.CZ (BEZ EMOJI, ČISTÁ SYMETRIE)
+           ========================================================================== */
+        :root {
+            --navy-primary: #173753;
+            --navy-dark: #0F263A;
+            --navy-Tint: #F0F5F9;
+
+            --green-primary: #159A62;
+            --green-hover: #107C4E;
+            --green-tint: #EAF6F0;
+
+            --bg-body: #F4F7FA;
+            --bg-surface: #FFFFFF;
+            --bg-muted: #F8FAFC;
+
+            --text-dark: #0F172A;
+            --text-medium: #334155;
+            --text-light: #64748B;
+
+            --border-std: #CBD5E1;
+            --border-subtle: #E2E8F0;
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+
+            --shadow-card: 0 2px 6px rgba(23, 55, 83, 0.05), 0 1px 2px rgba(23, 55, 83, 0.04);
+            --shadow-dropdown: 0 12px 28px rgba(15, 38, 58, 0.16);
+            --shadow-a4: 0 14px 40px rgba(15, 38, 58, 0.12);
+
+            --base-font: 16px;
+        }
+
+        body.large-text {
+            --base-font: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: var(--base-font);
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            line-height: 1.55;
+            overflow-x: hidden;
+            font-variant-numeric: tabular-nums;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--navy-primary);
+            letter-spacing: -0.02em;
+        }
+
+        /* ==========================================================================
+           2. HORNÍ HLAVNÍ LIŠTA A ROZBALOVACÍ KATEGORIE (SMĚREM DOLŮ)
+           ========================================================================== */
+        .top-header {
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-std);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-card);
+        }
+
+        .top-header-upper {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .brand-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--navy-primary);
+            letter-spacing: -0.03em;
+        }
+
+        .brand-title span {
+            color: var(--green-primary);
+        }
+
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Přepínač tarifu OSVČ / s.r.o. */
+        .tariff-pill-switch {
+            display: inline-flex;
+            background: var(--navy-Tint);
+            padding: 0.25rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-std);
+        }
+
+        .tariff-pill-btn {
+            border: none;
+            background: transparent;
+            padding: 0.45rem 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-medium);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tariff-pill-btn.active {
+            background: var(--navy-primary);
+            color: #FFFFFF;
+        }
+
+        .btn-top-nav {
+            padding: 0.55rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-std);
+            background: var(--bg-surface);
+            color: var(--navy-primary);
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-top-nav:hover {
+            background: var(--navy-Tint);
+        }
+
+        .btn-top-nav.active {
+            background: var(--green-primary);
+            color: #FFFFFF;
+            border-color: var(--green-primary);
+        }
+
+        /* Druhá řada horní lišty: Rozbalovací kategorie dokumentů */
+        .category-navbar {
+            background: var(--navy-primary);
+            border-top: 1px solid var(--navy-dark);
+        }
+
+        .category-navbar-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .cat-dropdown {
+            position: relative;
+        }
+
+        .cat-trigger {
+            background: transparent;
+            color: #FFFFFF;
+            border: none;
+            padding: 0.9rem 1.15rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 3px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .cat-trigger:hover,
+        .cat-dropdown.open .cat-trigger {
+            background: rgba(255, 255, 255, 0.08);
+            border-bottom-color: var(--green-primary);
+        }
+
+        .chevron-down {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 5px solid #FFFFFF;
+            opacity: 0.8;
+        }
+
+        .cat-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 290px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-std);
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            box-shadow: var(--shadow-dropdown);
+            padding: 0.5rem;
+            display: none;
+            z-index: 2000;
+        }
+
+        .cat-dropdown.open .cat-menu {
+            display: block;
+        }
+
+        .cat-menu-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.7rem 0.95rem;
+            border: none;
+            background: transparent;
+            color: var(--text-dark);
+            font-size: 0.92rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+
+        .cat-menu-item:hover {
+            background: var(--green-tint);
+            color: var(--green-hover);
+            font-weight: 600;
+        }
+
+        .cat-menu-item.active {
+            background: var(--navy-primary);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .sro-badge {
+            background: var(--green-primary);
+            color: #FFFFFF;
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            margin-left: 0.35rem;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* ==========================================================================
+           3. HLAVNÍ KONTEJNER (ŽÁDNÉ SCROLLOVÁNÍ DO STRANY, VŠE POD SEBOU)
+           ========================================================================== */
+        .main-container {
+            max-width: 1120px;
+            margin: 2rem auto 4rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* ==========================================================================
+           4. OBRAZOVKA: ONBOARDING (VÝBĚR OSVČ / FIRMA S.R.O.)
+           ========================================================================== */
+        .onboarding-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .onboarding-card {
+            background: var(--bg-surface);
+            border: 2px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 2.25rem;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: border-color 0.2s;
+        }
+
+        .onboarding-card:hover {
+            border-color: var(--green-primary);
+        }
+
+        .onboarding-tag {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+        }
+
+        .tag-green {
+            background: var(--green-tint);
+            color: var(--green-primary);
+        }
+
+        .tag-navy {
+            background: var(--navy-Tint);
+            color: var(--navy-primary);
+        }
+
+        .clean-list {
+            list-style: none;
+            margin: 1.5rem 0 2rem 0;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 1.25rem;
+        }
+
+        .clean-list li {
+            padding: 0.5rem 0;
+            font-size: 0.95rem;
+            color: var(--text-medium);
+            display: flex;
+            align-items: baseline;
+            gap: 0.65rem;
+        }
+
+        .clean-list li::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            background: var(--green-primary);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ==========================================================================
+           5. OBRAZOVKA: ARCHIV A PŘEHLED VYSTAVENÝCH DOKLADŮ (UPRAVIT / TISK)
+           ========================================================================== */
+        .archive-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-md);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .archive-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .archive-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .archive-table th {
+            text-align: left;
+            padding: 0.85rem 1rem;
+            background: var(--navy-Tint);
+            color: var(--navy-primary);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-std);
+        }
+
+        .archive-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        .archive-table tr:hover td {
+            background: var(--bg-muted);
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 0.25rem 0.65rem;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: var(--green-tint);
+            color: var(--green-primary);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .btn-sm {
+            padding: 0.45rem 0.85rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            border: 1px solid var(--border-std);
+            background: var(--bg-surface);
+            color: var(--navy-primary);
+            transition: all 0.15s;
+        }
+
+        .btn-sm:hover {
+            background: var(--navy-primary);
+            color: #FFFFFF;
+            border-color: var(--navy-primary);
+        }
+
+        .btn-sm.green {
+            background: var(--green-primary);
+            color: #FFFFFF;
+            border-color: var(--green-primary);
+        }
+
+        .btn-sm.green:hover {
+            background: var(--green-hover);
+        }
+
+        /* ==========================================================================
+           6. SYMETRICKÝ FORMULÁŘ PRO VYPLŇOVÁNÍ DOKUMENTU (NAHOŘE NAD A4)
+           ========================================================================== */
+        .builder-top-bar {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-md);
+            padding: 1.35rem 1.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .doc-breadcrumb {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--green-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .builder-top-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary-green {
+            background: var(--green-primary);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.8rem 1.4rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-primary-green:hover {
+            background: var(--green-hover);
+        }
+
+        .btn-secondary-navy {
+            background: var(--navy-primary);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.8rem 1.3rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-secondary-navy:hover {
+            background: var(--navy-dark);
+        }
+
+        /* Symetrická mřížka pro Stranu 1 a Stranu 2 */
+        .parties-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-md);
+            padding: 1.6rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .card-header-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.85rem;
+            margin-bottom: 1.25rem;
+            border-bottom: 2px solid var(--navy-Tint);
+        }
+
+        .card-step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--navy-primary);
+            color: #FFFFFF;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+
+        .card-header-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--navy-primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .ares-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--green-primary);
+            background: var(--green-tint);
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        /* Perfektně zarovnaná mřížka polí uvnitř karet */
+        .sym-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sym-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sym-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .field-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field-box.full-span {
+            grid-column: 1 / -1;
+        }
+
+        .field-label {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--text-medium);
+            margin-bottom: 0.4rem;
+        }
+
+        .field-input,
+        .field-select,
+        .field-textarea {
+            width: 100%;
+            padding: 0.68rem 0.85rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text-dark);
+            background: var(--bg-muted);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-sm);
+            transition: all 0.15s;
+        }
+
+        .field-input:focus,
+        .field-select:focus,
+        .field-textarea:focus {
+            outline: none;
+            background: var(--bg-surface);
+            border-color: var(--green-primary);
+            box-shadow: 0 0 0 3px rgba(21, 154, 98, 0.14);
+        }
+
+        .ares-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-ares {
+            background: var(--navy-primary);
+            color: #FFFFFF;
+            border: none;
+            padding: 0 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s;
+        }
+
+        .btn-ares:hover {
+            background: var(--green-primary);
+        }
+
+        /* Rychlá tlačítka splatnosti (+7, +14, +30, Vlastní) */
+        .due-btn-group {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.35rem;
+        }
+
+        .due-btn {
+            padding: 0.65rem 0.4rem;
+            border: 1px solid var(--border-std);
+            background: var(--bg-muted);
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 0.84rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .due-btn.active {
+            background: var(--green-primary);
+            color: #FFFFFF;
+            border-color: var(--green-primary);
+        }
+
+        /* ==========================================================================
+           7. PŘEPÍNAČ 3 ŠABLON A PLNÁ ŠÍŘKA PAPÍRU A4 DOLE POD FORMULÁŘEM
+           ========================================================================== */
+        .template-bar {
+            max-width: 860px;
+            margin: 2rem auto 1rem auto;
+            background: var(--navy-primary);
+            color: #FFFFFF;
+            padding: 0.9rem 1.5rem;
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .template-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tpl-option-btn {
+            background: rgba(255, 255, 255, 0.12);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tpl-option-btn.active {
+            background: var(--green-primary);
+            border-color: var(--green-primary);
+        }
+
+        /* Plátno pro list A4 */
+        .a4-wrapper {
+            display: flex;
+            justify-content: center;
+        }
+
+        .a4-document {
+            width: 100%;
+            max-width: 860px;
+            min-height: 1120px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-std);
+            box-shadow: var(--shadow-a4);
+            padding: 3.5rem 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* --- ŠABLONA 1: MINIMALISTICKÁ --- */
+        .a4-document.tpl-minimal {
+            font-family: 'Inter', sans-serif;
+            border-top: 8px solid var(--green-primary);
+        }
+        .tpl-minimal .doc-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-subtle);
+        }
+        .tpl-minimal .doc-title {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: var(--navy-primary);
+        }
+        .tpl-minimal .doc-parties-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .tpl-minimal .doc-party-card {
+            background: var(--bg-muted);
+            border: 1px solid var(--border-subtle);
+            padding: 1.25rem;
+            border-radius: var(--radius-sm);
+        }
+
+        /* --- ŠABLONA 2: KORPORÁTNÍ (Tradiční úřední) --- */
+        .a4-document.tpl-corporate {
+            font-family: 'Lora', Georgia, serif;
+            color: #000000;
+        }
+        .tpl-corporate .doc-head {
+            border: 2px solid #000000;
+            padding: 1.25rem;
+            margin-bottom: 1.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #F8FAFC;
+        }
+        .tpl-corporate .doc-title {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #000000;
+            text-transform: uppercase;
+        }
+        .tpl-corporate .doc-parties-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 2px solid #000000;
+            margin-bottom: 2rem;
+        }
+        .tpl-corporate .doc-party-card {
+            padding: 1.25rem;
+        }
+        .tpl-corporate .doc-party-card:first-child {
+            border-right: 2px solid #000000;
+        }
+
+        /* --- ŠABLONA 3: KREATIVNÍ (Firemní barvy čistásložka.cz) --- */
+        .a4-document.tpl-creative {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            padding-top: 0;
+        }
+        .tpl-creative .doc-head {
+            background: linear-gradient(135deg, var(--navy-primary) 0%, var(--green-primary) 100%);
+            color: #FFFFFF;
+            margin: 0 -4rem 2.25rem -4rem;
+            padding: 2.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .tpl-creative .doc-title {
+            color: #FFFFFF;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+        .tpl-creative .doc-parties-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .tpl-creative .doc-party-card {
+            background: var(--navy-Tint);
+            border-left: 5px solid var(--green-primary);
+            padding: 1.25rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .party-caption {
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--green-primary);
+            margin-bottom: 0.45rem;
+        }
+        .tpl-corporate .party-caption {
+            color: #000000;
+            text-decoration: underline;
+        }
+
+        .doc-meta-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background: var(--bg-muted);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 1.25rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .doc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+        .doc-table th {
+            background: var(--navy-primary);
+            color: #FFFFFF;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+        }
+        .tpl-corporate .doc-table th {
+            background: #E2E8F0;
+            color: #000000;
+            border: 1px solid #000000;
+        }
+        .doc-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-std);
+        }
+        .tpl-corporate .doc-table td {
+            border: 1px solid #000000;
+        }
+
+        .doc-bottom-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 2px solid var(--navy-primary);
+        }
+
+        .qr-box {
+            border: 2px solid var(--navy-primary);
+            padding: 0.5rem;
+            border-radius: 6px;
+            width: 115px;
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .price-highlight-box {
+            background: var(--green-tint);
+            border: 2px solid var(--green-primary);
+            padding: 1rem 1.65rem;
+            border-radius: var(--radius-sm);
+            text-align: right;
+        }
+
+        .doc-signatures-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-top: 3.5rem;
+            padding-top: 1rem;
+        }
+
+        .signature-script {
+            font-family: 'Lora', Georgia, serif;
+            font-style: italic;
+            font-size: 1.3rem;
+            color: var(--navy-primary);
+            text-align: center;
+            min-height: 32px;
+            margin-bottom: 0.35rem;
+        }
+
+        .signature-line {
+            border-top: 1.5px solid var(--text-dark);
+            padding-top: 0.45rem;
+            text-align: center;
+            font-size: 0.86rem;
+            color: var(--text-medium);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ==========================================================================
+           8. ČISTÝ TISK A STÁHNUTÍ DO PDF (VYTISKNE SE POUZE DOKUMENT A4)
+           ========================================================================== */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 12mm;
+            }
+            body {
+                background: #FFFFFF !important;
+            }
+            .top-header,
+            #view-onboarding,
+            #view-archive,
+            .builder-top-bar,
+            .parties-form-grid,
+            #specific-form-card,
+            .template-bar {
+                display: none !important;
+            }
+            .main-container,
+            #view-builder,
+            .a4-wrapper {
+                display: block !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .a4-document {
+                box-shadow: none !important;
+                border: none !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                min-height: auto !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .onboarding-grid,
+            .parties-form-grid,
+            .sym-grid-2,
+            .sym-grid-3,
+            .sym-grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================================================
+         HORNÍ NAVIGAČNÍ PANEL + ROZBALOVACÍ KATEGORIE DOKUMENTŮ SMĚREM DOLŮ
+         ========================================================================== -->
+    <header class="top-header">
+        <div class="top-header-upper">
+            <div class="brand-box" onclick="switchView('builder')">
+                <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
+                    <path d="M8 18C8 14.6863 10.6863 12 14 12H26L32 18H50C53.3137 18 56 20.6863 56 24V48C56 51.3137 53.3137 54 50 54H14C10.6863 54 8 51.3137 8 48V18Z" fill="#173753"/>
+                    <path d="M12 54C24 54 38 42 56 26V48C56 51.3137 53.3137 54 50 54H12Z" fill="#159A62"/>
+                </svg>
+                <div class="brand-title">cistaslozka<span>.cz</span></div>
+            </div>
+
+            <div class="top-controls">
+                <div class="tariff-pill-switch">
+                    <button type="button" class="tariff-pill-btn" id="tariff-btn-osvc" onclick="setTariff('osvc')">Tarif OSVČ</button>
+                    <button type="button" class="tariff-pill-btn active" id="tariff-btn-sro" onclick="setTariff('sro')">Tarif Firma (s.r.o.)</button>
+                </div>
+
+                <button type="button" class="btn-top-nav active" id="nav-btn-builder" onclick="switchView('builder')">
+                    Tvorba dokumentu
+                </button>
+                <button type="button" class="btn-top-nav" id="nav-btn-archive" onclick="switchView('archive')">
+                    Archiv a přehled dokladů (<span id="archive-count">4</span>)
+                </button>
+                <button type="button" class="btn-top-nav" id="nav-btn-onboarding" onclick="switchView('onboarding')">
+                    Změna tarifu
+                </button>
+                <button type="button" class="btn-top-nav" onclick="document.body.classList.toggle('large-text')">
+                    Zvětšit písmo (A+)
+                </button>
+            </div>
+        </div>
+
+        <!-- HORIZONTÁLNÍ LIŠTA KATEGORIÍ (Po kliknutí se rozbalí směrem dolů) -->
+        <nav class="category-navbar">
+            <div class="category-navbar-inner">
+                
+                <!-- 1. FAKTURACE -->
+                <div class="cat-dropdown">
+                    <button type="button" class="cat-trigger" onclick="toggleDropdown(event, this)">
+                        <span>1. Fakturace a platby</span>
+                        <span class="chevron-down"></span>
+                    </button>
+                    <div class="cat-menu">
+                        <button type="button" class="cat-menu-item active" data-doc="faktura_bez_dph" onclick="selectDoc('faktura_bez_dph')">Faktura (Neplátce – bez DPH)</button>
+                        <button type="button" class="cat-menu-item" data-doc="faktura_s_dph" onclick="selectDoc('faktura_s_dph')">Faktura s DPH (Daňový doklad)</button>
+                        <button type="button" class="cat-menu-item" data-doc="zalohova_faktura" onclick="selectDoc('zalohova_faktura')">Zálohová (Proforma) faktura</button>
+                        <button type="button" class="cat-menu-item" data-doc="upominka" onclick="selectDoc('upominka')">Upomínka k úhradě faktury</button>
+                    </div>
+                </div>
+
+                <!-- 2. OBCHODNÍ SMLOUVY & KNOW-HOW -->
+                <div class="cat-dropdown">
+                    <button type="button" class="cat-trigger" onclick="toggleDropdown(event, this)">
+                        <span>2. Obchodní smlouvy a NDA</span>
+                        <span class="chevron-down"></span>
+                    </button>
+                    <div class="cat-menu">
+                        <button type="button" class="cat-menu-item" data-doc="smlouva_o_dilo" onclick="selectDoc('smlouva_o_dilo')">Smlouva o dílo</button>
+                        <button type="button" class="cat-menu-item" data-doc="smlouva_sluzby" onclick="selectDoc('smlouva_sluzby')">Smlouva o poskytování služeb</button>
+                        <button type="button" class="cat-menu-item" data-doc="licencni_smlouva" onclick="selectDoc('licencni_smlouva')">Licenční smlouva</button>
+                        <button type="button" class="cat-menu-item" data-doc="nda" onclick="selectDoc('nda')">Dohoda o mlčenlivosti (NDA)</button>
+                    </div>
+                </div>
+
+                <!-- 3. PROTOKOLY A PROVOZ -->
+                <div class="cat-dropdown">
+                    <button type="button" class="cat-trigger" onclick="toggleDropdown(event, this)">
+                        <span>3. Protokoly a cestovní příkazy</span>
+                        <span class="chevron-down"></span>
+                    </button>
+                    <div class="cat-menu">
+                        <button type="button" class="cat-menu-item" data-doc="predavaci_protokol" onclick="selectDoc('predavaci_protokol')">Předávací protokol díla</button>
+                        <button type="button" class="cat-menu-item" data-doc="cestovni_prikaz" onclick="selectDoc('cestovni_prikaz')">Cestovní příkaz (Vyúčtování)</button>
+                    </div>
+                </div>
+
+                <!-- 4. HR A ZAMĚSTNANCI (Pouze tarif s.r.o.) -->
+                <div class="cat-dropdown sro-only-menu">
+                    <button type="button" class="cat-trigger" onclick="toggleDropdown(event, this)">
+                        <span>4. HR a Zaměstnanci <span class="sro-badge">s.r.o.</span></span>
+                        <span class="chevron-down"></span>
+                    </button>
+                    <div class="cat-menu">
+                        <button type="button" class="cat-menu-item" data-doc="hpp" onclick="selectDoc('hpp')">Pracovní smlouva (HPP)</button>
+                        <button type="button" class="cat-menu-item" data-doc="dpp" onclick="selectDoc('dpp')">Dohoda o provedení práce (DPP)</button>
+                        <button type="button" class="cat-menu-item" data-doc="dpc" onclick="selectDoc('dpc')">Dohoda o pracovní činnosti (DPČ)</button>
+                        <button type="button" class="cat-menu-item" data-doc="mzdovy_vymer" onclick="selectDoc('mzdovy_vymer')">Mzdový výměr</button>
+                        <button type="button" class="cat-menu-item" data-doc="rozvazani_dohodou" onclick="selectDoc('rozvazani_dohodou')">Rozvázání pracovního poměru dohodou</button>
+                        <button type="button" class="cat-menu-item" data-doc="vypoved" onclick="selectDoc('vypoved')">Výpověď z pracovního poměru</button>
+                        <button type="button" class="cat-menu-item" data-doc="vytykaci_dopis" onclick="selectDoc('vytykaci_dopis')">Vytýkací dopis zaměstnanci</button>
+                    </div>
+                </div>
+
+                <!-- 5. FIREMNÍ AGENDA A B2B (Pouze tarif s.r.o.) -->
+                <div class="cat-dropdown sro-only-menu">
+                    <button type="button" class="cat-trigger" onclick="toggleDropdown(event, this)">
+                        <span>5. Firemní agenda a B2B <span class="sro-badge">s.r.o.</span></span>
+                        <span class="chevron-down"></span>
+                    </button>
+                    <div class="cat-menu">
+                        <button type="button" class="cat-menu-item" data-doc="svereni_majetku" onclick="selectDoc('svereni_majetku')">Protokol o svěření majetku (Notebook / Auto)</button>
+                        <button type="button" class="cat-menu-item" data-doc="bozp_gdpr" onclick="selectDoc('bozp_gdpr')">Záznam o školení BOZP a GDPR</button>
+                        <button type="button" class="cat-menu-item" data-doc="dobropis" onclick="selectDoc('dobropis')">Dobropis (Opravný daňový doklad)</button>
+                        <button type="button" class="cat-menu-item" data-doc="pokladni_doklad" onclick="selectDoc('pokladni_doklad')">Pokladní doklad</button>
+                        <button type="button" class="cat-menu-item" data-doc="ramcova_smlouva" onclick="selectDoc('ramcova_smlouva')">Rámcová smlouva o spolupráci (B2B)</button>
+                        <button type="button" class="cat-menu-item" data-doc="plna_moc" onclick="selectDoc('plna_moc')">Plná moc k zastupování</button>
+                    </div>
+                </div>
+
+            </div>
+        </nav>
+    </header>
+
+    <!-- ==========================================================================
+         HLAVNÍ OBSAH STRÁNKY
+         ========================================================================== -->
+    <main class="main-container">
+
+        <!-- ======================================================================
+             POHLED A: ONBOARDING (ROZCESTNÍK OSVČ / FIRMA S.R.O.)
+             ====================================================================== -->
+        <section id="view-onboarding" class="hidden">
+            <div style="text-align: center; max-width: 680px; margin: 0 auto;">
+                <h1>Zvolte režim vašeho účtu</h1>
+                <p style="color: var(--text-medium); margin-top: 0.5rem;">
+                    Rozhraní systému čistásložka.cz se automaticky přizpůsobí vašemu typu podnikání.
+                </p>
+            </div>
+
+            <div class="onboarding-grid">
+                <div class="onboarding-card">
+                    <div>
+                        <span class="onboarding-tag tag-green">Parametr: plan_type = 'osvc'</span>
+                        <h2>Tarif OSVČ (Živnostník)</h2>
+                        <p style="color: var(--text-medium); margin-top: 0.4rem;">Přehledné rozhraní pro rychlou fakturaci a klientské smlouvy bez personální agendy.</p>
+                        <ul class="clean-list">
+                            <li>Faktury s DPH i bez DPH, zálohové faktury, QR platby a upomínky</li>
+                            <li>Smlouva o dílo a Smlouva o poskytování služeb</li>
+                            <li>Licenční smlouva a Dohoda o mlčenlivosti (NDA)</li>
+                            <li>Předávací protokoly, cestovní příkazy a Adresář klientů</li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-primary-green" style="width: 100%;" onclick="setTariff('osvc'); switchView('builder');">
+                        Aktivovat prostředí pro OSVČ
+                    </button>
+                </div>
+
+                <div class="onboarding-card">
+                    <div>
+                        <span class="onboarding-tag tag-navy">Parametr: plan_type = 'sro'</span>
+                        <h2>Tarif Firma (s.r.o.)</h2>
+                        <p style="color: var(--text-medium); margin-top: 0.4rem;">Kompletní agenda včetně pracovních smluv, ukončení poměru, majetku a B2B dokumentů.</p>
+                        <ul class="clean-list">
+                            <li>Pracovní smlouvy (HPP, DPP, DPČ) a mzdové výměry</li>
+                            <li>Rozvázání pracovního poměru dohodou, výpovědi a vytýkací dopisy</li>
+                            <li>Protokoly o svěření majetku (auta, notebooky), BOZP a GDPR</li>
+                            <li>Dobropisy, pokladní doklady, rámcové smlouvy a plné moci</li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-secondary-navy" style="width: 100%;" onclick="setTariff('sro'); switchView('builder');">
+                        Aktivovat firemní prostředí (s.r.o.)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================================
+             POHLED B: ARCHIV A PŘEHLED VYSTAVENÝCH FAKTUR A DOKUMENTŮ
+             ====================================================================== -->
+        <section id="view-archive" class="hidden">
+            <div class="archive-box">
+                <div class="archive-header">
+                    <div>
+                        <h1>Archiv vystavených faktur a dokumentů</h1>
+                        <p style="color: var(--text-medium); font-size: 0.95rem;">
+                            Zde vidíte všechny uložené doklady. Kterýkoliv dokument můžete jedním kliknutím otevřít k úpravě nebo ihned vytisknout do PDF.
+                        </p>
+                    </div>
+                    <button type="button" class="btn-primary-green" onclick="switchView('builder')">
+                        + Vytvořit nový dokument
+                    </button>
+                </div>
+
+                <table class="archive-table">
+                    <thead>
+                        <tr>
+                            <th>Číslo / Ev. ID</th>
+                            <th>Typ dokumentu</th>
+                            <th>Klient / Druhá strana</th>
+                            <th>Datum vystavení</th>
+                            <th>Částka / Údaj</th>
+                            <th>Stav</th>
+                            <th style="text-align: right;">Akce s dokumentem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="archive-tbody">
+                        <!-- Automaticky vykresluje JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ======================================================================
+             POHLED C: TVORBA DOKUMENTU (SYMETRICKÝ FORMULÁŘ NAHOŘE + A4 DOLE)
+             ====================================================================== -->
+        <section id="view-builder">
+
+            <!-- HORNÍ LIŠTA AKTIVNÍHO DOKUMENTU -->
+            <div class="builder-top-bar">
+                <div>
+                    <div class="doc-breadcrumb" id="active-doc-cat">Kategorie: 1. Fakturace a platby</div>
+                    <h1 id="active-doc-title" style="font-size: 1.6rem;">Faktura (Neplátce – bez DPH)</h1>
+                </div>
+                <div class="builder-top-actions">
+                    <button type="button" class="btn-secondary-navy" onclick="saveCurrentToArchive()">
+                        Uložit do archivu dokladů
+                    </button>
+                    <button type="button" class="btn-primary-green" onclick="window.print()">
+                        Stáhnout PDF / Vytisknout čistou A4
+                    </button>
+                </div>
+            </div>
+
+            <!-- KROK 1 & 2: SYMETRICKÉ VYPLNĚNÍ OBOU STRAN (MOJE FIRMA + DRUHÁ STRANA) -->
+            <div class="parties-form-grid">
+                
+                <!-- KARTA 1: MOJE FIRMA -->
+                <div class="form-section-card">
+                    <div class="card-header-line">
+                        <div class="card-header-title">
+                            <span class="card-step-number">1</span>
+                            <span id="label-party-1">Moje firma (Dodavatel)</span>
+                        </div>
+                        <span class="ares-tag">Napojeno na ARES</span>
+                    </div>
+
+                    <div class="sym-grid-2">
+                        <div class="field-box full-span">
+                            <label class="field-label">IČO vaší společnosti (automatické načtení z ARES)</label>
+                            <div class="ares-input-group">
+                                <input type="text" class="field-input" id="my-ico" value="08912345" oninput="renderA4()">
+                                <button type="button" class="btn-ares" onclick="fetchAres('my')">Načíst z ARES</button>
+                            </div>
+                        </div>
+
+                        <div class="field-box">
+                            <label class="field-label">Obchodní jméno / Název firmy</label>
+                            <input type="text" class="field-input" id="my-name" value="Ing. Jan Novák – IT Consulting" oninput="renderA4()">
+                        </div>
+
+                        <div class="field-box">
+                            <label class="field-label">DIČ / Daňový status</label>
+                            <input type="text" class="field-input" id="my-dic" value="Neplátce DPH" oninput="renderA4()">
+                        </div>
+
+                        <div class="field-box">
+                            <label class="field-label">Ulice a číslo popisné, město</label>
+                            <input type="text" class="field-input" id="my-address" value="Masarykova 412/18, 602 00 Brno" oninput="renderA4()">
+                        </div>
+
+                        <div class="field-box">
+                            <label class="field-label">Bankovní účet / Zastoupení</label>
+                            <input type="text" class="field-input" id="my-bank" value="1029384756/0800" oninput="renderA4()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARTA 2: DRUHÁ STRANA (KLIENT / ZAMĚSTNANEC) -->
+                <div class="form-section-card">
+                    <div class="card-header-line">
+                        <div class="card-header-title">
+                            <span class="card-step-number">2</span>
+                            <span id="label-party-2">Druhá strana (Odběratel)</span>
+                        </div>
+                        <span class="ares-tag">Napojeno na ARES</span>
+                    </div>
+
+                    <div class="sym-grid-2">
+                        <div class="field-box full-span">
+                            <label class="field-label" id="label-client-ico">IČO odběratele / klienta (zkuste např. 27082440 nebo 26168685)</label>
+                            <div class="ares-input-group">
+                                <input type="text" class="field-input" id="client-ico" value="27082440" oninput="renderA4()">
+                                <button type="button" class="btn-ares" id="btn-client-ares" onclick="fetchAres('client')">Načíst z ARES</button>
+                            </div>
+                        </div>
+
+                        <div class="field-box">
+                            <label class="field-label" id="label-client-name">Název firmy / Jméno a příjmení</label>
+                            <input type="text" class="field-input" id="client-name" value="Alza.cz a.s." oninput="renderA4()">
+                        </div>
+
+                        <div class="field-box">
+                            <label class="field-label" id="label-client-dic">DIČ klienta / Datum narození</label>
+                            <input type="text" class="field-input" id="client-dic" value="CZ27082440" oninput="renderA4()">
+                        </div>
+
+                        <div class="field-box full-span">
+                            <label class="field-label" id="label-client-address">Sídlo společnosti / Trvalé bydliště</label>
+                            <input type="text" class="field-input" id="client-address" value="Jankovcova 1522/53, 170 00 Praha 7" oninput="renderA4()">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- KROK 3: DYNAMICKÝ PANEL NASTAVENÍ SPECIFICKÝ PRO VYBRANÝ DOKUMENT -->
+            <div class="form-section-card" id="specific-form-card">
+                <div class="card-header-line">
+                    <div class="card-header-title">
+                        <span class="card-step-number">3</span>
+                        <span id="specific-panel-title">Parametry faktury, splatnost a fakturovaná částka</span>
+                    </div>
+                </div>
+
+                <!-- Společná řada datumů a čísla dokladu -->
+                <div class="sym-grid-4">
+                    <div class="field-box">
+                        <label class="field-label" id="label-doc-num">Číslo dokladu / Variabilní symbol</label>
+                        <input type="text" class="field-input" id="doc-number" value="20260048" oninput="renderA4()">
+                    </div>
+
+                    <div class="field-box">
+                        <label class="field-label" id="label-date-issue">Datum vystavení / uzavření</label>
+                        <input type="date" class="field-input" id="date-issue" onchange="recalcDueDate()">
+                    </div>
+
+                    <div class="field-box" id="box-due-buttons">
+                        <label class="field-label">Rychlá volba splatnosti / lhůty</label>
+                        <div class="due-btn-group">
+                            <button type="button" class="due-btn" id="due-7" onclick="setDueDays(7)">+7 dní</button>
+                            <button type="button" class="due-btn active" id="due-14" onclick="setDueDays(14)">+14 dní</button>
+                            <button type="button" class="due-btn" id="due-30" onclick="setDueDays(30)">+30 dní</button>
+                            <button type="button" class="due-btn" id="due-custom" onclick="setDueDays('custom')">Vlastní</button>
+                        </div>
+                    </div>
+
+                    <div class="field-box">
+                        <label class="field-label" id="label-date-due">Datum splatnosti</label>
+                        <input type="date" class="field-input" id="date-due" onchange="markCustomDue(); renderA4();">
+                    </div>
+                </div>
+
+                <!-- Dynamická pole podle toho, zda jde o Fakturu bez DPH, Fakturu s DPH, HR smlouvu nebo Dokument bez ceny -->
+                <div class="sym-grid-3" style="margin-bottom: 0;">
+                    
+                    <div class="field-box" id="box-subject" style="grid-column: span 2;">
+                        <label class="field-label" id="label-subject">Fakturovaná položka / Popis dodávky</label>
+                        <input type="text" class="field-input" id="doc-subject" value="Vývoj webové aplikace a návrh uživatelského rozhraní" oninput="renderA4()">
+                    </div>
+
+                    <!-- Pole pro doplňkový údaj u HR a nefinančních dokumentů (místo výkonu práce, SČ majetku atd.) -->
+                    <div class="field-box hidden" id="box-extra-detail">
+                        <label class="field-label" id="label-extra-detail">Místo výkonu práce / Doplňující údaj</label>
+                        <input type="text" class="field-input" id="doc-extra-detail" value="Brno / Práce na dálku" oninput="renderA4()">
+                    </div>
+
+                    <!-- Pole pro Částku / Mzdu (Skryje se u výpovědí, rozvázání poměru, vytýkacího dopisu, plné moci atd.) -->
+                    <div class="field-box" id="box-amount">
+                        <label class="field-label" id="label-amount">Celková částka (v Kč)</label>
+                        <input type="number" class="field-input" id="doc-amount" value="45000" oninput="renderA4()">
+                    </div>
+
+                    <!-- Pole pro sazbu DPH (Zobrazí se VÝHRADNĚ u Faktury s DPH a Dobropisu!) -->
+                    <div class="field-box hidden" id="box-vat">
+                        <label class="field-label">Sazba DPH</label>
+                        <select class="field-select" id="doc-vat" onchange="renderA4()">
+                            <option value="21">Základní sazba 21 % DPH</option>
+                            <option value="12">Snížená sazba 12 % DPH</option>
+                            <option value="reverse">Přenesená daňová povinnost (0 %)</option>
+                        </select>
+                    </div>
+
+                    <div class="field-box">
+                        <label class="field-label">Způsob úhrady / Forma předání</label>
+                        <select class="field-select" id="doc-payment" onchange="renderA4()">
+                            <option value="Bankovní převod">Bankovní převod (vč. QR)</option>
+                            <option value="Hotovostně">V hotovosti</option>
+                            <option value="Osobně oproti podpisu">Osobně oproti podpisu</option>
+                            <option value="Elektronicky">Elektronicky (Datová schránka / E-mail)</option>
+                        </select>
+                    </div>
+
+                    <div class="field-box">
+                        <label class="field-label">Elektronický podpis na dokumentu</label>
+                        <input type="text" class="field-input" id="doc-signature" value="Ing. Jan Novák, v. r." oninput="renderA4()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIŠTA VÝBĚRU 3 ŠABLON DOKUMENTU -->
+            <div class="template-bar">
+                <div>
+                    <strong>Vizuální šablona dokumentu A4:</strong>
+                </div>
+                <div class="template-buttons">
+                    <button type="button" class="tpl-option-btn active" id="tpl-btn-minimal" onclick="setTemplate('minimal')">
+                        1. Minimalistický vzor
+                    </button>
+                    <button type="button" class="tpl-option-btn" id="tpl-btn-corporate" onclick="setTemplate('corporate')">
+                        2. Korporátní vzor
+                    </button>
+                    <button type="button" class="tpl-option-btn" id="tpl-btn-creative" onclick="setTemplate('creative')">
+                        3. Kreativní vzor
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==================================================================
+                 PLNÝ FORMÁT A4 DOLE POD FORMULÁŘEM (ŽÁDNÉ OŘEZÁNÍ DO STRANY)
+                 ================================================================== -->
+            <div class="a4-wrapper">
+                <article id="a4-paper" class="a4-document tpl-minimal">
+                    
+                    <div>
+                        <!-- Hlavička A4 -->
+                        <div class="doc-head">
+                            <div>
+                                <div class="doc-title" id="a4-title">FAKTURA č. 20260048</div>
+                                <div id="a4-subtitle" style="font-size: 0.92rem; opacity: 0.85; margin-top: 0.2rem;">
+                                    Doklad vystavený neplátcem DPH
+                                </div>
+                            </div>
+                            <div style="text-align: right; font-size: 0.9rem;">
+                                <strong>cistaslozka.cz</strong><br>
+                                Evidenční č.: <span id="a4-ev">20260048</span>
+                            </div>
+                        </div>
+
+                        <!-- Obě smluvní strany -->
+                        <div class="doc-parties-grid">
+                            <div class="doc-party-card">
+                                <div class="party-caption" id="a4-role-1">Dodavatel</div>
+                                <strong style="font-size: 1.06rem;" id="a4-my-name">Ing. Jan Novák – IT Consulting</strong><br>
+                                <span id="a4-my-address">Masarykova 412/18, 602 00 Brno</span><br>
+                                <strong>IČO:</strong> <span id="a4-my-ico">08912345</span> | <span id="a4-my-dic">Neplátce DPH</span><br>
+                                <strong>Účet / Spojení:</strong> <span id="a4-my-bank">1029384756/0800</span>
+                            </div>
+
+                            <div class="doc-party-card">
+                                <div class="party-caption" id="a4-role-2">Odběratel</div>
+                                <strong style="font-size: 1.06rem;" id="a4-client-name">Alza.cz a.s.</strong><br>
+                                <span id="a4-client-address">Jankovcova 1522/53, 170 00 Praha 7</span><br>
+                                <span id="a4-client-meta-line"><strong>IČO:</strong> 27082440 | <strong>DIČ:</strong> CZ27082440</span>
+                            </div>
+                        </div>
+
+                        <!-- Datumový pruh -->
+                        <div class="doc-meta-strip">
+                            <div>
+                                <strong id="a4-label-date-1">Datum vystavení:</strong><br>
+                                <span id="a4-date-issue">18. 10. 2026</span>
+                            </div>
+                            <div>
+                                <strong id="a4-label-date-2">Datum splatnosti:</strong><br>
+                                <strong style="color: var(--green-primary);" id="a4-date-due">01. 11. 2026</strong>
+                            </div>
+                            <div>
+                                <strong id="a4-label-meta-3">Forma úhrady / předání:</strong><br>
+                                <span id="a4-payment">Bankovní převod (vč. QR)</span>
+                            </div>
+                        </div>
+
+                        <!-- Hlavní obsah dokumentu A4 -->
+                        <div id="a4-body-content">
+                            <!-- Dynamicky generuje JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Spodní souhrn a podpisy -->
+                    <div>
+                        <!-- Finanční souhrn (zobrazí se pouze u dokumentů s cenou/mzdou) -->
+                        <div class="doc-bottom-summary" id="a4-financial-footer">
+                            <div class="qr-box" id="a4-qr-box">
+                                <div style="background: var(--navy-primary); color: #fff; padding: 3px; border-radius: 3px; margin-bottom: 5px;">
+                                    QR PLATBA
+                                </div>
+                                <div style="height: 64px; border: 1px dashed var(--navy-primary); display: flex; align-items: center; justify-content: center; font-size: 0.65rem;">
+                                    SPD*1.0*ACC<br>Automatický QR
+                                </div>
+                            </div>
+
+                            <div class="price-highlight-box" style="margin-left: auto;">
+                                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-medium);" id="a4-total-caption">CELKEM K ÚHRADĚ</div>
+                                <div style="font-size: 1.85rem; font-weight: 800; color: var(--navy-primary);" id="a4-total-amount">45 000 Kč</div>
+                                <div style="font-size: 0.8rem; color: var(--text-light);" id="a4-total-subnote">Neplátce DPH – konečná částka</div>
+                            </div>
+                        </div>
+
+                        <div class="doc-signatures-grid">
+                            <div>
+                                <div class="signature-script" id="a4-signature-val">Ing. Jan Novák, v. r.</div>
+                                <div class="signature-line" id="a4-sign-label-1">Podpis vystavitele / první strany</div>
+                            </div>
+                            <div>
+                                <div class="signature-script"></div>
+                                <div class="signature-line" id="a4-sign-label-2">Podpis druhé strany</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </article>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ==========================================================================
+         JAVASCRIPT: LOGIKA VLASTNÍCH FORMULÁŘŮ PRO KAŽDÝ VZOR, ARES A ARCHIV
+         ========================================================================== -->
+    <script>
+        let currentDocKey = 'faktura_bez_dph';
+        let dueDaysMode = 14;
+
+        /*
+         * Přesná konfigurace formulářů pro každý jednotlivý vzor:
+         * mode:
+         * - 'invoice_no_vat': Faktura bez DPH / Zálohovka / Pokladní doklad (skryté pole DPH)
+         * - 'invoice_vat': Faktura s DPH / Dobropis (zobrazený výběr DPH 21 % / 12 %)
+         * - 'contract_paid': Smlouva o dílo, Služby, Licence, Cestovní příkaz (obsahuje cenu, ale žádné DPH)
+         * - 'hr_paid': HPP, DPP, DPČ, Mzdový výměr (obsahuje pozici, místo práce a hrubou mzdu, žádné DPH)
+         * - 'no_price': Rozvázání poměru, Výpověď, Vytýkací dopis, NDA, Předávací protokol, Svěření majetku, BOZP, Plná moc, Upomínka (žádná cena ani DPH!)
+         */
+        const DOC_SCHEMAS = {
+            faktura_bez_dph: {
+                cat: '1. Fakturace a platby', title: 'Faktura (Neplátce – bez DPH)', mode: 'invoice_no_vat',
+                role1: 'Dodavatel', role2: 'Odběratel', subjectLabel: 'Fakturovaná položka / popis plnění',
+                amountLabel: 'Konečná částka k úhradě (v Kč)', date2Label: 'Datum splatnosti'
+            },
+            faktura_s_dph: {
+                cat: '1. Fakturace a platby', title: 'Faktura s DPH (Daňový doklad)', mode: 'invoice_vat',
+                role1: 'Dodavatel (Plátce DPH)', role2: 'Odběratel', subjectLabel: 'Fakturovaná položka / popis plnění',
+                amountLabel: 'Základ daně bez DPH (v Kč)', date2Label: 'Datum splatnosti'
+            },
+            zalohova_faktura: {
+                cat: '1. Fakturace a platby', title: 'Zálohová (Proforma) faktura', mode: 'invoice_no_vat',
+                role1: 'Dodavatel', role2: 'Odběratel', subjectLabel: 'Účel zálohové platby',
+                amountLabel: 'Výše požadované zálohy (v Kč)', date2Label: 'Datum splatnosti'
+            },
+            upominka: {
+                cat: '1. Fakturace a platby', title: 'Upomínka k úhradě faktury po splatnosti', mode: 'no_price',
+                role1: 'Věřitel (Dodavatel)', role2: 'Dlužník (Odběratel)', subjectLabel: 'Označení neuhrazené faktury a dlužné částky',
+                extraLabel: 'Číslo původní faktury po splatnosti', date2Label: 'Náhradní termín úhrady'
+            },
+
+            smlouva_o_dilo: {
+                cat: '2. Obchodní smlouvy a NDA', title: 'Smlouva o dílo (§ 2586 občanského zákoníku)', mode: 'contract_paid',
+                role1: 'Zhotovitel', role2: 'Objednatel', subjectLabel: 'Specifikace předmětu díla',
+                amountLabel: 'Sjednaná cena díla (v Kč)', date2Label: 'Termín dokončení a předání díla'
+            },
+            smlouva_sluzby: {
+                cat: '2. Obchodní smlouvy a NDA', title: 'Smlouva o poskytování služeb', mode: 'contract_paid',
+                role1: 'Poskytovatel', role2: 'Klient (Objednatel)', subjectLabel: 'Rozsah poskytovaných služeb',
+                amountLabel: 'Sjednaná odměna za služby (v Kč)', date2Label: 'Datum zahájení plnění'
+            },
+            licencni_smlouva: {
+                cat: '2. Obchodní smlouvy a NDA', title: 'Licenční smlouva k autorskému dílu', mode: 'contract_paid',
+                role1: 'Poskytovatel licence (Autor)', role2: 'Nabyvatel licence', subjectLabel: 'Specifikace autorského díla a rozsah licence',
+                amountLabel: 'Licenční odměna (v Kč)', date2Label: 'Datum nabytí účinnosti licence'
+            },
+            nda: {
+                cat: '2. Obchodní smlouvy a NDA', title: 'Dohoda o mlčenlivosti a ochraně informací (NDA)', mode: 'no_price',
+                role1: 'Předávající strana', role2: 'Přebírající strana', subjectLabel: 'Vymezení chráněných informací a projektu',
+                extraLabel: 'Doba trvání závazku mlčenlivosti', date2Label: 'Platnost dohody od'
+            },
+
+            predavaci_protokol: {
+                cat: '3. Protokoly a cestovní příkazy', title: 'Předávací protokol díla / služby', mode: 'no_price',
+                role1: 'Předávající', role2: 'Přebírající', subjectLabel: 'Soupis předávaného díla nebo dokumentace',
+                extraLabel: 'Stav při převzetí (např. Bez zjevných vad)', date2Label: 'Datum fyzického převzetí'
+            },
+            cestovni_prikaz: {
+                cat: '3. Protokoly a cestovní příkazy', title: 'Cestovní příkaz a vyúčtování pracovní cesty', mode: 'contract_paid',
+                role1: 'Zaměstnavatel / OSVČ', role2: 'Cestující osoba', subjectLabel: 'Cíl a účel pracovní cesty (Trasa a vozidlo)',
+                amountLabel: 'Celková náhrada cestovních výdajů (v Kč)', date2Label: 'Datum ukončení pracovní cesty'
+            },
+
+            hpp: {
+                cat: '4. HR a Zaměstnanci', title: 'Pracovní smlouva – Hlavní pracovní poměr (HPP)', mode: 'hr_paid',
+                role1: 'Zaměstnavatel', role2: 'Zaměstnanec', subjectLabel: 'Sjednaný druh práce (Pracovní pozice)',
+                extraLabel: 'Místo výkonu práce a zkušební doba', amountLabel: 'Základní hrubá měsíční mzda (v Kč)', date2Label: 'Den nástupu do práce'
+            },
+            dpp: {
+                cat: '4. HR a Zaměstnanci', title: 'Dohoda o provedení práce (DPP – do 300 hodin)', mode: 'hr_paid',
+                role1: 'Zaměstnavatel', role2: 'Zaměstnanec', subjectLabel: 'Vymezení pracovního úkolu (DPP)',
+                extraLabel: 'Místo výkonu a maximální rozsah hodin', amountLabel: 'Sjednaná odměna (Kč / hod. nebo celkem)', date2Label: 'Doba trvání dohody do'
+            },
+            dpc: {
+                cat: '4. HR a Zaměstnanci', title: 'Dohoda o pracovní činnosti (DPČ)', mode: 'hr_paid',
+                role1: 'Zaměstnavatel', role2: 'Zaměstnanec', subjectLabel: 'Sjednaná pracovní činnost (DPČ)',
+                extraLabel: 'Týdenní rozsah pracovní doby', amountLabel: 'Hrubá měsíční / hodinová odměna (v Kč)', date2Label: 'Den zahájení práce'
+            },
+            mzdovy_vymer: {
+                cat: '4. HR a Zaměstnanci', title: 'Mzdový výměr zaměstnance', mode: 'hr_paid',
+                role1: 'Zaměstnavatel', role2: 'Zaměstnanec', subjectLabel: 'Pracovní zařazení a mzdová složka',
+                extraLabel: 'Výplatní termín a bankovní účet', amountLabel: 'Stanovená hrubá měsíční mzda (v Kč)', date2Label: 'Účinnost mzdového výměru od'
+            },
+            rozvazani_dohodou: {
+                cat: '4. HR a Zaměstnanci', title: 'Dohoda o rozvázání pracovního poměru (§ 49 ZP)', mode: 'no_price',
+                role1: 'Zaměstnavatel', role2: 'Zaměstnanec', subjectLabel: 'Ujednání o ukončení pracovního poměru a předání agendy',
+                extraLabel: 'Důvod ukončení (na žádost / nadbytečnost)', date2Label: 'Den skončení pracovního poměru'
+            },
+            vypoved: {
+                cat: '4. HR a Zaměstnanci', title: 'Výpověď z pracovního poměru', mode: 'no_price',
+                role1: 'Zaměstnavatel', role2: 'Zaměstnanec', subjectLabel: 'Zákonný důvod výpovědi a běh dvouměsíční výpovědní doby',
+                extraLabel: 'Odkaz na ustanovení zákoníku práce', date2Label: 'Datum doručení výpovědi'
+            },
+            vytykaci_dopis: {
+                cat: '4. HR a Zaměstnanci', title: 'Vytýkací dopis – upozornění na porušení povinností', mode: 'no_price',
+                role1: 'Zaměstnavatel', role2: 'Zaměstnanec', subjectLabel: 'Přesný popis porušení pracovních povinností',
+                extraLabel: 'Výzva k nápravě a lhůta', date2Label: 'Lhůta ke zjednání nápravy do'
+            },
+
+            svereni_majetku: {
+                cat: '5. Firemní agenda a B2B', title: 'Protokol o svěření firemního majetku (Notebook / Auto)', mode: 'no_price',
+                role1: 'Společnost (Vlastník)', role2: 'Přebírající zaměstnanec', subjectLabel: 'Název svěřeného předmětu (Značka, model)',
+                extraLabel: 'Výrobní číslo (S/N) nebo SPZ vozidla', date2Label: 'Datum převzetí do užívání'
+            },
+            bozp_gdpr: {
+                cat: '5. Firemní agenda a B2B', title: 'Záznam o školení BOZP a souhlas GDPR', mode: 'no_price',
+                role1: 'Společnost (Správce údajů)', role2: 'Školená osoba / Zaměstnanec', subjectLabel: 'Rozsah proškolení BOZP, PO a zpracování osobních údajů',
+                extraLabel: 'Jméno školitele / vedoucího', date2Label: 'Platnost školení do'
+            },
+            dobropis: {
+                cat: '5. Firemní agenda a B2B', title: 'Dobropis – Opravný daňový doklad', mode: 'invoice_vat',
+                role1: 'Dodavatel', role2: 'Odběratel', subjectLabel: 'Důvod opravy základu daně (ke které faktuře se vztahuje)',
+                amountLabel: 'Opravovaná částka bez DPH (v Kč)', date2Label: 'Datum vrácení prostředků'
+            },
+            pokladni_doklad: {
+                cat: '5. Firemní agenda a B2B', title: 'Pokladní doklad (Hotovostní operace)', mode: 'invoice_no_vat',
+                role1: 'Vystavitel pokladního dokladu', role2: 'Plátce / Příjemce hotovosti', subjectLabel: 'Účel hotovostní platby',
+                amountLabel: 'Hotovostní částka (v Kč)', date2Label: 'Datum pokladní operace'
+            },
+            ramcova_smlouva: {
+                cat: '5. Firemní agenda a B2B', title: 'Rámcová smlouva o obchodní spolupráci (B2B)', mode: 'no_price',
+                role1: 'První smluvní strana', role2: 'Druhá smluvní strana', subjectLabel: 'Vymezení dlouhodobé B2B spolupráce a dílčích objednávek',
+                extraLabel: 'Výpovědní doba a fakturační období', date2Label: 'Platnost rámcové smlouvy od'
+            },
+            plna_moc: {
+                cat: '5. Firemní agenda a B2B', title: 'Plná moc k zastupování společnosti', mode: 'no_price',
+                role1: 'Zmocnitel', role2: 'Zmocněnec', subjectLabel: 'Rozsah zmocnění a právních jednání',
+                extraLabel: 'Omezení plné moci (např. Generální / Speciální)', date2Label: 'Platnost plné moci do'
+            }
+        };
+
+        // Uložené dokumenty v Archivu (pro okamžitou úpravu nebo tisk)
+        let savedDocuments = [
+            {
+                id: 1, docKey: 'faktura_bez_dph', docNumber: '20260045',
+                clientName: 'Alza.cz a.s.', clientIco: '27082440', clientDic: 'CZ27082440',
+                clientAddress: 'Jankovcova 1522/53, 170 00 Praha 7',
+                dateIssue: '2026-10-10', dateDue: '2026-10-24',
+                subject: 'Vývoj webové aplikace a UI design', extraDetail: '',
+                amount: '45000', vat: '0', status: 'Vystaveno'
+            },
+            {
+                id: 2, docKey: 'faktura_s_dph', docNumber: '20260046',
+                clientName: 'Seznam.cz, a.s.', clientIco: '26168685', clientDic: 'CZ26168685',
+                clientAddress: 'Radlická 3294/10, 150 00 Praha 5',
+                dateIssue: '2026-10-14', dateDue: '2026-10-28',
+                subject: 'Konzultace kybernetické bezpečnosti a správa serverů', extraDetail: '',
+                amount: '60000', vat: '21', status: 'Uhrazeno'
+            },
+            {
+                id: 3, docKey: 'smlouva_o_dilo', docNumber: 'SOD-2026-12',
+                clientName: 'ČEZ, a. s.', clientIco: '45274649', clientDic: 'CZ45274649',
+                clientAddress: 'Duhová 2/1444, 140 53 Praha 4',
+                dateIssue: '2026-10-15', dateDue: '2026-11-15',
+                subject: 'Dodávka interního firemního portálu na klíč', extraDetail: '',
+                amount: '125000', vat: '0', status: 'Podepsáno'
+            },
+            {
+                id: 4, docKey: 'hpp', docNumber: 'HR-2026-08',
+                clientName: 'Bc. Martin Dvořák', clientIco: 'Narozen: 14. 05. 1992', clientDic: 'RČ / Ev. č. 920514',
+                clientAddress: 'Veveří 112, 602 00 Brno',
+                dateIssue: '2026-10-18', dateDue: '2026-11-01',
+                subject: 'Senior Frontend Developer', extraDetail: 'Brno / Zkušební doba 3 měsíce',
+                amount: '78000', vat: '0', status: 'Aktivní smlouva'
+            }
+        ];
+
+        // 1. Otevírání a zavírání horních rozbalovacích nabídek
+        function toggleDropdown(event, btnEl) {
+            event.stopPropagation();
+            const parent = btnEl.closest('.cat-dropdown');
+            const isOpen = parent.classList.contains('open');
+            closeAllDropdowns();
+            if (!isOpen) {
+                parent.classList.add('open');
+            }
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.cat-dropdown').forEach(el => el.classList.remove('open'));
+        }
+
+        document.addEventListener('click', closeAllDropdowns);
+
+        // 2. Přepínání pohledů (Builder / Archiv / Onboarding)
+        function switchView(viewName) {
+            document.getElementById('view-builder').classList.toggle('hidden', viewName !== 'builder');
+            document.getElementById('view-archive').classList.toggle('hidden', viewName !== 'archive');
+            document.getElementById('view-onboarding').classList.toggle('hidden', viewName !== 'onboarding');
+
+            document.getElementById('nav-btn-builder').classList.toggle('active', viewName === 'builder');
+            document.getElementById('nav-btn-archive').classList.toggle('active', viewName === 'archive');
+            document.getElementById('nav-btn-onboarding').classList.toggle('active', viewName === 'onboarding');
+
+            if (viewName === 'archive') {
+                renderArchiveTable();
+            }
+        }
+
+        // 3. Přepínání tarifu OSVČ / Firma s.r.o.
+        function setTariff(tariff) {
+            document.getElementById('tariff-btn-osvc').classList.toggle('active', tariff === 'osvc');
+            document.getElementById('tariff-btn-sro').classList.toggle('active', tariff === 'sro');
+
+            document.querySelectorAll('.sro-only-menu').forEach(el => {
+                el.classList.toggle('hidden', tariff === 'osvc');
+            });
+
+            if (tariff === 'osvc' && DOC_SCHEMAS[currentDocKey].cat.startsWith('4.')) {
+                selectDoc('faktura_bez_dph');
+            }
+        }
+
+        // 4. Výběr dokumentu a automatické přestavění formuláře přesně na míru danému vzoru
+        function selectDoc(docKey) {
+            currentDocKey = docKey;
+            closeAllDropdowns();
+            switchView('builder');
+
+            document.querySelectorAll('.cat-menu-item').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-doc') === docKey);
+            });
+
+            const schema = DOC_SCHEMAS[docKey];
+            document.getElementById('active-doc-cat').textContent = 'Kategorie: ' + schema.cat;
+            document.getElementById('active-doc-title').textContent = schema.title;
+
+            // Popisky stran
+            document.getElementById('label-party-1').textContent = 'Moje firma (' + schema.role1 + ')';
+            document.getElementById('label-party-2').textContent = 'Druhá strana (' + schema.role2 + ')';
+            document.getElementById('label-subject').textContent = schema.subjectLabel;
+            document.getElementById('label-date-due').textContent = schema.date2Label;
+
+            const boxSubject = document.getElementById('box-subject');
+            const boxExtra = document.getElementById('box-extra-detail');
+            const boxAmount = document.getElementById('box-amount');
+            const boxVat = document.getElementById('box-vat');
+
+            // Zobrazení / skrytí polí přesně podle logiky dokumentu
+            if (schema.mode === 'invoice_no_vat') {
+                boxSubject.style.gridColumn = 'span 2';
+                boxExtra.classList.add('hidden');
+                boxAmount.classList.remove('hidden');
+                boxVat.classList.add('hidden');
+                document.getElementById('label-amount').textContent = schema.amountLabel;
+                document.getElementById('my-dic').value = 'Neplátce DPH';
+            } else if (schema.mode === 'invoice_vat') {
+                boxSubject.style.gridColumn = 'span 1';
+                boxExtra.classList.add('hidden');
+                boxAmount.classList.remove('hidden');
+                boxVat.classList.remove('hidden');
+                document.getElementById('label-amount').textContent = schema.amountLabel;
+                document.getElementById('my-dic').value = 'CZ08912345 (Plátce DPH)';
+            } else if (schema.mode === 'contract_paid') {
+                boxSubject.style.gridColumn = 'span 2';
+                boxExtra.classList.add('hidden');
+                boxAmount.classList.remove('hidden');
+                boxVat.classList.add('hidden');
+                document.getElementById('label-amount').textContent = schema.amountLabel;
+            } else if (schema.mode === 'hr_paid') {
+                boxSubject.style.gridColumn = 'span 1';
+                boxExtra.classList.remove('hidden');
+                boxAmount.classList.remove('hidden');
+                boxVat.classList.add('hidden');
+                document.getElementById('label-extra-detail').textContent = schema.extraLabel;
+                document.getElementById('label-amount').textContent = schema.amountLabel;
+            } else if (schema.mode === 'no_price') {
+                // Dokumenty bez ceny (Rozvázání poměru, Výpověď, Vytýkací dopis, NDA, Plná moc, BOZP...)
+                boxSubject.style.gridColumn = 'span 2';
+                boxExtra.classList.remove('hidden');
+                boxAmount.classList.add('hidden');
+                boxVat.classList.add('hidden');
+                document.getElementById('label-extra-detail').textContent = schema.extraLabel;
+            }
+
+            renderA4();
+        }
+
+        // 5. Načtení z ARESu (Moje firma + Druhá strana)
+        function fetchAres(side) {
+            const mockAres = {
+                '08912345': { name: 'Čistá Složka Digital s.r.o.', dic: 'CZ08912345', addr: 'Masarykova 412/18, 602 00 Brno' },
+                '27082440': { name: 'Alza.cz a.s.', dic: 'CZ27082440', addr: 'Jankovcova 1522/53, 170 00 Praha 7' },
+                '26168685': { name: 'Seznam.cz, a.s.', dic: 'CZ26168685', addr: 'Radlická 3294/10, 150 00 Praha 5' },
+                '45274649': { name: 'ČEZ, a. s.', dic: 'CZ45274649', addr: 'Duhová 2/1444, 140 53 Praha 4' }
+            };
+
+            if (side === 'my') {
+                const ico = document.getElementById('my-ico').value.trim();
+                const d = mockAres[ico] || { name: 'Moje Společnost s.r.o. (ARES)', dic: 'CZ' + ico, addr: 'Václavské náměstí 1, 110 00 Praha 1' };
+                document.getElementById('my-name').value = d.name;
+                document.getElementById('my-dic').value = d.dic;
+                document.getElementById('my-address').value = d.addr;
+            } else {
+                const ico = document.getElementById('client-ico').value.trim();
+                const d = mockAres[ico] || { name: 'Obchodní Partner s.r.o. (ARES)', dic: 'CZ' + ico, addr: 'Sokolovská 100/94, 186 00 Praha 8' };
+                document.getElementById('client-name').value = d.name;
+                document.getElementById('client-dic').value = d.dic;
+                document.getElementById('client-address').value = d.addr;
+            }
+            renderA4();
+        }
+
+        // 6. Výpočet splatnosti (+7, +14, +30 dní nebo vlastní)
+        function initDates() {
+            const now = new Date();
+            document.getElementById('date-issue').value = toIsoDate(now);
+            setDueDays(14);
+        }
+
+        function setDueDays(days) {
+            dueDaysMode = days;
+            ['7', '14', '30', 'custom'].forEach(k => {
+                document.getElementById('due-' + k).classList.toggle('active', String(days) === k);
+            });
+            if (days === 'custom') {
+                document.getElementById('date-due').focus();
+            } else {
+                recalcDueDate();
+            }
+        }
+
+        function markCustomDue() {
+            dueDaysMode = 'custom';
+            ['7', '14', '30', 'custom'].forEach(k => {
+                document.getElementById('due-' + k).classList.toggle('active', k === 'custom');
+            });
+        }
+
+        function recalcDueDate() {
+            if (dueDaysMode === 'custom') {
+                renderA4();
+                return;
+            }
+            const issueStr = document.getElementById('date-issue').value;
+            if (!issueStr) return;
+            const d = new Date(issueStr);
+            d.setDate(d.getDate() + Number(dueDaysMode));
+            document.getElementById('date-due').value = toIsoDate(d);
+            renderA4();
+        }
+
+        function toIsoDate(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        function toCzDate(iso) {
+            if (!iso) return '';
+            const p = iso.split('-');
+            return p.length === 3 ? `${p[2]}. ${p[1]}. ${p[0]}` : iso;
+        }
+
+        // 7. Přepínání 3 šablon A4
+        function setTemplate(tpl) {
+            const paper = document.getElementById('a4-paper');
+            paper.classList.remove('tpl-minimal', 'tpl-corporate', 'tpl-creative');
+            paper.classList.add('tpl-' + tpl);
+
+            document.getElementById('tpl-btn-minimal').classList.toggle('active', tpl === 'minimal');
+            document.getElementById('tpl-btn-corporate').classList.toggle('active', tpl === 'corporate');
+            document.getElementById('tpl-btn-creative').classList.toggle('active', tpl === 'creative');
+        }
+
+        // 8. Vykreslení A4 dokumentu podle zvoleného schématu
+        function renderA4() {
+            const schema = DOC_SCHEMAS[currentDocKey];
+            const docNum = document.getElementById('doc-number').value;
+            const issueCz = toCzDate(document.getElementById('date-issue').value);
+            const dueCz = toCzDate(document.getElementById('date-due').value);
+            const subject = document.getElementById('doc-subject').value;
+            const extraDetail = document.getElementById('doc-extra-detail').value;
+            const rawAmount = Number(document.getElementById('doc-amount').value || 0);
+            const vatVal = document.getElementById('doc-vat').value;
+
+            document.getElementById('a4-ev').textContent = docNum;
+            document.getElementById('a4-role-1').textContent = schema.role1;
+            document.getElementById('a4-role-2').textContent = schema.role2;
+
+            document.getElementById('a4-my-name').textContent = document.getElementById('my-name').value;
+            document.getElementById('a4-my-address').textContent = document.getElementById('my-address').value;
+            document.getElementById('a4-my-ico').textContent = document.getElementById('my-ico').value;
+            document.getElementById('a4-my-dic').textContent = document.getElementById('my-dic').value;
+            document.getElementById('a4-my-bank').textContent = document.getElementById('my-bank').value;
+
+            document.getElementById('a4-client-name').textContent = document.getElementById('client-name').value;
+            document.getElementById('a4-client-address').textContent = document.getElementById('client-address').value;
+            document.getElementById('a4-client-meta-line').innerHTML = `<strong>IČO / ID:</strong> ${document.getElementById('client-ico').value} | <strong>DIČ / Údaj:</strong> ${document.getElementById('client-dic').value}`;
+
+            document.getElementById('a4-date-issue').textContent = issueCz;
+            document.getElementById('a4-label-date-2').textContent = schema.date2Label + ':';
+            document.getElementById('a4-date-due').textContent = dueCz;
+            document.getElementById('a4-payment').textContent = document.getElementById('doc-payment').value;
+            document.getElementById('a4-signature-val').textContent = document.getElementById('doc-signature').value;
+
+            const bodyEl = document.getElementById('a4-body-content');
+            const finFooter = document.getElementById('a4-financial-footer');
+            const qrBox = document.getElementById('a4-qr-box');
+
+            const fmtBase = rawAmount.toLocaleString('cs-CZ') + ' Kč';
+
+            if (schema.mode === 'invoice_no_vat') {
+                document.getElementById('a4-title').textContent = schema.title.split('(')[0].toUpperCase() + ' č. ' + docNum;
+                document.getElementById('a4-subtitle').textContent = 'Doklad vystavený neplátcem DPH';
+                finFooter.classList.remove('hidden');
+                qrBox.classList.remove('hidden');
+
+                bodyEl.innerHTML = `
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Označení dodávky / fakturované položky</th>
+                                <th>Množství</th>
+                                <th style="text-align: right;">Celková částka</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>${subject}</strong></td>
+                                <td>1 komplet</td>
+                                <td style="text-align: right; font-weight: 700;">${fmtBase}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('a4-total-caption').textContent = 'CELKEM K ÚHRADĚ';
+                document.getElementById('a4-total-amount').textContent = fmtBase;
+                document.getElementById('a4-total-subnote').textContent = 'Neplátce DPH – částka je konečná';
+
+            } else if (schema.mode === 'invoice_vat') {
+                const rate = vatVal === '21' ? 0.21 : (vatVal === '12' ? 0.12 : 0);
+                const vatMoney = Math.round(rawAmount * rate);
+                const totalMoney = rawAmount + vatMoney;
+
+                document.getElementById('a4-title').textContent = schema.title.split('(')[0].toUpperCase() + ' č. ' + docNum;
+                document.getElementById('a4-subtitle').textContent = 'Daňový doklad (Plátce DPH)';
+                finFooter.classList.remove('hidden');
+                qrBox.classList.remove('hidden');
+
+                bodyEl.innerHTML = `
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Označení zdanitelného plnění</th>
+                                <th>Základ daně</th>
+                                <th>DPH (${vatVal === 'reverse' ? 'Přenesená 0 %' : vatVal + ' %'})</th>
+                                <th style="text-align: right;">Celkem s DPH</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>${subject}</strong></td>
+                                <td>${fmtBase}</td>
+                                <td>${vatMoney.toLocaleString('cs-CZ')} Kč</td>
+                                <td style="text-align: right; font-weight: 700;">${totalMoney.toLocaleString('cs-CZ')} Kč</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('a4-total-caption').textContent = 'CELKEM K ÚHRADĚ S DPH';
+                document.getElementById('a4-total-amount').textContent = totalMoney.toLocaleString('cs-CZ') + ' Kč';
+                document.getElementById('a4-total-subnote').textContent = `Základ: ${fmtBase} + DPH: ${vatMoney.toLocaleString('cs-CZ')} Kč`;
+
+            } else if (schema.mode === 'contract_paid') {
+                document.getElementById('a4-title').textContent = schema.title.split('(')[0].toUpperCase();
+                document.getElementById('a4-subtitle').textContent = 'Obchodní smluvní dokument č. ' + docNum;
+                finFooter.classList.remove('hidden');
+                qrBox.classList.add('hidden');
+
+                bodyEl.innerHTML = `
+                    <div style="line-height: 1.75; font-size: 0.96rem;">
+                        <p style="margin-bottom: 1rem;"><strong>Článek I. Předmět smlouvy</strong><br>
+                        ${schema.role1} (<strong>${document.getElementById('my-name').value}</strong>) se touto smlouvou zavazuje pro druhou smluvní stranu (${schema.role2}: <strong>${document.getElementById('client-name').value}</strong>) řádně realizovat následující předmět plnění: <strong>${subject}</strong>.</p>
+                        <p style="margin-bottom: 1rem;"><strong>Článek II. Cena a platební podmínky</strong><br>
+                        Smluvní strany sjednávají za výše uvedené plnění odměnu ve výši <strong>${fmtBase}</strong>. Termín plnění / splatnosti je sjednán do <strong>${dueCz}</strong>.</p>
+                        <p><strong>Článek III. Závěrečná ustanovení</strong><br>
+                        Tato smlouva nabývá platnosti a účinnosti dnem podpisu oběma smluvními stranami a řídí se zákonem č. 89/2012 Sb., občanský zákoník.</p>
+                    </div>
+                `;
+                document.getElementById('a4-total-caption').textContent = 'SJEDNANÁ SMLUVNÍ ODMĚNA';
+                document.getElementById('a4-total-amount').textContent = fmtBase;
+                document.getElementById('a4-total-subnote').textContent = 'Dle podmínek této smlouvy';
+
+            } else if (schema.mode === 'hr_paid') {
+                document.getElementById('a4-title').textContent = schema.title.split('–')[0].toUpperCase();
+                document.getElementById('a4-subtitle').textContent = 'Pracovněprávní dokument dle zákona č. 262/2006 Sb., zákoník práce';
+                finFooter.classList.remove('hidden');
+                qrBox.classList.add('hidden');
+
+                bodyEl.innerHTML = `
+                    <div style="line-height: 1.75; font-size: 0.96rem;">
+                        <p style="margin-bottom: 1rem;"><strong>Článek I. Druh a místo výkonu práce</strong><br>
+                        Zaměstnanec (<strong>${document.getElementById('client-name').value}</strong>) bude u Zaměstnavatele (<strong>${document.getElementById('my-name').value}</strong>) vykonávat práci na pozici: <strong>${subject}</strong>.<br>
+                        Doplňující určení a místo výkonu práce: <strong>${extraDetail}</strong>.</p>
+                        <p style="margin-bottom: 1rem;"><strong>Článek II. Den nástupu a mzdové podmínky</strong><br>
+                        Den nástupu do práce / účinnosti se sjednává na <strong>${dueCz}</strong>. Za vykonanou práci přísluší zaměstnanci hrubá mzda / odměna ve výši <strong>${fmtBase}</strong>.</p>
+                        <p><strong>Článek III. Práva a povinnosti</strong><br>
+                        Ostatní práva a povinnosti zaměstnavatele a zaměstnance se řídí zákoníkem práce České republiky a vnitřními předpisy zaměstnavatele.</p>
+                    </div>
+                `;
+                document.getElementById('a4-total-caption').textContent = 'SJEDNANÁ HRUBÁ MZDA / ODMĚNA';
+                document.getElementById('a4-total-amount').textContent = fmtBase;
+                document.getElementById('a4-total-subnote').textContent = 'Pracovněprávní agenda (HR)';
+
+            } else if (schema.mode === 'no_price') {
+                // Dokument bez jakékoliv ceny a bez DPH
+                document.getElementById('a4-title').textContent = schema.title.split('–')[0].toUpperCase();
+                document.getElementById('a4-subtitle').textContent = 'Oficiální právní dokument č. ' + docNum;
+                finFooter.classList.add('hidden'); // Zcela skryjeme finanční patičku
+
+                bodyEl.innerHTML = `
+                    <div style="line-height: 1.8; font-size: 0.98rem;">
+                        <p style="margin-bottom: 1.15rem;"><strong>Článek I. Předmět a vymezení dokumentu</strong><br>
+                        <strong>${document.getElementById('my-name').value}</strong> (${schema.role1}) a <strong>${document.getElementById('client-name').value}</strong> (${schema.role2}) tímto činí následující právní jednání / záznam:<br>
+                        <strong>${subject}</strong></p>
+                        <p style="margin-bottom: 1.15rem;"><strong>Článek II. Specifikace a rozhodné údaje</strong><br>
+                        ${schema.extraLabel}: <strong>${extraDetail || 'Dle dohody smluvních stran'}</strong>.<br>
+                        Rozhodné datum (${schema.date2Label.toLowerCase()}): <strong>${dueCz}</strong>.</p>
+                        <p><strong>Článek III. Potvrzení a podpisy stran</strong><br>
+                        Obě strany prohlašují, že obsah tohoto dokumentu odpovídá skutečnosti a jejich svobodné vůli, což stvrzují svými vlastnoručními či elektronickými podpisy níže.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 9. Uložení aktuálně vyplněného dokumentu do Archivu a možnost jeho opětovné úpravy / tisku
+        function saveCurrentToArchive() {
+            const schema = DOC_SCHEMAS[currentDocKey];
+            const newEntry = {
+                id: Date.now(),
+                docKey: currentDocKey,
+                docNumber: document.getElementById('doc-number').value,
+                clientName: document.getElementById('client-name').value,
+                clientIco: document.getElementById('client-ico').value,
+                clientDic: document.getElementById('client-dic').value,
+                clientAddress: document.getElementById('client-address').value,
+                dateIssue: document.getElementById('date-issue').value,
+                dateDue: document.getElementById('date-due').value,
+                subject: document.getElementById('doc-subject').value,
+                extraDetail: document.getElementById('doc-extra-detail').value,
+                amount: schema.mode === 'no_price' ? null : document.getElementById('doc-amount').value,
+                vat: document.getElementById('doc-vat').value,
+                status: 'Uloženo'
+            };
+
+            savedDocuments.unshift(newEntry);
+            document.getElementById('archive-count').textContent = savedDocuments.length;
+            switchView('archive');
+        }
+
+        function renderArchiveTable() {
+            const tbody = document.getElementById('archive-tbody');
+            tbody.innerHTML = savedDocuments.map(item => {
+                const schema = DOC_SCHEMAS[item.docKey];
+                const priceText = item.amount !== null && schema.mode !== 'no_price'
+                    ? Number(item.amount).toLocaleString('cs-CZ') + ' Kč'
+                    : 'Právní dokument (bez částky)';
+
+                return `
+                    <tr>
+                        <td><strong>${item.docNumber}</strong></td>
+                        <td>${schema.title}</td>
+                        <td><strong>${item.clientName}</strong><br><span style="font-size: 0.82rem; color: var(--text-light);">${item.clientIco}</span></td>
+                        <td>${toCzDate(item.dateIssue)}</td>
+                        <td><strong>${priceText}</strong></td>
+                        <td><span class="status-pill">${item.status}</span></td>
+                        <td>
+                            <div class="table-actions">
+                                <button type="button" class="btn-sm" onclick="loadDocumentFromArchive(${item.id}, false)">Upravit</button>
+                                <button type="button" class="btn-sm green" onclick="loadDocumentFromArchive(${item.id}, true)">Tisk / PDF</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadDocumentFromArchive(id, printImmediately) {
+            const item = savedDocuments.find(d => d.id === id);
+            if (!item) return;
+
+            document.getElementById('doc-number').value = item.docNumber;
+            document.getElementById('client-name').value = item.clientName;
+            document.getElementById('client-ico').value = item.clientIco;
+            document.getElementById('client-dic').value = item.clientDic;
+            document.getElementById('client-address').value = item.clientAddress;
+            document.getElementById('date-issue').value = item.dateIssue;
+            document.getElementById('date-due').value = item.dateDue;
+            document.getElementById('doc-subject').value = item.subject;
+            document.getElementById('doc-extra-detail').value = item.extraDetail || '';
+            if (item.amount !== null) {
+                document.getElementById('doc-amount').value = item.amount;
+            }
+            document.getElementById('doc-vat').value = item.vat || '21';
+
+            selectDoc(item.docKey);
+
+            if (printImmediately) {
+                setTimeout(() => window.print(), 200);
+            }
+        }
+
+        // Inicializace
+        initDates();
+        selectDoc('faktura_bez_dph');
+    </script>
+</body>
+</html>
