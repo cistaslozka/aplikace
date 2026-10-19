@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Můj přehled – cistaslozka.cz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: lepkavá hlavička, pod ní mřížka dlaždic (3 / 2 / 1 sloupec), v režimu úprav se objeví ovládání a katalog dlaždic.
+   Barvy a písma převzaty z Omarovy úvodní stránky. */
+:root {
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --ink: #0f2537;
+  --text: #334155;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --green: #10b981;
+  --green-ink: #047857;
+  --green-tint: #ecfdf5;
+  --red: #dc2626;
+  --red-tint: #fef2f2;
+  --amber: #b45309;
+  --amber-tint: #fffbeb;
+  --shadow: 0 4px 14px -6px rgba(15, 37, 55, 0.10);
+  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1724; --surface: #11212f; --surface-2: #162b3c; --ink: #e6eef5; --text: #c3d0dc;
+    --muted: #8ea3b5; --line: #223a4d; --green: #34d399; --green-ink: #6ee7b7; --green-tint: #0f3a2e;
+    --red: #f87171; --red-tint: #3b1a1e; --amber: #fbbf24; --amber-tint: #3a2e12;
+    --shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.5); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1724; --surface: #11212f; --surface-2: #162b3c; --ink: #e6eef5; --text: #c3d0dc;
+  --muted: #8ea3b5; --line: #223a4d; --green: #34d399; --green-ink: #6ee7b7; --green-tint: #0f3a2e;
+  --red: #f87171; --red-tint: #3b1a1e; --amber: #fbbf24; --amber-tint: #3a2e12;
+  --shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.5); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+h1, h2, h3 { font-family: var(--font-display); color: var(--ink); margin: 0; text-wrap: balance; letter-spacing: -0.3px; }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Hlavička */
+header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--surface); border-bottom: 1px solid var(--line); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.bar { display: flex; align-items: center; gap: 24px; padding-block: 14px; }
+.logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 21px; color: var(--ink); text-decoration: none; }
+.logo span { color: var(--green); }
+nav { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
+nav a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 12px; border-radius: 8px; white-space: nowrap; }
+nav a:hover { color: var(--ink); background: var(--surface-2); }
+nav a[aria-current="page"] { color: var(--ink); background: var(--green-tint); }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+@media (max-width: 720px) { nav { display: none; } .bar { justify-content: space-between; } }
+
+/* Záhlaví přehledu */
+main { padding-block: 32px 64px; display: flex; flex-direction: column; gap: 24px; }
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.top h1 { font-size: clamp(24px, 4vw, 32px); }
+.sub { color: var(--muted); margin: 4px 0 0; }
+.sample { display: inline-block; font-size: 12px; font-weight: 600; color: var(--amber); background: var(--amber-tint); padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 600; font-size: 14px; padding: 10px 16px; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; }
+.btn:hover { border-color: var(--muted); }
+.btn-green { background: var(--green); border-color: var(--green); color: #fff; }
+.btn-green:hover { filter: brightness(0.95); border-color: var(--green); }
+.btn-sm { padding: 6px 10px; font-size: 13px; border-radius: 8px; }
+
+/* Katalog dlaždic */
+.catalog { background: var(--surface); border: 1.5px dashed var(--green); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.catalog h2 { font-size: 17px; }
+.catalog p { margin: 0; color: var(--muted); font-size: 14px; }
+.cat-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.cat-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.cat-item strong { color: var(--ink); font-size: 14px; display: block; }
+.cat-item small { color: var(--muted); font-size: 12px; }
+.cat-empty { color: var(--muted); font-size: 14px; }
+
+/* Mřížka dlaždic */
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; grid-auto-flow: dense; }
+@media (max-width: 1024px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .grid { grid-template-columns: minmax(0, 1fr); } .w.wide { grid-column: auto; } }
+.w { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.w.wide { grid-column: span 2; }
+.w-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.w-head h3 { font-size: 15px; font-weight: 700; }
+.w-link { font-size: 13px; color: var(--green-ink); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.w-tools { display: none; gap: 4px; }
+.editing .w { border-style: dashed; border-color: var(--muted); cursor: grab; }
+.editing .w-tools { display: flex; }
+.editing .w-link { display: none; }
+.w.dragging { opacity: 0.4; }
+.w.drop-target { outline: 2px solid var(--green); outline-offset: 2px; }
+.icon-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); display: grid; place-items: center; padding: 0; }
+.icon-btn:hover { border-color: var(--muted); }
+.icon-btn.danger:hover { color: var(--red); border-color: var(--red); }
+.icon-btn svg { width: 15px; height: 15px; }
+
+/* Obsah dlaždic */
+.big { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.meta { color: var(--muted); font-size: 13px; }
+.rows { display: flex; flex-direction: column; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.row:first-child { border-top: 0; padding-top: 0; }
+.row b { color: var(--ink); font-weight: 600; }
+.row .l { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill.red { color: var(--red); background: var(--red-tint); }
+.pill.amber { color: var(--amber); background: var(--amber-tint); }
+.pill.green { color: var(--green-ink); background: var(--green-tint); }
+.pill.grey { color: var(--muted); background: var(--surface-2); border: 1px solid var(--line); }
+.quick { display: grid; gap: 8px; }
+.quick .btn { justify-content: flex-start; width: 100%; }
+.chart { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; align-items: end; height: 170px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; }
+.col .v { font-size: 11px; color: var(--muted); }
+.col .b { width: 100%; max-width: 44px; background: var(--green-tint); border: 1px solid var(--green); border-bottom: 0; border-radius: 6px 6px 0 0; }
+.col.now .b { background: var(--green); }
+.col .m { font-size: 12px; color: var(--muted); font-weight: 600; }
+.chart-base { border-top: 1px solid var(--line); margin-top: -8px; }
+.meter { height: 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--green); border-radius: 999px; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; padding: 0 10px 8px 0; white-space: nowrap; }
+td { padding: 10px 10px 10px 0; border-top: 1px solid var(--line); white-space: nowrap; }
+td.r, th.r { text-align: right; padding-right: 0; }
+textarea { width: 100%; min-height: 120px; resize: vertical; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--text); padding: 12px; font: inherit; font-size: 14px; }
+.foot-note { color: var(--muted); font-size: 13px; text-align: center; }
+@media (prefers-reduced-motion: no-preference) { .w { transition: box-shadow .2s, border-color .2s; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a href="#" class="logo" aria-label="cistaslozka.cz">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      cistaslozka<span>.cz</span>
+    </a>
+    <nav aria-label="Hlavní menu">
+      <a href="#" aria-current="page">Přehled</a>
+      <a href="#">Faktury</a>
+      <a href="#">Smlouvy</a>
+      <a href="#">Klienti</a>
+      <a href="#">Nastavení</a>
+    </nav>
+    <div class="avatar" title="Jan Novák">JN</div>
+  </div>
+</header>
+
+<main class="wrap" id="app">
+  <div class="top">
+    <div>
+      <h1>Můj přehled</h1>
+      <p class="sub">Dobrý den, Jane. Tady je, co se děje ve vaší firmě. <span class="sample">Ukázková data k 19. 10. 2026</span></p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="btn-reset" hidden>Obnovit výchozí</button>
+      <button type="button" class="btn" id="btn-edit">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Upravit přehled</span>
+      </button>
+    </div>
+  </div>
+
+  <section class="catalog" id="catalog" hidden>
+    <div>
+      <h2>Přidat dlaždici</h2>
+      <p>Dlaždice přesouvejte tažením nebo šipkami. Křížkem dlaždici odeberete, tlačítkem s šipkami změníte šířku.</p>
+    </div>
+    <div class="cat-list" id="cat-list"></div>
+  </section>
+
+  <section class="grid" id="grid" aria-label="Dlaždice přehledu"></section>
+
+  <p class="foot-note">V ukázce se rozložení pamatuje jen v tomto prohlížeči. Ve skutečné aplikaci se uloží k vašemu účtu.</p>
+</main>
+
+<script>
+(function () {
+  var TODAY = new Date('2026-10-19');
+  var KEY = 'cistaslozka-prehled-v1';
+
+  // ---- Ukázková data (vymyšlené firmy) ----
+  var invoices = [
+    { no: '20260052', client: 'Studio Lipa s.r.o.', issued: '2026-10-15', due: '2026-10-29', amount: 38500, paid: false },
+    { no: '20260051', client: 'Pekárna U Mostu', issued: '2026-10-08', due: '2026-10-22', amount: 12400, paid: false },
+    { no: '20260050', client: 'Kovář & syn, s.r.o.', issued: '2026-09-30', due: '2026-10-14', amount: 27000, paid: false },
+    { no: '20260049', client: 'Bistro Zelená', issued: '2026-09-22', due: '2026-10-06', amount: 8900, paid: false },
+    { no: '20260048', client: 'Jana Malá – fotografka', issued: '2026-09-18', due: '2026-10-02', amount: 15000, paid: true },
+    { no: '20260047', client: 'Studio Lipa s.r.o.', issued: '2026-09-05', due: '2026-09-19', amount: 42000, paid: true }
+  ];
+  var months = [['Kvě', 52000], ['Čvn', 61500], ['Čvc', 48000], ['Srp', 70200], ['Zář', 66000], ['Říj', 57000]];
+  var yearTurnover = 612400, vatLimit = 2000000;
+  var contracts = [
+    { name: 'Smlouva o dílo', client: 'Studio Lipa s.r.o.', end: '2026-10-31' },
+    { name: 'Dohoda o mlčenlivosti (NDA)', client: 'Kovář & syn, s.r.o.', end: '2026-11-15' },
+    { name: 'Smlouva o poskytování služeb', client: 'Bistro Zelená', end: '2026-12-31' }
+  ];
+  var topClients = [['Studio Lipa s.r.o.', 184000], ['Kovář & syn, s.r.o.', 121000], ['Pekárna U Mostu', 76500], ['Bistro Zelená', 48900]];
+
+  // ---- Pomocné funkce ----
+  function kc(n) { return n.toLocaleString('cs-CZ') + ' Kč'; }
+  function d(iso) { var p = iso.split('-'); return +p[2] + '. ' + +p[1] + '. ' + p[0]; }
+  function days(iso) { return Math.round((new Date(iso) - TODAY) / 86400000); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function dny(n) { return n === 1 ? 'den' : (n >= 2 && n <= 4 ? 'dny' : 'dní'); }
+  var open = invoices.filter(function (i) { return !i.paid; });
+  var overdue = open.filter(function (i) { return days(i.due) < 0; });
+  function sum(list) { return list.reduce(function (a, i) { return a + i.amount; }, 0); }
+
+  // ---- Katalog dlaždic ----
+  var W = {
+    quick: { title: 'Rychlé akce', desc: 'Nová faktura, smlouva, klient', size: 1, body: function () {
+      return '<div class="quick">' +
+        '<button type="button" class="btn btn-green">+ Nová faktura</button>' +
+        '<button type="button" class="btn">+ Nová smlouva</button>' +
+        '<button type="button" class="btn">+ Přidat klienta (z ARES)</button></div>';
+    } },
+    unpaid: { title: 'Neuhrazené faktury', desc: 'Kolik vám dluží klienti', size: 1, link: 'Zobrazit', body: function () {
+      return '<div><div class="big num">' + kc(sum(open)) + '</div><div class="meta">' + open.length + ' faktury čekají na úhradu</div></div>' +
+        '<div class="rows">' + open.slice(0, 3).map(function (i) {
+          var n = days(i.due);
+          return '<div class="row"><span class="l"><b>' + esc(i.client) + '</b></span><span class="num">' + kc(i.amount) + '</span></div>';
+        }).join('') + '</div>';
+    } },
+    overdue: { title: 'Po splatnosti', desc: 'Faktury, na které je čas upomínat', size: 1, link: 'Poslat upomínky', body: function () {
+      if (!overdue.length) return '<p class="meta">Žádná faktura není po splatnosti.</p>';
+      return '<div><div class="big num" style="color:var(--red)">' + kc(sum(overdue)) + '</div><div class="meta">' + overdue.length + ' faktury po splatnosti</div></div>' +
+        '<div class="rows">' + overdue.map(function (i) {
+          var n = -days(i.due);
+          return '<div class="row"><span class="l"><b>' + esc(i.client) + '</b><br><span class="meta">č. ' + i.no + ' · ' + kc(i.amount) + '</span></span><span class="pill red">' + n + ' ' + dny(n) + ' po splatnosti</span></div>';
+        }).join('') + '</div>';
+    } },
+    income: { title: 'Příjmy za posledních 6 měsíců', desc: 'Sloupcový graf po měsících', size: 2, body: function () {
+      var max = Math.max.apply(null, months.map(function (m) { return m[1]; }));
+      var total = months.reduce(function (a, m) { return a + m[1]; }, 0);
+      return '<div class="meta">Celkem <b class="num" style="color:var(--ink)">' + kc(total) + '</b> · říjen zatím ' + kc(months[5][1]) + '</div>' +
+        '<div class="chart">' + months.map(function (m, idx) {
+          var h = Math.round(m[1] / max * 120);
+          return '<div class="col' + (idx === 5 ? ' now' : '') + '"><span class="v num">' + Math.round(m[1] / 1000) + ' tis.</span><span class="b" style="height:' + h + 'px"></span><span class="m">' + m[0] + '</span></div>';
+        }).join('') + '</div>';
+    } },
+    vat: { title: 'Obrat a limit pro DPH', desc: 'Hlídá hranici 2 mil. Kč za rok', size: 1, body: function () {
+      var pct = Math.round(yearTurnover / vatLimit * 1000) / 10;
+      return '<div><div class="big num">' + kc(yearTurnover) + '</div><div class="meta">obrat za rok 2026 (leden–říjen)</div></div>' +
+        '<div class="meter" role="img" aria-label="' + pct + ' % limitu"><i style="width:' + pct + '%"></i></div>' +
+        '<div class="row" style="border:0;padding:0"><span class="meta">' + pct.toLocaleString('cs-CZ') + ' % z limitu ' + kc(vatLimit) + '</span><span class="pill green">V pořádku</span></div>';
+    } },
+    recent: { title: 'Poslední doklady', desc: 'Tabulka posledních faktur', size: 2, link: 'Všechny doklady', body: function () {
+      return '<div class="table-scroll"><table><thead><tr><th>Číslo</th><th>Klient</th><th>Vystaveno</th><th>Splatnost</th><th class="r">Částka</th><th class="r">Stav</th></tr></thead><tbody>' +
+        invoices.slice(0, 5).map(function (i) {
+          var n = days(i.due), st;
+          if (i.paid) st = '<span class="pill green">Uhrazeno</span>';
+          else if (n < 0) st = '<span class="pill red">Po splatnosti</span>';
+          else st = '<span class="pill grey">Čeká na úhradu</span>';
+          return '<tr><td class="num"><b style="color:var(--ink)">' + i.no + '</b></td><td>' + esc(i.client) + '</td><td class="num">' + d(i.issued) + '</td><td class="num">' + d(i.due) + '</td><td class="r num">' + kc(i.amount) + '</td><td class="r">' + st + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    } },
+    contracts: { title: 'Končící smlouvy', desc: 'Smlouvy, kterým brzy končí platnost', size: 1, link: 'Smlouvy', body: function () {
+      return '<div class="rows">' + contracts.map(function (c) {
+        var n = days(c.end), cls = n <= 14 ? 'amber' : 'grey';
+        return '<div class="row"><span class="l"><b>' + esc(c.name) + '</b><br><span class="meta">' + esc(c.client) + '</span></span><span class="pill ' + cls + '">za ' + n + ' ' + dny(n) + '</span></div>';
+      }).join('') + '</div>';
+    } },
+    clients: { title: 'Největší klienti', desc: 'Kdo vám letos nejvíc zaplatil', size: 1, body: function () {
+      return '<div class="rows">' + topClients.map(function (c, i) {
+        return '<div class="row"><span class="l"><b>' + esc(c[0]) + '</b></span><span class="num">' + kc(c[1]) + '</span></div>';
+      }).join('') + '</div>';
+    } },
+    notes: { title: 'Poznámky', desc: 'Vlastní poznámky a připomínky', size: 1, body: function () {
+      return '<label class="meta" for="notes-text">Pište si, co nechcete zapomenout.</label><textarea id="notes-text" placeholder="Např. zavolat Pekárně kvůli nové objednávce"></textarea>';
+    } }
+  };
+  var DEFAULT = [
+    { id: 'quick', size: 1 }, { id: 'unpaid', size: 1 }, { id: 'overdue', size: 1 },
+    { id: 'income', size: 2 }, { id: 'vat', size: 1 }, { id: 'recent', size: 2 }, { id: 'contracts', size: 1 }
+  ];
+
+  // ---- Uložení rozložení ----
+  function load() {
+    try { var s = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(s.layout)) return s; } catch (e) {}
+    return { layout: DEFAULT.map(function (x) { return { id: x.id, size: x.size }; }), notes: '' };
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  var state = load();
+  state.layout = state.layout.filter(function (x) { return W[x.id]; });
+  var editing = false;
+
+  var grid = document.getElementById('grid');
+  var catList = document.getElementById('cat-list');
+  var ico = {
+    left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+    right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+    size: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 3 12 7 16"/><polyline points="17 8 21 12 17 16"/><line x1="3" y1="12" x2="21" y2="12"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+  };
+
+  function render() {
+    grid.innerHTML = state.layout.map(function (x, idx) {
+      var w = W[x.id];
+      return '<article class="w' + (x.size === 2 ? ' wide' : '') + '" data-idx="' + idx + '" draggable="' + editing + '">' +
+        '<div class="w-head"><h3>' + w.title + '</h3>' +
+        (w.link ? '<a href="#" class="w-link">' + w.link + ' →</a>' : '') +
+        '<div class="w-tools">' +
+          '<button type="button" class="icon-btn" data-act="left" aria-label="Posunout dopředu">' + ico.left + '</button>' +
+          '<button type="button" class="icon-btn" data-act="right" aria-label="Posunout dozadu">' + ico.right + '</button>' +
+          '<button type="button" class="icon-btn" data-act="size" aria-label="Změnit šířku">' + ico.size + '</button>' +
+          '<button type="button" class="icon-btn danger" data-act="remove" aria-label="Odebrat dlaždici">' + ico.x + '</button>' +
+        '</div></div>' + w.body() + '</article>';
+    }).join('');
+    var ta = document.getElementById('notes-text');
+    if (ta) { ta.value = state.notes || ''; ta.addEventListener('input', function () { state.notes = ta.value; save(); }); }
+    var used = state.layout.map(function (x) { return x.id; });
+    var free = Object.keys(W).filter(function (k) { return used.indexOf(k) < 0; });
+    catList.innerHTML = free.length ? free.map(function (k) {
+      return '<div class="cat-item"><div><strong>' + W[k].title + '</strong><small>' + W[k].desc + '</small></div><button type="button" class="btn btn-sm" data-add="' + k + '">Přidat</button></div>';
+    }).join('') : '<p class="cat-empty">Všechny dlaždice už máte na přehledu.</p>';
+  }
+
+  function setEditing(on) {
+    editing = on;
+    document.getElementById('app').classList.toggle('editing', on);
+    document.getElementById('catalog').hidden = !on;
+    document.getElementById('btn-reset').hidden = !on;
+    document.querySelector('#btn-edit span').textContent = on ? 'Hotovo' : 'Upravit přehled';
+    document.getElementById('btn-edit').classList.toggle('btn-green', on);
+    render();
+  }
+
+  document.getElementById('btn-edit').addEventListener('click', function () { setEditing(!editing); });
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    state.layout = DEFAULT.map(function (x) { return { id: x.id, size: x.size }; }); save(); render();
+  });
+  catList.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-add]'); if (!b) return;
+    var id = b.getAttribute('data-add');
+    state.layout.push({ id: id, size: W[id].size }); save(); render();
+  });
+  grid.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    var idx = +b.closest('.w').getAttribute('data-idx'), L = state.layout, act = b.getAttribute('data-act');
+    if (act === 'remove') L.splice(idx, 1);
+    if (act === 'size') L[idx].size = L[idx].size === 2 ? 1 : 2;
+    if (act === 'left' && idx > 0) L.splice(idx - 1, 0, L.splice(idx, 1)[0]);
+    if (act === 'right' && idx < L.length - 1) L.splice(idx + 1, 0, L.splice(idx, 1)[0]);
+    save(); render();
+  });
+
+  // Přetahování myší
+  var dragIdx = null;
+  grid.addEventListener('dragstart', function (e) {
+    var w = e.target.closest('.w'); if (!editing || !w) return;
+    dragIdx = +w.getAttribute('data-idx'); w.classList.add('dragging');
+    try { e.dataTransfer.setData('text/plain', String(dragIdx)); e.dataTransfer.effectAllowed = 'move'; } catch (err) {}
+  });
+  grid.addEventListener('dragover', function (e) {
+    if (dragIdx === null) return; e.preventDefault();
+    var w = e.target.closest('.w');
+    grid.querySelectorAll('.drop-target').forEach(function (el) { el.classList.remove('drop-target'); });
+    if (w && +w.getAttribute('data-idx') !== dragIdx) w.classList.add('drop-target');
+  });
+  grid.addEventListener('drop', function (e) {
+    e.preventDefault(); var w = e.target.closest('.w');
+    if (w && dragIdx !== null) {
+      var to = +w.getAttribute('data-idx');
+      state.layout.splice(to, 0, state.layout.splice(dragIdx, 1)[0]); save();
+    }
+    dragIdx = null; render();
+  });
+  grid.addEventListener('dragend', function () { dragIdx = null; render(); });
+
+  render();
+})();
+</script>
+</body>
+</html>
