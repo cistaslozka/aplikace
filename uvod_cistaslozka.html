@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>čistásložka.cz | Fakturační a právní systém</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================================================
+           1. ZÁKLADNÍ PROMĚNNÉ A RESET
+           ========================================================================== */
+        :root {
+            --brand-navy: #0F2537;
+            --brand-navy-light: #1A3852;
+            --brand-green: #10B981;
+            --brand-green-hover: #059669;
+            --brand-green-soft: #ECFDF5;
+            
+            --bg-page: #F4F7FB;
+            --bg-card: #FFFFFF;
+            
+            --text-dark: #0F172A;
+            --text-medium: #334155;
+            --text-muted: #64748B;
+            
+            --border-std: #E2E8F0;
+            --border-hover: #CBD5E1;
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            
+            --shadow-sm: 0 4px 12px -2px rgba(15, 37, 55, 0.05);
+            --shadow-md: 0 16px 40px -10px rgba(15, 37, 55, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-variant-numeric: tabular-nums;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--brand-navy);
+            letter-spacing: -0.03em;
+        }
+
+        a { text-decoration: none; color: var(--brand-green); font-weight: 600; transition: color 0.2s; }
+        a:hover { color: var(--brand-green-hover); }
+
+        .hidden { display: none !important; }
+
+        /* ==========================================================================
+           2. HORNÍ LIŠTA S KOMPAKTNÍ NAVIGACÍ UPROSTŘED (JEDNA ČISTÁ LINKA)
+           ========================================================================== */
+        .top-navbar {
+            background: var(--brand-navy);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0.9rem 2rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        /* Logo vlevo */
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.03em;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .brand-icon-svg {
+            color: var(--brand-green);
+            margin-right: 0.55rem;
+            stroke-width: 2.5;
+        }
+        
+        .brand-logo-tld {
+            color: var(--brand-green);
+            margin-left: 0.08rem;
+        }
+
+        /* STŘEDNÍ NAVIGACE */
+        .nav-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .nav-tab-btn {
+            background: rgba(255, 255, 255, 0.06);
+            color: #CBD5E1;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 0.6rem 1.4rem;
+            border-radius: 999px;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-tab-btn:hover {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .nav-tab-btn.active {
+            background: var(--brand-green);
+            color: var(--brand-navy);
+            border-color: var(--brand-green);
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);
+        }
+
+        /* Pravá část: Ikony (IG, Telefon) + Podpora */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            position: relative;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            padding-right: 1.25rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .icon-btn {
+            color: #CBD5E1;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .icon-btn:hover {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.16);
+            border-color: var(--brand-green);
+        }
+
+        .phone-popover {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 170px;
+            background: #FFFFFF;
+            color: var(--brand-navy);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1.15rem;
+            box-shadow: var(--shadow-md);
+            font-size: 0.88rem;
+            white-space: nowrap;
+            z-index: 2000;
+        }
+
+        .phone-popover strong {
+            display: block;
+            font-size: 1rem;
+            color: var(--brand-green-hover);
+        }
+
+        .btn-support {
+            background: transparent;
+            border: 1.5px solid #CBD5E1;
+            color: #FFFFFF;
+            padding: 0.55rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-support:hover {
+            border-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ==========================================================================
+           3. OBRAZOVKA 1: TARIFY A PŘIHLÁŠENÍ VPRAVO NAHOŘE
+           ========================================================================== */
+        .main-stage {
+            flex: 1; 
+            max-width: 1380px;
+            width: 100%;
+            margin: 3.5rem auto;
+            padding: 0 2rem;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 480px;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .hero-left-text h1 {
+            font-size: 3.1rem;
+            margin-bottom: 0.65rem;
+            line-height: 1.1;
+        }
+
+        .hero-left-text p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 640px;
+        }
+
+        .pricing-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.25rem;
+            margin-top: 2.25rem;
+        }
+
+        .tariff-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .tariff-pro {
+            border: 2px solid var(--brand-green);
+            box-shadow: var(--shadow-md);
+        }
+
+        .badge-pro {
+            position: absolute;
+            top: -13px;
+            left: 2.5rem;
+            background: var(--brand-green);
+            color: #FFFFFF;
+            padding: 0.3rem 1.1rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tariff-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-std);
+        }
+
+        .tariff-name {
+            font-size: 1.85rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .tariff-subtitle {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .tariff-basic-highlight { color: var(--brand-green); }
+
+        .tariff-price {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: var(--brand-navy);
+            line-height: 1;
+            text-align: right;
+        }
+
+        .tariff-price span {
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        .feature-details {
+            font-size: 0.96rem;
+            color: var(--text-dark);
+        }
+
+        .feature-details strong {
+            display: block;
+            color: var(--brand-navy);
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            margin-top: 0.75rem;
+        }
+
+        .feature-details ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 1rem;
+        }
+
+        .feature-details li {
+            position: relative;
+            padding-left: 1.4rem;
+            margin-bottom: 0.4rem;
+            color: var(--text-medium);
+        }
+
+        .feature-details li::before {
+            content: "•";
+            color: var(--brand-green);
+            position: absolute;
+            left: 0;
+            font-size: 1.4rem;
+            line-height: 1;
+            top: -2px;
+        }
+
+        /* Pravý sloupec s Přihlášením nahoře */
+        .right-column-sticky {
+            position: sticky;
+            top: 96px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-lg);
+            padding: 2.75rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .auth-header {
+            margin-bottom: 1.75rem;
+            text-align: center;
+        }
+
+        .auth-header h2 {
+            font-size: 1.9rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .auth-header p {
+            color: var(--text-muted);
+            font-size: 0.98rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--brand-navy);
+            margin-bottom: 0.45rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            font-family: inherit;
+            font-size: 0.98rem;
+            color: var(--text-dark);
+            background: var(--bg-page);
+            border: 1.5px solid var(--border-hover);
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+            background: var(--bg-card);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--brand-navy);
+            color: #FFFFFF;
+            border: none;
+            padding: 1.05rem;
+            border-radius: var(--radius-md);
+            font-size: 1.02rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 0.4rem;
+        }
+
+        .btn-submit:hover {
+            background: var(--brand-navy-light);
+        }
+
+        .auth-divider {
+            text-align: center;
+            margin: 1.75rem 0;
+            position: relative;
+        }
+
+        .auth-divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            border-top: 1px solid var(--border-hover);
+            z-index: 1;
+        }
+
+        .auth-divider span {
+            background: var(--bg-card);
+            padding: 0 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-switch-mode {
+            width: 100%;
+            background: transparent;
+            color: var(--brand-green);
+            border: 2px solid var(--brand-green);
+            padding: 0.95rem;
+            border-radius: var(--radius-md);
+            font-size: 0.98rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-switch-mode:hover {
+            background: rgba(16, 185, 129, 0.06);
+        }
+
+        .quick-explore-box {
+            background: var(--brand-navy);
+            color: #FFFFFF;
+            border-radius: var(--radius-lg);
+            padding: 1.65rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .quick-explore-box:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ==========================================================================
+           4. OBRAZOVKA 2: CO SYSTÉM UMÍ (VČETNĚ KONFIGURACE VLASTNÍ DOMÁCÍ STRÁNKY)
+           ========================================================================== */
+        .features-page-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 3.5rem auto;
+        }
+
+        .features-page-header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .features-page-header p {
+            font-size: 1.18rem;
+            color: var(--text-muted);
+        }
+
+        /* 3 hlavní prezentační karty nahoře */
+        .showcase-3col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 3.5rem;
+        }
+
+        .showcase-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-lg);
+            padding: 2.25rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1.75rem;
+        }
+
+        .showcase-card h3 {
+            font-size: 1.35rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .showcase-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .mini-ui-preview {
+            background: var(--bg-page);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+        }
+
+        .tpl-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tpl-pill-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.3rem 0.75rem;
+            border-radius: 99px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-hover);
+            color: var(--brand-navy);
+        }
+
+        .tpl-pill-tag.active {
+            background: var(--brand-green);
+            color: var(--brand-navy);
+            border-color: var(--brand-green);
+        }
+
+        /* SEKCE: KONFIGURACE VLASTNÍ DOMÁCÍ STRÁNKY (INTERAKTIVNÍ BUILDER NÁSTĚNKY) */
+        .customizer-showcase {
+            background: var(--bg-card);
+            border: 2px solid var(--brand-green);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            margin-bottom: 3.5rem;
+            box-shadow: var(--shadow-md);
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        .customizer-controls h3 {
+            font-size: 1.55rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .customizer-controls p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .widget-toggle-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .widget-toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 1.1rem;
+            border: 1.5px solid var(--border-std);
+            border-radius: var(--radius-md);
+            background: var(--bg-page);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: var(--brand-navy);
+            transition: all 0.15s;
+        }
+
+        .widget-toggle-item.active {
+            border-color: var(--brand-green);
+            background: var(--brand-green-soft);
+        }
+
+        .toggle-switch-pill {
+            width: 40px;
+            height: 22px;
+            border-radius: 99px;
+            background: var(--border-hover);
+            position: relative;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch-pill::after {
+            content: "";
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #FFFFFF;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.2s;
+        }
+
+        .widget-toggle-item.active .toggle-switch-pill {
+            background: var(--brand-green);
+        }
+
+        .widget-toggle-item.active .toggle-switch-pill::after {
+            transform: translateX(18px);
+        }
+
+        /* Živý mini-náhled složené domácí stránky */
+        .customizer-live-stage {
+            background: var(--bg-page);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+        }
+
+        .customizer-stage-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid var(--border-std);
+        }
+
+        .mini-widgets-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .mini-widget-box {
+            background: #FFFFFF;
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-md);
+            padding: 1.15rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mini-widget-box.span-full {
+            grid-column: span 2;
+        }
+
+        .mini-widget-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--brand-green-hover);
+            margin-bottom: 0.35rem;
+        }
+
+        /* Sekce Grafů a Archivu faktur */
+        .dashboard-preview-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 1.25fr;
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .preview-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-lg);
+            padding: 2.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .panel-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .year-switch {
+            display: flex;
+            background: var(--bg-page);
+            padding: 0.25rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-std);
+        }
+
+        .year-btn {
+            border: none;
+            background: transparent;
+            padding: 0.35rem 0.85rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .year-btn.active {
+            background: var(--brand-navy);
+            color: #FFFFFF;
+        }
+
+        .bars-box {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.85rem;
+            align-items: end;
+            height: 190px;
+            padding-top: 1.5rem;
+            border-bottom: 1px solid var(--border-std);
+        }
+
+        .bar-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 100%;
+            gap: 0.45rem;
+        }
+
+        .bar-fill {
+            width: 100%;
+            max-width: 48px;
+            background: #A7F3D0;
+            border-radius: 8px 8px 0 0;
+            transition: height 0.3s ease;
+        }
+
+        .bar-fill.highlight {
+            background: var(--brand-green);
+        }
+
+        /* Tabulka Archivu v ukázce */
+        .demo-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .demo-table th {
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid var(--border-std);
+        }
+
+        .demo-table td {
+            padding: 0.9rem 0.5rem;
+            border-bottom: 1px solid var(--border-std);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.7rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-paid { background: #ECFDF5; color: #047857; }
+        .status-unpaid { background: #FEF2F2; color: #B91C1C; }
+
+        .btn-toggle-paid {
+            border: 1px solid var(--border-hover);
+            background: #FFFFFF;
+            color: var(--brand-navy);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.35rem 0.7rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-toggle-paid:hover {
+            border-color: var(--brand-green);
+            color: var(--brand-green-hover);
+        }
+
+        /* Kompletní Katalog všech dokumentů (4 kategorie) */
+        .catalog-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .catalog-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-std);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .catalog-box-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid var(--border-std);
+        }
+
+        .catalog-items-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem 1.25rem;
+        }
+
+        .catalog-items-list li {
+            font-size: 0.92rem;
+            color: var(--text-medium);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .catalog-items-list li::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--brand-green);
+            flex-shrink: 0;
+        }
+
+        /* ==========================================================================
+           5. PATIČKA (GDPR, Podmínky)
+           ========================================================================== */
+        .main-footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-std);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            font-weight: 500;
+        }
+
+        .footer-links a:hover {
+            color: var(--brand-green);
+        }
+
+        .footer-copyright {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 1120px) {
+            .nav-container { grid-template-columns: 1fr; justify-items: center; }
+            .hero-grid, .showcase-3col, .customizer-showcase, .dashboard-preview-grid, .catalog-grid-4 { grid-template-columns: 1fr; }
+            .right-column-sticky { position: static; order: -1; }
+            .catalog-items-list, .mini-widgets-grid { grid-template-columns: 1fr; }
+            .mini-widget-box.span-full { grid-column: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================================================
+         HORNÍ LIŠTA S UPRAVENÝMI NÁZVY TLAČÍTEK (V JEDNÉ ROVINĚ)
+         ========================================================================== -->
+    <header class="top-navbar">
+        <div class="nav-container">
+            
+            <!-- 1. Logo vlevo -->
+            <div class="brand-logo" onclick="switchPageTab('pricing')">
+                <svg class="brand-icon-svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                čistásložka<span class="brand-logo-tld">.cz</span>
+            </div>
+
+            <!-- 2. STŘEDNÍ PANEL (Čisté jednořádkové názvy dle tvého zadání) -->
+            <nav class="nav-center" aria-label="Hlavní navigace">
+                <button type="button" class="nav-tab-btn active" id="tab-btn-pricing" onclick="switchPageTab('pricing')">
+                    Tarify a přihlášení
+                </button>
+                <button type="button" class="nav-tab-btn" id="tab-btn-features" onclick="switchPageTab('features')">
+                    Co systém umí
+                </button>
+                <button type="button" class="nav-tab-btn" id="tab-btn-catalog" onclick="switchPageTab('catalog')">
+                    Přehled všech dokumentů
+                </button>
+            </nav>
+            
+            <!-- 3. Pravá část: Instagram, Telefon a Zákaznická podpora -->
+            <div class="nav-actions">
+                <div class="nav-icons">
+                    <a href="https://instagram.com" target="_blank" class="icon-btn" title="Náš Instagram">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
+                    </a>
+                    <button type="button" class="icon-btn" onclick="togglePhoneBox()" title="Zobrazit telefonní číslo podpory">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Okénko s telefonním číslem po kliknutí -->
+                <div id="phone-popover" class="phone-popover hidden">
+                    Zákaznická linka (Po–Pá 8:00–17:00):
+                    <strong>+420 777 123 456</strong>
+                </div>
+
+                <a href="mailto:podpora@cistaslozka.cz" class="btn-support">Zákaznická podpora</a>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ==========================================================================
+         HLAVNÍ KONTEJNER
+         ========================================================================== -->
+    <main class="main-stage">
+        
+        <!-- ======================================================================
+             ČÁST 1: TARIFY A PŘIHLÁŠENÍ VPRAVO NAHOŘE (Výchozí pohled)
+             ====================================================================== -->
+        <section id="view-pricing">
+            <div class="hero-grid">
+                
+                <!-- VLEVO: Tarify Basic a Pro -->
+                <div class="hero-left-text">
+                    <h1>Ceník a tarify</h1>
+                    <p>Aplikace se dokonale přizpůsobí tomu, zda fakturujete jako živnostník, nebo vedete firmu. Domácí stránku si navíc poskládáte přesně podle sebe.</p>
+                    
+                    <div class="pricing-container">
+                        
+                        <!-- TARIF BASIC -->
+                        <div class="tariff-card">
+                            <div class="tariff-header-row">
+                                <div>
+                                    <h2 class="tariff-name">Tarif Basic</h2>
+                                    <div class="tariff-subtitle tariff-basic-highlight">Prvních 7 dní zdarma na zkoušku</div>
+                                </div>
+                                <div class="tariff-price">199 Kč <span>/ měsíc</span></div>
+                            </div>
+                            
+                            <div class="feature-details">
+                                <strong>Základní Fakturace a Vlastní Nástěnka</strong>
+                                <ul>
+                                    <li>Faktury (plátce / neplátce DPH), zálohové faktury, QR platby a upomínky</li>
+                                    <li>Nastavitelná domácí stránka (volba dlaždic: Přehled, Archiv, Grafy, Rychlé akce)</li>
+                                    <li>Archiv vydaných faktur: Zpětná úprava a označení Uhrazeno / Neuhrazeno</li>
+                                    <li>Přehledné grafy fakturace podle měsíců a vybraného roku</li>
+                                </ul>
+                                
+                                <strong>Obchodní Smlouvy a Ochrana know-how</strong>
+                                <ul>
+                                    <li>Smlouva o dílo a Smlouva o poskytování služeb</li>
+                                    <li>Licenční smlouva a NDA (Dohoda o mlčenlivosti)</li>
+                                </ul>
+                                
+                                <strong>Ostatní Agenda a Exporty</strong>
+                                <ul>
+                                    <li>Předávací protokoly, cestovní příkazy a Adresář klientů z ARES</li>
+                                    <li>3 vizuální šablony ke každému dokumentu + export PDF, XLSX a ISDOC</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- TARIF PRO -->
+                        <div class="tariff-card tariff-pro">
+                            <div class="badge-pro">Rozšířeno o firemní HR agendu</div>
+                            
+                            <div class="tariff-header-row">
+                                <div>
+                                    <h2 class="tariff-name">Tarif Pro</h2>
+                                    <div class="tariff-subtitle">Komplexní řešení pro firmy</div>
+                                </div>
+                                <div class="tariff-price">449 Kč <span>/ měsíc</span></div>
+                            </div>
+                            
+                            <div class="feature-details">
+                                <strong>Obsahuje vše z tarifu Basic a navíc:</strong>
+                                
+                                <strong>Personální agenda (HR) a Zaměstnanci</strong>
+                                <ul>
+                                    <li>Pracovní smlouvy (HPP, DPP, DPČ) a mzdové výměry</li>
+                                    <li>Dohody o rozvázání pracovního poměru, výpovědi a vytýkací dopisy</li>
+                                </ul>
+                                
+                                <strong>Firemní procesy a Účetnictví</strong>
+                                <ul>
+                                    <li>Předávací protokoly majetku (notebooky, telefony, firemní auta)</li>
+                                    <li>Záznamy o školení BOZP a souhlasy GDPR</li>
+                                    <li>Pokladní doklady (příjmové/výdajové) a dobropisy</li>
+                                </ul>
+                                
+                                <strong>Pokročilý B2B obchod a Tým</strong>
+                                <ul>
+                                    <li>Rámcové smlouvy (B2B), kupní smlouvy, nájemní smlouvy a plné moci</li>
+                                    <li>Týmový přístup (Multi-user) pro vaši účetní nebo asistentku</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <!-- VPRAVO NAHOŘE: Přihlášení / Registrace -->
+                <div class="right-column-sticky">
+                    
+                    <div class="auth-card">
+                        <div class="auth-header">
+                            <h2 id="auth-title">Přihlášení do účtu</h2>
+                            <p id="auth-subtitle">Vstupte do své čisté složky a spravujte agendu.</p>
+                        </div>
+
+                        <form onsubmit="event.preventDefault(); alert('Připraveno pro napojení na Supabase Auth.');">
+                            <div class="form-group">
+                                <div class="form-label">E-mailová adresa</div>
+                                <input type="email" class="form-input" placeholder="vase@firma.cz" required>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="form-label">
+                                    <span>Bezpečné heslo</span>
+                                    <a href="#" id="link-forgot-pass">Zapomenuté heslo?</a>
+                                </div>
+                                <input type="password" class="form-input" placeholder="••••••••" required>
+                            </div>
+
+                            <!-- Zobrazí se při přepnutí na Registraci -->
+                            <div class="form-group hidden" id="box-password-confirm">
+                                <div class="form-label">Potvrzení hesla</div>
+                                <input type="password" class="form-input" placeholder="Zadejte heslo znovu pro kontrolu">
+                            </div>
+
+                            <button type="submit" class="btn-submit" id="btn-main-action">Přihlásit se do systému</button>
+                        </form>
+
+                        <div class="auth-divider">
+                            <span id="auth-switch-text">Nemáte ještě založený účet?</span>
+                        </div>
+
+                        <button type="button" class="btn-switch-mode" id="btn-switch-mode" onclick="toggleAuthMode()">
+                            Založit nový účet (7 dní zdarma)
+                        </button>
+                    </div>
+
+                    <!-- Rychlý přechod na detailní představení systému -->
+                    <div class="quick-explore-box" onclick="switchPageTab('features')">
+                        <div>
+                            <div style="font-size: 0.8rem; color: #A7F3D0; font-weight: 700; text-transform: uppercase;">Prohlídka funkcí</div>
+                            <div style="font-size: 1.08rem; font-weight: 700;">Zjistěte, co systém umí (vlastní domácí stránka, grafy, vzory)</div>
+                        </div>
+                        <span style="font-size: 1.4rem; color: var(--brand-green); font-weight: 800;">→</span>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================================
+             ČÁST 2: CO SYSTÉM UMÍ (Vlastní domácí stránka, ARES, 3 šablony, Grafy, Archiv)
+             ====================================================================== -->
+        <section id="view-features" class="hidden">
+            
+            <div class="features-page-header">
+                <h1>Co systém čistásložka.cz umí</h1>
+                <p>Od přizpůsobitelné domácí stránky přes interaktivní grafy příjmů až po automatické generování faktur a smluv ve 3 designových vzorech.</p>
+            </div>
+
+            <!-- 1. TŘI HLAVNÍ KARTY FUNKCÍ -->
+            <div class="showcase-3col">
+                
+                <!-- Karta 1: Efektivita a ARES -->
+                <div class="showcase-card">
+                    <div>
+                        <h3>Chytrý Auto-fill z ARES</h3>
+                        <p>Zadáte pouze IČO a systém automaticky doplní název firmy, sídlo, DIČ a sestaví právní i fakturační text.</p>
+                    </div>
+                    <div class="mini-ui-preview">
+                        <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem;">IČO ODBĚRATELE / KLIENTA</div>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                            <div style="flex: 1; background: #FFF; border: 1px solid var(--border-hover); padding: 0.45rem 0.7rem; border-radius: 6px; font-weight: 700; font-size: 0.88rem;">05512345</div>
+                            <div style="background: var(--brand-navy); color: #FFF; padding: 0.45rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">Načteno z ARES</div>
+                        </div>
+                        <div style="background: var(--brand-green-soft); border: 1px solid #A7F3D0; padding: 0.65rem; border-radius: 8px; font-size: 0.82rem; color: #047857; font-weight: 600;">
+                            ✓ Studio Lipa s.r.o. · Údolní 12, Brno
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Karta 2: 3 Vizuální šablony -->
+                <div class="showcase-card">
+                    <div>
+                        <h3>3 vizuální šablony dokumentů</h3>
+                        <p>U každé faktury i smlouvy si jedním kliknutím vyberete vzhled, který přesně reprezentuje vaši značku.</p>
+                    </div>
+                    <div class="mini-ui-preview">
+                        <div class="tpl-dots">
+                            <span class="tpl-pill-tag active">1. Minimalistický</span>
+                            <span class="tpl-pill-tag">2. Korporátní</span>
+                            <span class="tpl-pill-tag">3. Kreativní</span>
+                        </div>
+                        <div style="background: #FFF; border: 1px solid var(--border-std); border-top: 4px solid var(--brand-green); border-radius: 6px; padding: 0.85rem; font-size: 0.8rem;">
+                            <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.4rem;">
+                                <span>FAKTURA č. 20260053</span>
+                                <span style="color: var(--brand-green);">QR Platba</span>
+                            </div>
+                            <div style="color: var(--text-muted); font-size: 0.75rem;">Okamžitý živý náhled A4 před stažením</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Karta 3: Exporty PDF, XLSX, ISDOC a E-podpis -->
+                <div class="showcase-card">
+                    <div>
+                        <h3>Export PDF, XLSX a ISDOC</h3>
+                        <p>Stahujte čistá PDF, tabulky Excel (XLSX) a účetní formát ISDOC. Dokumenty lze rovněž elektronicky podepsat.</p>
+                    </div>
+                    <div class="mini-ui-preview">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.75rem;">
+                            <div style="background: #FFF; border: 1px solid var(--border-hover); padding: 0.55rem; border-radius: 6px; text-align: center; font-weight: 800; font-size: 0.82rem; color: var(--brand-navy);">PDF</div>
+                            <div style="background: #FFF; border: 1px solid var(--border-hover); padding: 0.55rem; border-radius: 6px; text-align: center; font-weight: 800; font-size: 0.82rem; color: var(--brand-green-hover);">XLSX</div>
+                            <div style="background: #FFF; border: 1px solid var(--border-hover); padding: 0.55rem; border-radius: 6px; text-align: center; font-weight: 800; font-size: 0.82rem; color: var(--brand-navy);">ISDOC</div>
+                        </div>
+                        <div style="background: var(--brand-navy); color: #FFF; padding: 0.6rem; border-radius: 8px; text-align: center; font-size: 0.82rem; font-weight: 600;">
+                            Podpis přímo na obrazovce a okamžitý tisk
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 2. NOVÁ SEKCE: KONFIGURACE VLASTNÍ DOMÁCÍ STRÁNKY (NÁSTĚNKY NA MÍRU) -->
+            <div class="customizer-showcase">
+                <div class="customizer-controls">
+                    <span class="status-badge status-paid" style="margin-bottom: 0.6rem;">Unikátní funkce přizpůsobení</span>
+                    <h3>Nakonfigurujte si vlastní domácí stránku</h3>
+                    <p>Každý podnikatel pracuje jinak. Sami si určíte, které dlaždice chcete mít na úvodní obrazovce (Přehled, Archiv dokladů, Grafy příjmů nebo Rychlé akce). Zkuste si je zapnout nebo vypnout:</p>
+
+                    <div class="widget-toggle-list">
+                        <div class="widget-toggle-item active" onclick="toggleHomeWidget('kpi', this)">
+                            <span>Finanční přehled a limit DPH</span>
+                            <span class="toggle-switch-pill"></span>
+                        </div>
+                        <div class="widget-toggle-item active" onclick="toggleHomeWidget('archive', this)">
+                            <span>Archiv posledních faktur a smluv</span>
+                            <span class="toggle-switch-pill"></span>
+                        </div>
+                        <div class="widget-toggle-item active" onclick="toggleHomeWidget('chart', this)">
+                            <span>Graf fakturace za vybraný rok</span>
+                            <span class="toggle-switch-pill"></span>
+                        </div>
+                        <div class="widget-toggle-item active" onclick="toggleHomeWidget('actions', this)">
+                            <span>Rychlé vytvoření dokladu a ARES</span>
+                            <span class="toggle-switch-pill"></span>
+                        </div>
+                        <div class="widget-toggle-item active" onclick="toggleHomeWidget('contracts', this)">
+                            <span>Hlídání končících smluv a HR</span>
+                            <span class="toggle-switch-pill"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Živý náhled složené domácí stránky -->
+                <div class="customizer-live-stage">
+                    <div class="customizer-stage-top">
+                        <div>
+                            <strong style="color: var(--brand-navy); font-size: 1.05rem;">Náhled vaší přizpůsobené domácí stránky</strong>
+                            <div style="font-size: 0.82rem; color: var(--text-muted);">Rozložení se okamžitě přeskupí podle vašich voleb vlevo</div>
+                        </div>
+                        <span style="font-size: 0.78rem; font-weight: 700; background: #FFF; border: 1px solid var(--border-std); padding: 0.35rem 0.75rem; border-radius: 8px; color: var(--brand-navy);">
+                            Upravit přehled
+                        </span>
+                    </div>
+
+                    <div class="mini-widgets-grid">
+                        
+                        <div class="mini-widget-box span-full" id="preview-widget-kpi">
+                            <div class="mini-widget-label">Modul: Finanční přehled a limit DPH</div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 0.4rem;">
+                                <div><div style="font-size: 0.78rem; color: var(--text-muted);">Neuhrazeno</div><strong style="font-size: 1.2rem; color: var(--brand-navy);">86 800 Kč</strong></div>
+                                <div><div style="font-size: 0.78rem; color: var(--text-muted);">Po splatnosti</div><strong style="font-size: 1.2rem; color: #B91C1C;">35 900 Kč</strong></div>
+                                <div><div style="font-size: 0.78rem; color: var(--text-muted);">Obrat DPH (31 %)</div><strong style="font-size: 1.2rem; color: #047857;">612 400 Kč</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="mini-widget-box" id="preview-widget-archive">
+                            <div class="mini-widget-label">Modul: Rychlý archiv dokladů</div>
+                            <div style="font-size: 0.85rem; margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.45rem;">
+                                <div style="display: flex; justify-content: space-between;"><span><strong>20260052</strong> · Studio Lipa</span><span style="color: #047857; font-weight: 700;">38 500 Kč</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span><strong>20260051</strong> · Pekárna U Mostu</span><span style="color: var(--brand-navy); font-weight: 700;">12 400 Kč</span></div>
+                            </div>
+                        </div>
+
+                        <div class="mini-widget-box" id="preview-widget-actions">
+                            <div class="mini-widget-label">Modul: Rychlé akce</div>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                                <span style="background: var(--brand-green); color: var(--brand-navy); font-weight: 700; font-size: 0.8rem; padding: 0.4rem 0.75rem; border-radius: 6px;">+ Nová faktura</span>
+                                <span style="background: var(--brand-navy); color: #FFF; font-weight: 600; font-size: 0.8rem; padding: 0.4rem 0.75rem; border-radius: 6px;">+ Nová smlouva</span>
+                            </div>
+                        </div>
+
+                        <div class="mini-widget-box" id="preview-widget-chart">
+                            <div class="mini-widget-label">Modul: Graf příjmů (6 měsíců)</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem;">
+                                Celkem za období: <strong style="color: var(--brand-navy);">354 700 Kč</strong> (aktivní sloupcový graf)
+                            </div>
+                        </div>
+
+                        <div class="mini-widget-box" id="preview-widget-contracts">
+                            <div class="mini-widget-label">Modul: Končící smlouvy a HR</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem;">
+                                Smlouva o dílo (Studio Lipa) · <strong style="color: #B45309;">končí za 11 dní</strong>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. INTERAKTIVNÍ UKÁZKA GRAFŮ FAKTURACE A ARCHIVU VYDANÝCH FAKTUR -->
+            <div class="dashboard-preview-grid">
+                
+                <!-- Levý panel: Graf příjmů podle vybraného roku -->
+                <div class="preview-panel">
+                    <div class="panel-top-row">
+                        <div>
+                            <h3 style="font-size: 1.35rem;">Přehledné grafy fakturace</h3>
+                            <p style="font-size: 0.9rem; color: var(--text-muted);">Vyberte si rok a sledujte měsíční přehled vyfakturovaných částek.</p>
+                        </div>
+                        <div class="year-switch">
+                            <button type="button" class="year-btn active" id="year-2026" onclick="switchDemoYear(2026)">Rok 2026</button>
+                            <button type="button" class="year-btn" id="year-2025" onclick="switchDemoYear(2025)">Rok 2025</button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; background: var(--bg-page); padding: 1rem 1.25rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+                        <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Vyfakturováno celkem za vybrané období:</span>
+                        <strong style="font-size: 1.5rem; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--brand-navy);" id="demo-year-total">354 700 Kč</strong>
+                    </div>
+
+                    <div class="bars-box" id="demo-bars-container">
+                        <!-- Vykresluje JS -->
+                    </div>
+                </div>
+
+                <!-- Pravý panel: Archiv vydaných faktur s přepínáním Uhrazeno / Neuhrazeno -->
+                <div class="preview-panel">
+                    <div class="panel-top-row">
+                        <div>
+                            <h3 style="font-size: 1.35rem;">Archiv a správa vydaných faktur</h3>
+                            <p style="font-size: 0.9rem; color: var(--text-muted);">Každou fakturu můžete zpětně upravit nebo jedním kliknutím označit jako uhrazenou.</p>
+                        </div>
+                    </div>
+
+                    <table class="demo-table">
+                        <thead>
+                            <tr>
+                                <th>Číslo</th>
+                                <th>Klient</th>
+                                <th>Částka</th>
+                                <th>Stav úhrady</th>
+                                <th style="text-align: right;">Vyzkoušejte</th>
+                            </tr>
+                        </thead>
+                        <tbody id="demo-archive-tbody">
+                            <!-- Vykresluje JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- 4. KOMPLETNÍ KATALOG VŠECH DOKUMENTŮ V SYSTÉMU -->
+            <div id="catalog-anchor" style="margin-bottom: 1.75rem;">
+                <h2 style="font-size: 2.1rem; margin-bottom: 0.4rem;">Přehled všech generovaných dokumentů</h2>
+                <p style="color: var(--text-muted); font-size: 1.05rem;">Stačí vyplnit základní údaje a systém automaticky vygeneruje právně i účetně naformátovaný dokument.</p>
+            </div>
+
+            <div class="catalog-grid-4">
+                
+                <div class="catalog-box">
+                    <div class="catalog-box-head">
+                        <h3>1. Fakturace a účetní doklady</h3>
+                        <span class="status-badge status-paid">Tarif Basic &amp; Pro</span>
+                    </div>
+                    <ul class="catalog-items-list">
+                        <li>Faktura (Neplátce DPH)</li>
+                        <li>Faktura s DPH (Daňový doklad)</li>
+                        <li>Zálohová (Proforma) faktura</li>
+                        <li>Upomínka k úhradě faktury</li>
+                        <li>Dobropis (Opravný daňový doklad)</li>
+                        <li>Pokladní doklady (Příjmový / Výdajový)</li>
+                    </ul>
+                </div>
+
+                <div class="catalog-box">
+                    <div class="catalog-box-head">
+                        <h3>2. Obchodní smlouvy a ochrana know-how</h3>
+                        <span class="status-badge status-paid">Tarif Basic &amp; Pro</span>
+                    </div>
+                    <ul class="catalog-items-list">
+                        <li>Smlouva o dílo</li>
+                        <li>Smlouva o poskytování služeb</li>
+                        <li>Licenční smlouva k dílu</li>
+                        <li>NDA – Dohoda o mlčenlivosti</li>
+                        <li>Rámcová smlouva o spolupráci (B2B)</li>
+                        <li>Kupní smlouva a Smlouva o pronájmu</li>
+                    </ul>
+                </div>
+
+                <div class="catalog-box">
+                    <div class="catalog-box-head">
+                        <h3>3. HR a zaměstnanecká agenda</h3>
+                        <span class="status-badge" style="background: var(--brand-navy); color: #FFF;">Tarif Pro</span>
+                    </div>
+                    <ul class="catalog-items-list">
+                        <li>Pracovní smlouva (HPP)</li>
+                        <li>Dohoda o provedení práce (DPP)</li>
+                        <li>Dohoda o pracovní činnosti (DPČ)</li>
+                        <li>Mzdový výměr zaměstnance</li>
+                        <li>Dohoda o rozvázání pracovního poměru</li>
+                        <li>Výpověď a Vytýkací dopis</li>
+                    </ul>
+                </div>
+
+                <div class="catalog-box">
+                    <div class="catalog-box-head">
+                        <h3>4. Provozní doklady a firemní procesy</h3>
+                        <span class="status-badge status-paid">Basic &amp; Pro</span>
+                    </div>
+                    <ul class="catalog-items-list">
+                        <li>Předávací protokol díla / služby</li>
+                        <li>Cestovní příkaz a vyúčtování</li>
+                        <li>Svěření majetku (Notebook, auto)</li>
+                        <li>Záznam o školení BOZP</li>
+                        <li>Souhlas se zpracováním GDPR</li>
+                        <li>Plná moc k zastupování</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Spodní tlačítko pro návrat k registraci a tarifům -->
+            <div style="text-align: center; margin-top: 2.5rem;">
+                <button type="button" class="btn-submit" style="max-width: 380px;" onclick="switchPageTab('pricing')">
+                    ← Zpět na Tarify a přihlášení
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ==========================================================================
+         PATIČKA (GDPR, Podmínky)
+         ========================================================================== -->
+    <footer class="main-footer">
+        <div class="footer-inner">
+            <div class="footer-links">
+                <a href="#">Obchodní podmínky</a>
+                <a href="#">Zásady ochrany osobních údajů (GDPR)</a>
+                <a href="#">Vyloučení právní odpovědnosti</a>
+                <a href="#">O cookies</a>
+            </div>
+            <div class="footer-copyright">
+                © 2026 čistásložka.cz s.r.o. Všechna práva vyhrazena.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==========================================================================
+         JAVASCRIPT LOGIKA (Přepínání sekcí, Konfigurátor domácí stránky, Grafy)
+         ========================================================================== -->
+    <script>
+        // 1. Přepínání mezi pohledem "Tarify a přihlášení" a "Co systém umí"
+        function switchPageTab(tabName) {
+            const viewPricing = document.getElementById('view-pricing');
+            const viewFeatures = document.getElementById('view-features');
+
+            const btnPricing = document.getElementById('tab-btn-pricing');
+            const btnFeatures = document.getElementById('tab-btn-features');
+            const btnCatalog = document.getElementById('tab-btn-catalog');
+
+            btnPricing.classList.remove('active');
+            btnFeatures.classList.remove('active');
+            btnCatalog.classList.remove('active');
+
+            if (tabName === 'pricing') {
+                viewPricing.classList.remove('hidden');
+                viewFeatures.classList.add('hidden');
+                btnPricing.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (tabName === 'features') {
+                viewPricing.classList.add('hidden');
+                viewFeatures.classList.remove('hidden');
+                btnFeatures.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (tabName === 'catalog') {
+                viewPricing.classList.add('hidden');
+                viewFeatures.classList.remove('hidden');
+                btnCatalog.classList.add('active');
+                document.getElementById('catalog-anchor').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // 2. Interaktivní zapínání a vypínání modulů domácí stránky v sekci "Co systém umí"
+        function toggleHomeWidget(widgetKey, itemEl) {
+            itemEl.classList.toggle('active');
+            const targetBox = document.getElementById('preview-widget-' + widgetKey);
+            if (targetBox) {
+                targetBox.classList.toggle('hidden', !itemEl.classList.contains('active'));
+            }
+        }
+
+        // 3. Zobrazení telefonního čísla po kliknutí na ikonu telefonu
+        function togglePhoneBox() {
+            document.getElementById('phone-popover').classList.toggle('hidden');
+        }
+
+        // 4. Přepínání Přihlášení / Registrace (včetně Potvrzení hesla)
+        let isLoginMode = true;
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const btnMain = document.getElementById('btn-main-action');
+            const switchText = document.getElementById('auth-switch-text');
+            const btnSwitch = document.getElementById('btn-switch-mode');
+            const linkForgot = document.getElementById('link-forgot-pass');
+            const boxConfirm = document.getElementById('box-password-confirm');
+
+            if (isLoginMode) {
+                title.textContent = 'Přihlášení do účtu';
+                subtitle.textContent = 'Vstupte do své čisté složky a spravujte agendu.';
+                btnMain.textContent = 'Přihlásit se do systému';
+                switchText.textContent = 'Nemáte ještě založený účet?';
+                btnSwitch.textContent = 'Založit nový účet (7 dní zdarma)';
+                linkForgot.style.display = 'block';
+                boxConfirm.classList.add('hidden');
+            } else {
+                title.textContent = 'Založení nového účtu';
+                subtitle.textContent = 'Získejte přístup k tarifu Basic na 7 dní zcela zdarma.';
+                btnMain.textContent = 'Dokončit registraci a vyzkoušet';
+                switchText.textContent = 'Máte již u nás účet?';
+                btnSwitch.textContent = 'Zpět na Přihlášení';
+                linkForgot.style.display = 'none';
+                boxConfirm.classList.remove('hidden');
+            }
+        }
+
+        // 5. Interaktivní ukázka grafu podle roku v sekci "Co systém umí"
+        const YEAR_DATA = {
+            2026: {
+                total: '354 700 Kč',
+                months: [
+                    { name: 'Kvě', val: 52, h: 105 },
+                    { name: 'Čvn', val: 61, h: 122 },
+                    { name: 'Čvc', val: 48, h: 96 },
+                    { name: 'Srp', val: 70, h: 140 },
+                    { name: 'Zář', val: 66, h: 132 },
+                    { name: 'Říj', val: 57, h: 114, active: true }
+                ]
+            },
+            2025: {
+                total: '289 400 Kč',
+                months: [
+                    { name: 'Kvě', val: 41, h: 82 },
+                    { name: 'Čvn', val: 45, h: 90 },
+                    { name: 'Čvc', val: 39, h: 78 },
+                    { name: 'Srp', val: 54, h: 108 },
+                    { name: 'Zář', val: 52, h: 104 },
+                    { name: 'Říj', val: 58, h: 116, active: true }
+                ]
+            }
+        };
+
+        function switchDemoYear(year) {
+            document.getElementById('year-2026').classList.toggle('active', year === 2026);
+            document.getElementById('year-2025').classList.toggle('active', year === 2025);
+
+            const data = YEAR_DATA[year];
+            document.getElementById('demo-year-total').textContent = data.total;
+
+            const container = document.getElementById('demo-bars-container');
+            container.innerHTML = data.months.map(m => `
+                <div class="bar-col">
+                    <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">${m.val} tis.</span>
+                    <div class="bar-fill ${m.active ? 'highlight' : ''}" style="height: ${m.h}px;"></div>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--brand-navy); padding-top: 0.35rem;">${m.name}</span>
+                </div>
+            `).join('');
+        }
+
+        // 6. Interaktivní ukázka Archivu faktur (přepínání Uhrazeno / Neuhrazeno)
+        let demoInvoices = [
+            { id: 1, no: '20260052', client: 'Studio Lipa s.r.o.', amount: '38 500 Kč', paid: false },
+            { id: 2, no: '20260051', client: 'Pekárna U Mostu', amount: '12 400 Kč', paid: true },
+            { id: 3, no: '20260050', client: 'Kovář & syn, s.r.o.', amount: '27 000 Kč', paid: false },
+            { id: 4, no: '20260049', client: 'Jana Malá – design', amount: '15 000 Kč', paid: true }
+        ];
+
+        function renderDemoArchive() {
+            const tbody = document.getElementById('demo-archive-tbody');
+            tbody.innerHTML = demoInvoices.map(inv => `
+                <tr>
+                    <td><strong>${inv.no}</strong></td>
+                    <td>${inv.client}</td>
+                    <td><strong>${inv.amount}</strong></td>
+                    <td>
+                        <span class="status-badge ${inv.paid ? 'status-paid' : 'status-unpaid'}">
+                            ${inv.paid ? 'Uhrazeno' : 'Neuhrazeno'}
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button type="button" class="btn-toggle-paid" onclick="toggleDemoInvoice(${inv.id})">
+                            ${inv.paid ? 'Označit neuhrazené' : 'Označit uhrazené'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleDemoInvoice(id) {
+            const item = demoInvoices.find(i => i.id === id);
+            if (item) {
+                item.paid = !item.paid;
+                renderDemoArchive();
+            }
+        }
+
+        // Inicializace ukázek
+        switchDemoYear(2026);
+        renderDemoArchive();
+    </script>
+
+</body>
+</html>
