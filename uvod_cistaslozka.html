@@ -936,6 +936,22 @@
             .catalog-items-list, .mini-widgets-grid { grid-template-columns: 1fr; }
             .mini-widget-box.span-full { grid-column: auto; }
         }
+
+        /* Mobil: hlavička se zalomí na víc řádků a nepřetéká do stran */
+        @media (max-width: 720px) {
+            .top-navbar { position: static; }
+            .nav-container { padding: 0.9rem 1rem; gap: 0.85rem; }
+            .brand-logo { font-size: 1.4rem; }
+            .nav-center { flex-wrap: wrap; gap: 0.5rem; }
+            .nav-tab-btn { padding: 0.55rem 0.95rem; font-size: 0.85rem; }
+            .nav-actions { flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+            .nav-icons { padding-right: 0.75rem; }
+            .btn-support { padding: 0.5rem 1rem; font-size: 0.85rem; }
+            .phone-popover { right: auto; left: 50%; transform: translateX(-50%); }
+            .hero-grid, .showcase-3col, .customizer-showcase, .dashboard-preview-grid, .catalog-grid-4 { grid-template-columns: minmax(0, 1fr); }
+            .preview-panel { padding: 1.25rem; min-width: 0; }
+            .demo-table { display: block; overflow-x: auto; }
+        }
     </style>
 </head>
 <body>
@@ -1095,7 +1111,7 @@
                             <p id="auth-subtitle">Vstupte do své čisté složky a spravujte agendu.</p>
                         </div>
 
-                        <form onsubmit="event.preventDefault(); alert('Připraveno pro napojení na Supabase Auth.');">
+                        <form onsubmit="event.preventDefault(); window.location.href = 'navrh-aplikace.html';">
                             <div class="form-group">
                                 <div class="form-label">E-mailová adresa</div>
                                 <input type="email" class="form-input" placeholder="vase@firma.cz" required>
@@ -1447,7 +1463,7 @@
                 <a href="#">O cookies</a>
             </div>
             <div class="footer-copyright">
-                © 2026 čistásložka.cz s.r.o. Všechna práva vyhrazena.
+                © 2026 čistásložka.cz. Všechna práva vyhrazena.
             </div>
         </div>
     </footer>
