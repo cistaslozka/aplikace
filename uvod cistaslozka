@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XimoX | Tvoříme digitální budoucnost</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f0ff;
+            --dark-bg: #030303;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        /* Background Glow Orbs */
+        .glow-orb {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0,240,255,0.15) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            filter: blur(40px);
+        }
+
+        /* Custom Gradients & Text */
+        .text-gradient {
+            background: linear-gradient(90deg, #ffffff 0%, var(--neon-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* XimoX Logo Styling */
+        .logo-ximox {
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            display: inline-flex;
+            align-items: center;
+        }
+        .logo-x {
+            color: var(--neon-blue);
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.7);
+        }
+        .logo-imomiddle {
+            color: #ffffff;
+        }
+        .logo-lightning {
+            display: inline-block;
+            margin-left: -3px;
+            margin-right: -3px;
+            vertical-align: middle;
+            color: var(--neon-blue);
+            filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.9));
+        }
+
+        /* Card Hover Effects */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px -10px rgba(0, 240, 255, 0.2);
+            background: rgba(0, 240, 255, 0.03);
+        }
+
+        /* Button Styling */
+        .btn-glow {
+            position: relative;
+            background: transparent;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            transition: 0.3s;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--neon-blue);
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        .btn-glow:hover {
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+        }
+        .btn-glow:hover::before {
+            transform: scaleX(1);
+        }
+
+        /* Scroll Reveal Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Infinite Marquee Animation */
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            background: rgba(255, 255, 255, 0.01);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 1.5rem 0;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: scroll 30s linear infinite;
+        }
+        .marquee-content span {
+            display: inline-block;
+            margin: 0 2rem;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: 0.3s;
+        }
+        .marquee-content span:hover {
+            -webkit-text-stroke: 1px var(--neon-blue);
+            color: var(--neon-blue);
+            text-shadow: 0 0 15px rgba(0,240,255,0.5);
+        }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+
+        /* Portfolio Mockup UI Element */
+        .mockup-ui {
+            background: linear-gradient(145deg, #111, #050505);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(0,240,255,0.3);
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.8);
+        }
+
+        /* Trik pro zmenšení celého webu do malého boxu (Mini-Web) */
+        .mini-web-viewport {
+            width: 100%;
+            height: 380px;
+            overflow: hidden;
+            position: relative;
+            background: #0a0a0c;
+            border-radius: 0.75rem;
+        }
+        .mini-web-iframe {
+            width: 250%; /* Vykreslí se jako široká desktopová obrazovka */
+            height: 265%; /* Mírně vyšší, aby se spodní lišta Netlify schovala pod ořez */
+            transform: scale(0.4); /* Zmenší celý web na 40 %, takže je vidět kompletně celý */
+            transform-origin: 0 0;
+            border: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-[#00f0ff] selection:text-black">
+
+    <!-- Background Orbs -->
+    <div class="glow-orb top-0 left-0"></div>
+    <div class="glow-orb top-[40%] right-[-10%]"></div>
+    <div class="glow-orb bottom-0 left-[20%]"></div>
+
+    <nav class="fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/5 bg-black/50" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-3xl logo-ximox tracking-tighter">
+                <span class="logo-x">X</span><span class="logo-imomiddle">imo</span><span class="logo-x">X</span><svg class="logo-lightning w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </a>
+            <div class="hidden md:flex space-x-8 text-sm font-semibold tracking-wide">
+                <a href="#proc-my" class="text-gray-300 hover:text-[#00f0ff] transition-colors">Proč my</a>
+                <a href="#portfolio" class="text-gray-300 hover:text-[#00f0ff] transition-colors">Portfolio</a>
+                <a href="#proces" class="text-gray-300 hover:text-[#00f0ff] transition-colors">Proces</a>
+                <a href="#kontakt" class="text-gray-300 hover:text-[#00f0ff] transition-colors">Kontakt</a>
+            </div>
+            <a href="#kontakt" class="hidden md:block btn-glow px-6 py-2 rounded-full font-bold uppercase text-xs tracking-widest">
+                Začít projekt
+            </a>
+        </div>
+    </nav>
+
+    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <div class="max-w-5xl mx-auto text-center px-6 relative z-10">
+            <div class="inline-block mb-4 px-4 py-1 rounded-full border border-[#00f0ff]/30 bg-[#00f0ff]/5 text-[#00f0ff] text-xs font-bold tracking-widest uppercase reveal active">
+                Digitální agentura nové generace
+            </div>
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight mb-6 reveal active" style="transition-delay: 0.1s;">
+                Nekódíme jen weby.<br>
+                <span class="text-gradient">Tvoříme dominanci.</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto reveal active" style="transition-delay: 0.2s;">
+                Specializujeme se na zakázkové weby s moderním designem a komplexní administrátorské panely, které posunou vaši firmu před konkurenci.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center reveal active" style="transition-delay: 0.3s;">
+                <a href="#portfolio" class="btn-glow px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm">Ukázky naší práce</a>
+                <a href="#kontakt" class="px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm text-white border border-gray-600 hover:border-[#00f0ff] hover:text-[#00f0ff] transition-all">Napsat nám</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="marquee-container reveal">
+        <div class="marquee-content">
+            <span>HTML5</span>
+            <span>CSS3 / Tailwind</span>
+            <span>JavaScript</span>
+            <span>React & Vue</span>
+            <span>VBA Excel</span>
+            <span>ERP / CRM</span>
+            <span>Custom Admin Panels</span>
+            <span>UX / UI Design</span>
+            <span>HTML5</span>
+            <span>CSS3 / Tailwind</span>
+            <span>JavaScript</span>
+            <span>React & Vue</span>
+            <span>VBA Excel</span>
+            <span>ERP / CRM</span>
+            <span>Custom Admin Panels</span>
+            <span>UX / UI Design</span>
+        </div>
+    </div>
+
+    <section id="proc-my" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-16 text-center reveal">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-[#00f0ff] mb-2">Naše filozofie</h2>
+                <h3 class="text-4xl md:text-5xl font-extrabold text-white">Proč zvolit <span class="text-gradient">XimoX</span></h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-8 rounded-2xl reveal">
+                    <div class="w-12 h-12 rounded-lg bg-[#00f0ff]/10 flex items-center justify-center mb-6 border border-[#00f0ff]/20">
+                        <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3 text-white">Blesková Rychlost</h4>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Optimalizujeme kód na maximum. Vaše stránky se načtou dřív, než konkurence vůbec mrkne. Rychlost znamená lepší konverze.
+                    </p>
+                </div>
+
+                <div class="glass-card p-8 rounded-2xl reveal" style="transition-delay: 0.1s;">
+                    <div class="w-12 h-12 rounded-lg bg-[#00f0ff]/10 flex items-center justify-center mb-6 border border-[#00f0ff]/20">
+                        <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3 text-white">Moderní Design</h4>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Inspirujeme se zahraničními trendy. Prémiové barvy, plynulé přechody a detaily, které udělají z návštěvníka klienta.
+                    </p>
+                </div>
+
+                <div class="glass-card p-8 rounded-2xl reveal" style="transition-delay: 0.2s;">
+                    <div class="w-12 h-12 rounded-lg bg-[#00f0ff]/10 flex items-center justify-center mb-6 border border-[#00f0ff]/20">
+                        <svg class="w-6 h-6 text-[#00f0ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3 text-white">Řešení na míru</h4>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Šablony u nás nehledejte. Tvoříme systémy a admin panely, které se přizpůsobí vašim procesům – od autodílen po logistiku.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="py-24 bg-[#020202] border-t border-b border-white/5 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-16 md:flex justify-between items-end reveal">
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-[#00f0ff] mb-2">Ukázky práce</h2>
+                    <h3 class="text-4xl md:text-5xl font-extrabold text-white">Naše <span class="text-gradient">Portfolio</span></h3>
+                </div>
+            </div>
+
+            <div class="space-y-20">
+                <!-- Project 1: DROCOMP -->
+                <div class="grid lg:grid-cols-2 gap-12 items-center reveal">
+                    <div class="order-2 lg:order-1 relative group">
+                        <div class="mockup-ui rounded-2xl p-6 aspect-video relative overflow-hidden transition-transform duration-500 group-hover:scale-[1.02]">
+                            <div class="flex gap-2 mb-4">
+                                <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="h-8 bg-white/5 rounded w-1/3"></div>
+                                <div class="h-4 bg-white/5 rounded w-full"></div>
+                                <div class="h-4 bg-white/5 rounded w-5/6"></div>
+                                <div class="flex gap-4 mt-6">
+                                    <div class="h-24 bg-[#00f0ff]/10 border border-[#00f0ff]/20 rounded-xl w-1/2 flex items-center justify-center text-[#00f0ff] text-2xl font-bold">35 000 Kč</div>
+                                    <div class="h-24 bg-white/5 rounded-xl w-1/2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-1 lg:order-2">
+                        <div class="text-[#00f0ff] text-sm font-bold uppercase tracking-widest mb-2">Web & Aplikace</div>
+                        <h4 class="text-3xl font-bold mb-4">DROCOMP s.r.o.</h4>
+                        <p class="text-xl text-white mb-4">Dynamická cenová kalkulačka</p>
+                        <p class="text-gray-400 mb-6 leading-relaxed">
+                            Pro klienta jsme vyvinuli interaktivní kalkulačku, která zákazníkům umožňuje okamžitě zjistit odhadovanou cenu služeb na základě zadaných parametrů. Vše zabaleno do čistého, plynulého UI, které zvyšuje konverzní poměr.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">Vue.js</span>
+                            <span class="text-xs px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">Tailwind</span>
+                            <span class="text-xs px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">Custom API</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2: Auto-repair Admin (Mini-web v kompaktním okně) -->
+                <div class="grid lg:grid-cols-2 gap-12 items-center reveal">
+                    <div>
+                        <div class="mockup-ui rounded-2xl p-2.5 relative overflow-hidden transition-transform duration-500 hover:scale-[1.01] shadow-[0_0_30px_rgba(0,240,255,0.15)]">
+                            <!-- Horní lišta okna pouze s tečkami -->
+                            <div class="bg-black/90 px-4 py-3 flex items-center justify-between border-b border-white/10 mb-2 rounded-t-xl">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                </div>
+                                <a href="https://meek-fenglisu-0076c2.netlify.app/" target="_blank" class="text-[11px] text-[#00f0ff] hover:underline font-mono flex items-center gap-1">
+                                    Otevřít na celou obrazovku ↗
+                                </a>
+                            </div>
+
+                            <!-- Zmenšený plnohodnotný web (Mini-Web) -->
+                            <div class="mini-web-viewport">
+                                <iframe 
+                                    src="https://meek-fenglisu-0076c2.netlify.app/" 
+                                    class="mini-web-iframe"
+                                    title="Administrativní panel autodílny">
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-[#00f0ff] text-sm font-bold uppercase tracking-widest mb-2">Interní Systém</div>
+                        <h4 class="text-3xl font-bold mb-4">Administrativní panel</h4>
+                        <p class="text-xl text-white mb-4">Kompletní systém pro autodílnu</p>
+                        <p class="text-gray-400 mb-6 leading-relaxed">
+                            Ukončili jsme éru nepřehledných excelových tabulek. Vytvořili jsme robustní administrační panel pro správu zakázek, klientů a přehlednou fakturaci na čistém papírovém základu. <br><br>
+                            <span class="text-[#00f0ff] text-sm font-semibold">👉 V okně vlevo vidíš kompletní živý systém zmenšený do náhledu. Můžeš v něm rovnou přepínat záložky, zkoušet grafy i generovat faktury.</span>
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">HTML / CSS</span>
+                            <span class="text-xs px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">JavaScript</span>
+                            <span class="text-xs px-3 py-1 bg-white/5 border border-white/10 rounded-full text-gray-300">VBA Excel</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="proces" class="py-24 relative overflow-hidden">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="mb-16 text-center reveal">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-[#00f0ff] mb-2">Roadmapa</h2>
+                <h3 class="text-4xl md:text-5xl font-extrabold text-white">Proces <span class="text-gradient">Spolupráce</span></h3>
+            </div>
+
+            <div class="relative border-l-2 border-white/10 md:border-l-0 md:border-l-none pl-8 md:pl-0">
+                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/10 transform -translate-x-1/2"></div>
+                
+                <div class="absolute left-0 md:left-1/2 top-0 h-full w-0.5 md:w-1 bg-gradient-to-b from-[#00f0ff] via-blue-500 to-transparent transform md:-translate-x-1/2 opacity-50"></div>
+
+                <div class="space-y-12">
+                    <div class="relative md:w-1/2 md:pr-12 md:text-right reveal">
+                        <div class="absolute -left-[41px] md:right-[-20px] md:left-auto top-1 w-10 h-10 bg-black border-2 border-[#00f0ff] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.5)] z-10 text-[#00f0ff] font-bold">1</div>
+                        <h4 class="text-2xl font-bold mb-2">Úvodní konzultace</h4>
+                        <p class="text-gray-400">Pochopíme váš byznys. Probereme cíle, funkce a rozpočet. Následně navrhneme optimální technologické řešení na míru.</p>
+                    </div>
+
+                    <div class="relative md:w-1/2 md:ml-auto md:pl-12 reveal" style="transition-delay: 0.1s;">
+                        <div class="absolute -left-[41px] md:left-[-20px] top-1 w-10 h-10 bg-black border-2 border-[#00f0ff] rounded-full flex items-center justify-center z-10 text-[#00f0ff] font-bold">2</div>
+                        <h4 class="text-2xl font-bold mb-2">Návrh designu</h4>
+                        <p class="text-gray-400">Vytvoříme interaktivní prototyp a vizuální koncept. Ladíme detaily, dokud si neřeknete: "Tohle je přesně ono".</p>
+                    </div>
+
+                    <div class="relative md:w-1/2 md:pr-12 md:text-right reveal" style="transition-delay: 0.2s;">
+                        <div class="absolute -left-[41px] md:right-[-20px] md:left-auto top-1 w-10 h-10 bg-black border-2 border-[#00f0ff] rounded-full flex items-center justify-center z-10 text-[#00f0ff] font-bold">3</div>
+                        <h4 class="text-2xl font-bold mb-2">Vývoj a kódování</h4>
+                        <p class="text-gray-400">Píšeme čistý kód. Proměňujeme design v rychlý, responzivní a plně funkční systém s nejmodernějšími technologiemi.</p>
+                    </div>
+
+                    <div class="relative md:w-1/2 md:ml-auto md:pl-12 reveal" style="transition-delay: 0.3s;">
+                        <div class="absolute -left-[41px] md:left-[-20px] top-1 w-10 h-10 bg-black border-2 border-[#00f0ff] rounded-full flex items-center justify-center z-10 text-[#00f0ff] font-bold">4</div>
+                        <h4 class="text-2xl font-bold mb-2">Předání a správa</h4>
+                        <p class="text-gray-400">Po důkladném testování spouštíme do světa. Zajišťujeme hosting, zaškolení do systému a následnou technickou podporu.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="kontakt" class="py-24 relative border-t border-white/5">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl font-extrabold mb-4">Připraveni na <span class="text-gradient">změnu?</span></h2>
+                <p class="text-gray-400">Dejte nám vědět o svém projektu. Odpovíme do 24 hodin.</p>
+            </div>
+            
+            <form class="glass-card p-8 md:p-12 rounded-3xl reveal" onsubmit="event.preventDefault();">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Jméno</label>
+                        <input type="text" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00f0ff] transition-colors" placeholder="Jan Novák">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Email</label>
+                        <input type="email" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00f0ff] transition-colors" placeholder="jan@firma.cz">
+                    </div>
+                </div>
+                <div class="mb-8">
+                    <label class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">O čem bude projekt?</label>
+                    <textarea rows="4" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00f0ff] transition-colors resize-none" placeholder="Např.: Potřebujeme nový web a admin panel pro..."></textarea>
+                </div>
+                <button type="submit" class="w-full btn-glow py-4 rounded-xl font-bold uppercase tracking-widest text-sm">
+                    Odeslat poptávku
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="py-8 border-t border-white/5 text-center text-sm text-gray-600 bg-black">
+        <p>&copy; 2026 XimoX. Všechna práva vyhrazena. | Tvořeno s vášní pro kód.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            const revealOnScroll = () => {
+                const windowHeight = window.innerHeight;
+                const elementVisible = 100;
+
+                reveals.forEach((reveal) => {
+                    const elementTop = reveal.getBoundingClientRect().top;
+                    if (elementTop < windowHeight - elementVisible) {
+                        reveal.classList.add('active');
+                    }
+                });
+            };
+
+            window.addEventListener('scroll', revealOnScroll);
+            revealOnScroll();
+
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('shadow-lg', 'shadow-[#00f0ff]/5', 'bg-black/80');
+                    navbar.classList.remove('bg-black/50');
+                } else {
+                    navbar.classList.remove('shadow-lg', 'shadow-[#00f0ff]/5', 'bg-black/80');
+                    navbar.classList.add('bg-black/50');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
