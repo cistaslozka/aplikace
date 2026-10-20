@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Návrh aplikace cistaslozka.cz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+<style>
+html, body { margin: 0; height: 100%; }
+body { background: #f4f7fb; font-family: 'Inter', system-ui, sans-serif; }
+a { color: #047857; } a:hover { color: #065f46; }
+.proto-bar { position: sticky; top: 0; z-index: 50; background: #0b1b29; color: #cbd5e1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 16px; font-size: 13px; }
+.proto-bar strong { color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; }
+.proto-bar .tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-left: auto; }
+.proto-bar button { border: 0; background: transparent; color: #cbd5e1; font: inherit; font-weight: 600; padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+.proto-bar button.on { background: #10b981; color: #0f2537; }
+.phone-stage { padding: 32px 16px; display: flex; justify-content: center; }
+.phone-stage > div { border-radius: 36px; box-shadow: 0 24px 60px -24px rgba(15, 37, 55, .45); }
+/* Přehled */
+.shell{display:flex;flex-wrap:wrap;min-height:100%;background:#f4f7fb;font-family:'Inter',system-ui,sans-serif;color:#334155}
+.side{flex:1 1 248px;max-width:248px;background:#0f2537;color:#cbd5e1;padding:24px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px}
+.content{flex:999 1 560px;min-width:0;padding:28px 40px 56px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#cbd5e1;text-decoration:none;font-weight:500;font-size:14px}
+.nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.span2{grid-column:span 2}
+.num{font-variant-numeric:tabular-nums}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#64748b;font-weight:600;padding:0 12px 10px 0}
+.tbl td{padding:12px 12px 12px 0;border-top:1px solid #e2e8f0;white-space:nowrap}
+@media (max-width:900px){.side{max-width:none;flex-basis:100%}.content{padding:20px 16px 40px}.g3{grid-template-columns:minmax(0,1fr)}.span2{grid-column:auto}}
+/* Nová faktura */
+.num{font-variant-numeric:tabular-nums}
+.card{background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.lbl{display:block;font-size:13px;font-weight:600;color:#0f2537;margin-bottom:6px}
+.inp{width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;font:inherit;font-size:14px;color:#0f2537;padding:11px 12px}
+.inp:focus{outline:none;border-color:#10b981;background:#fff}
+.h2{margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;color:#0f2537}
+.items{width:100%;border-collapse:collapse;font-size:14px}
+.items th{text-align:left;font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#64748b;font-weight:600;padding:0 8px 8px 0;white-space:nowrap}
+.items td{padding:6px 8px 6px 0;border-top:1px solid #e2e8f0}
+/* Faktury */
+.shell{display:flex;flex-wrap:wrap;min-height:100%;background:#f4f7fb;font-family:'Inter',system-ui,sans-serif;color:#334155}
+.side{flex:1 1 248px;max-width:248px;background:#0f2537;color:#cbd5e1;padding:24px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px}
+.content-d{flex:999 1 560px;min-width:0;padding:28px 40px 56px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#cbd5e1;text-decoration:none;font-weight:500;font-size:14px}
+.nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+.num{font-variant-numeric:tabular-nums}
+.tbl-d{width:100%;border-collapse:collapse;font-size:14px}
+.tbl-d th{text-align:left;font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#64748b;font-weight:600;padding:14px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+.tbl-d td{padding:14px 12px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+.tbl-d tr:last-child td{border-bottom:0}
+.sel{border:1.5px solid #e2e8f0;border-radius:10px;background:#ffffff;font:inherit;font-size:14px;color:#0f2537;padding:10px 12px;min-height:44px}
+@media (max-width:900px){.side{max-width:none;flex-basis:100%}.content-d{padding:20px 16px 40px}}
+/* Mobil */
+.num{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="proto-bar">
+  <strong>cistaslozka.cz · návrh aplikace</strong>
+  <span>Ukázková data, nic se neukládá</span>
+  <div class="tabs"><button type="button" data-tab="Main">Přehled</button><button type="button" data-tab="Faktura">Nová faktura</button><button type="button" data-tab="Doklady">Faktury</button><button type="button" data-tab="Mobil">Mobil</button></div>
+</div>
+<div id="screen"></div>
+<template id="t-Main"><div class="shell">
+
+<aside class="side">
+  <a href="#" data-go="Main" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#ffffff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;padding:0 8px">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+    <span>cistaslozka<span style="color:#10b981">.cz</span></span>
+  </a>
+
+  <a href="#" data-go="Faktura" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#10b981;color:#0f2537;text-decoration:none;font-weight:700;font-size:15px;padding:12px 16px;border-radius:12px">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    Nový doklad
+  </a>
+
+  <nav class="nav" aria-label="Hlavní menu" style="display:flex;flex-direction:column;gap:2px">
+    <a href="#" data-go="Main" aria-current="page" style="background:rgba(16,185,129,.16);color:#ffffff">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+      Přehled
+    </a>
+    <a href="#" data-go="Doklady">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="13" y2="17"></line></svg>
+      Faktury
+    </a>
+    <a href="#" data-go="Doklady">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+      Smlouvy
+    </a>
+    <a href="#" data-go="Doklady">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.9"></path></svg>
+      <span style="flex:1">HR a zaměstnanci</span>
+      <span style="font-size:11px;font-weight:700;color:#0f2537;background:#a7f3d0;padding:2px 7px;border-radius:999px">PRO</span>
+    </a>
+    <a href="#" data-go="Doklady">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M15 9h3M15 13h3M6 16c.5-1.5 1.7-2 3-2s2.5.5 3 2"></path></svg>
+      Adresář klientů
+    </a>
+    <a href="#" data-go="Doklady">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5" rx="1"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+      Archiv
+    </a>
+  </nav>
+
+  <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px">
+    <div style="background:rgba(255,255,255,.06);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:12px;color:#94a3b8;font-weight:600;letter-spacing:.4px;text-transform:uppercase">Váš tarif</div>
+      <div style="color:#ffffff;font-weight:700;font-size:15px">Basic · 199 Kč / měsíc</div>
+      <div style="font-size:13px;color:#cbd5e1;line-height:1.45">S tarifem PRO získáte pracovní smlouvy, DPP a týmový přístup.</div>
+      <a href="#" style="color:#6ee7b7;font-weight:600;font-size:13px;text-decoration:none">Přejít na PRO →</a>
+    </div>
+    <nav class="nav" aria-label="Účet">
+      <a href="#">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+        Nastavení firmy
+      </a>
+    </nav>
+  </div>
+</aside>
+
+<main class="content">
+  <header style="display:flex;flex-wrap:wrap;align-items:center;gap:16px">
+    <label for="search" style="flex:1 1 280px;display:flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:0 14px;max-width:520px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.6" y2="16.6"></line></svg>
+      <input id="search" type="search" placeholder="Hledat fakturu, klienta nebo IČO" style="border:0;outline:0;flex:1;font:inherit;font-size:14px;padding:12px 0;background:transparent;color:#0f2537">
+    </label>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+      <button type="button" aria-label="Upozornění" style="width:44px;height:44px;border-radius:12px;border:1px solid #e2e8f0;background:#ffffff;display:grid;place-items:center;cursor:pointer;position:relative">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f2537" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+        <span style="position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:#dc2626"></span>
+      </button>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;border-radius:50%;background:#0f2537;color:#ffffff;display:grid;place-items:center;font-weight:700;font-size:14px">JN</div>
+        <div style="line-height:1.25"><div style="font-weight:600;color:#0f2537;font-size:14px">Jan Novák</div><div style="font-size:12px;color:#64748b">OSVČ · IČO 08912345</div></div>
+      </div>
+    </div>
+  </header>
+
+  <section style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+    <div>
+      <h1 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;color:#0f2537;letter-spacing:-.5px">Dobrý den, Jane</h1>
+      <p style="margin:6px 0 0;color:#64748b;font-size:15px">Úterý 20. října 2026 · 2 faktury jsou po splatnosti</p>
+    </div>
+    <button type="button" style="display:flex;align-items:center;gap:8px;border:1.5px solid #e2e8f0;background:#ffffff;color:#0f2537;font:inherit;font-weight:600;font-size:14px;padding:10px 16px;border-radius:10px;cursor:pointer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+      Upravit přehled
+    </button>
+  </section>
+
+  <section class="g3" aria-label="Dlaždice přehledu">
+    <article style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-size:14px;font-weight:600;color:#64748b">Neuhrazené faktury</h2><a href="#" data-go="Doklady" style="font-size:13px;font-weight:600;text-decoration:none">Zobrazit</a></div>
+      <div class="num" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;font-weight:800;color:#0f2537">86 800 Kč</div>
+      <div style="font-size:13px;color:#64748b">4 faktury čekají na úhradu · nejbližší splatnost 22. 10.</div>
+    </article>
+    <article style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-size:14px;font-weight:600;color:#64748b">Po splatnosti</h2><span style="font-size:12px;font-weight:700;color:#b91c1c;background:#fef2f2;padding:3px 10px;border-radius:999px">Vyžaduje pozornost</span></div>
+      <div class="num" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;font-weight:800;color:#b91c1c">35 900 Kč</div>
+      <a href="#" style="font-size:13px;font-weight:600;text-decoration:none">Poslat 2 upomínky jedním kliknutím →</a>
+    </article>
+    <article style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-size:14px;font-weight:600;color:#64748b">Obrat a limit pro DPH</h2><span style="font-size:12px;font-weight:700;color:#047857;background:#ecfdf5;padding:3px 10px;border-radius:999px">V pořádku</span></div>
+      <div class="num" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;font-weight:800;color:#0f2537">612 400 Kč</div>
+      <div style="height:10px;border-radius:999px;background:#eef2f7;overflow:hidden"><div style="width:31%;height:100%;background:#10b981;border-radius:999px"></div></div>
+      <div class="num" style="font-size:13px;color:#64748b">31 % z limitu 2 000 000 Kč za rok 2026</div>
+    </article>
+
+    <article class="span2" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px">
+        <h2 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;color:#0f2537">Příjmy za posledních 6 měsíců</h2>
+        <div class="num" style="font-size:13px;color:#64748b">Celkem <strong style="color:#0f2537">354 700 Kč</strong></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;align-items:end;height:190px;border-bottom:1px solid #e2e8f0">
+        <div data-for="months" data-as="m" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%">
+            <span class="num" style="font-size:12px;color:#64748b">{{m.label}}</span>
+            <span style="{{m.bar}}"></span>
+          </div>
+        
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin-top:-8px">
+        <span data-for="months" data-as="m" style="text-align:center;font-size:12px;font-weight:600;color:#64748b">{{m.name}}</span>
+        
+      </div>
+    </article>
+
+    <article style="background:#0f2537;color:#cbd5e1;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">
+      <h2 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;color:#ffffff">Rychlé akce</h2>
+      <a href="#" data-go="Faktura" style="display:flex;align-items:center;justify-content:space-between;background:#10b981;color:#0f2537;font-weight:700;text-decoration:none;padding:14px 16px;border-radius:12px;font-size:15px">Nová faktura <span aria-hidden="true">→</span></a>
+      <a href="#" style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.07);color:#ffffff;font-weight:600;text-decoration:none;padding:14px 16px;border-radius:12px;font-size:15px">Nová smlouva <span aria-hidden="true">→</span></a>
+      <a href="#" style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.07);color:#ffffff;font-weight:600;text-decoration:none;padding:14px 16px;border-radius:12px;font-size:15px">Přidat klienta z ARES <span aria-hidden="true">→</span></a>
+      <a href="#" style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.07);color:#ffffff;font-weight:600;text-decoration:none;padding:14px 16px;border-radius:12px;font-size:15px">Zálohová faktura <span aria-hidden="true">→</span></a>
+    </article>
+
+    <article class="span2" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;color:#0f2537">Poslední doklady</h2>
+        <a href="#" data-go="Doklady" style="font-size:13px;font-weight:600;text-decoration:none">Všechny doklady →</a>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>Číslo</th><th>Klient</th><th>Splatnost</th><th style="text-align:right">Částka</th><th style="text-align:right;padding-right:0">Stav</th></tr></thead>
+          <tbody>
+            <tr data-for="docs" data-as="d">
+                <td class="num" style="font-weight:600;color:#0f2537">{{d.no}}</td>
+                <td>{{d.client}}</td>
+                <td class="num">{{d.due}}</td>
+                <td class="num" style="text-align:right">{{d.amount}}</td>
+                <td style="text-align:right;padding-right:0"><span style="{{d.pill}}">{{d.status}}</span></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:6px">
+      <h2 style="margin:0 0 8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;color:#0f2537">Končící smlouvy</h2>
+      <div data-for="contracts" data-as="c" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #e2e8f0">
+          <div style="min-width:0"><div style="font-weight:600;color:#0f2537;font-size:14px">{{c.name}}</div><div style="font-size:13px;color:#64748b">{{c.client}}</div></div>
+          <span style="{{c.pill}}">{{c.when}}</span>
+        </div>
+      
+    </article>
+  </section>
+</main>
+</div></template>
+<template id="t-Faktura"><div style="min-height:100%;background:#f4f7fb;font-family:'Inter',system-ui,sans-serif;color:#334155">
+
+<header style="background:#ffffff;border-bottom:1px solid #e2e8f0">
+  <div style="max-width:1360px;margin:0 auto;padding:14px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:16px">
+    <a href="#" data-go="Main" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:#64748b;font-weight:600;font-size:14px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Přehled
+    </a>
+    <div style="display:flex;align-items:center;gap:10px">
+      <h1 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;color:#0f2537">Nová faktura <span class="num" style="color:#64748b;font-weight:600">č. 20260053</span></h1>
+      <span style="font-size:12px;font-weight:600;color:#475569;background:#f1f5f9;padding:3px 10px;border-radius:999px">Koncept · uloženo před chvílí</span>
+    </div>
+    <div style="margin-left:auto;display:flex;flex-wrap:wrap;gap:8px">
+      <button type="button" style="border:1.5px solid #e2e8f0;background:#ffffff;color:#0f2537;font:inherit;font-weight:600;font-size:14px;padding:10px 16px;border-radius:10px;cursor:pointer">Stáhnout PDF</button>
+      <button type="button" style="border:1.5px solid #0f2537;background:#0f2537;color:#ffffff;font:inherit;font-weight:600;font-size:14px;padding:10px 16px;border-radius:10px;cursor:pointer">Odeslat klientovi e-mailem</button>
+    </div>
+  </div>
+</header>
+
+<div style="max-width:1360px;margin:0 auto;padding:24px;display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+
+  <div style="flex:1 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:14px;padding:14px 18px;font-size:14px">
+      <span><strong style="color:#0f2537">Fakturujete jako Jan Novák</strong> · IČO 08912345 · neplátce DPH</span>
+      <a href="#" style="font-weight:600;text-decoration:none;font-size:14px">Změnit údaje</a>
+    </div>
+
+    <section class="card" aria-labelledby="h-client">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <h2 class="h2" id="h-client">Odběratel</h2>
+        <a href="#" style="font-size:13px;font-weight:600;text-decoration:none">Vybrat z adresáře</a>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+        <div style="flex:1 1 200px">
+          <label class="lbl" for="ico">IČO odběratele</label>
+          <input class="inp num" id="ico" type="text" value="05512345">
+        </div>
+        <button type="button" style="border:0;background:#0f2537;color:#ffffff;font:inherit;font-weight:600;font-size:14px;padding:12px 18px;border-radius:10px;cursor:pointer;min-height:44px">Načíst z ARES</button>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;background:#f8fafc">
+        <div style="width:40px;height:40px;border-radius:10px;background:#ecfdf5;color:#047857;display:grid;place-items:center;flex-shrink:0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div style="font-size:14px;line-height:1.5">
+          <div style="font-weight:700;color:#0f2537">Studio Lipa s.r.o.</div>
+          <div>Údolní 12, 602 00 Brno · DIČ CZ05512345</div>
+          <div style="font-size:12px;color:#64748b">Načteno z ARES · plátce DPH</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="h-items">
+      <h2 class="h2" id="h-items">Položky</h2>
+      <div style="overflow-x:auto">
+        <table class="items">
+          <thead><tr><th>Popis</th><th style="width:70px">Množství</th><th style="width:70px">Jednotka</th><th style="width:110px">Cena za jedn.</th><th style="width:100px;text-align:right;padding-right:0">Celkem</th></tr></thead>
+          <tbody>
+            <tr data-for="items" data-as="it">
+                <td><input class="inp" type="text" value="{{it.name}}" aria-label="Popis položky" style="min-width:200px"></td>
+                <td><input class="inp num" type="text" value="{{it.qty}}" aria-label="Množství"></td>
+                <td><input class="inp" type="text" value="{{it.unit}}" aria-label="Jednotka"></td>
+                <td><input class="inp num" type="text" value="{{it.price}}" aria-label="Cena za jednotku"></td>
+                <td class="num" style="text-align:right;padding-right:0;font-weight:600;color:#0f2537;white-space:nowrap">{{it.total}}</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px">
+        <button type="button" style="border:1.5px dashed #94a3b8;background:transparent;color:#0f2537;font:inherit;font-weight:600;font-size:14px;padding:10px 14px;border-radius:10px;cursor:pointer">+ Přidat položku</button>
+        <div class="num" style="font-size:15px">Celkem k úhradě <strong style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;color:#0f2537;margin-left:8px">38 500 Kč</strong></div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="h-pay">
+      <h2 class="h2" id="h-pay">Platba a termíny</h2>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">
+        <div><label class="lbl" for="d-issue">Datum vystavení</label><input class="inp num" id="d-issue" type="text" value="20. 10. 2026"></div>
+        <div><label class="lbl" for="d-due">Datum splatnosti</label><input class="inp num" id="d-due" type="text" value="{{dueText}}"></div>
+      </div>
+      <div>
+        <span class="lbl">Splatnost</span>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button data-for="dues" data-as="d" type="button" onClick="{{d.pick}}" style="{{d.style}}">{{d.label}}</button>
+          
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">
+        <div><label class="lbl" for="vs">Variabilní symbol</label><input class="inp num" id="vs" type="text" value="20260053"></div>
+        <div><label class="lbl" for="acc">Bankovní účet</label><input class="inp num" id="acc" type="text" value="1029384756/0800"></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:#0f2537;font-weight:500">
+        <input type="checkbox" checked style="width:18px;height:18px;accent-color:#047857">
+        Přidat na fakturu QR platbu
+      </label>
+    </section>
+  </div>
+
+  <aside style="flex:1 1 540px;min-width:0;display:flex;flex-direction:column;gap:14px" aria-label="Náhled faktury">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">
+      <h2 class="h2">Náhled</h2>
+      <div role="group" aria-label="Vzhled faktury" style="display:flex;gap:4px;background:#e9eef4;padding:4px;border-radius:12px">
+        <button data-for="tpls" data-as="t" type="button" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+        
+      </div>
+    </div>
+
+    <div style="background:#e2e8f0;border-radius:16px;padding:24px;display:flex;justify-content:center">
+      <article style="width:100%;max-width:560px;aspect-ratio:210/297;background:#ffffff;box-shadow:0 18px 40px -18px rgba(15,37,55,.35);border-radius:4px;overflow:hidden;display:flex;flex-direction:column;font-size:11px;color:#1e293b;line-height:1.45">
+        <div style="{{v.head}}">
+          <div>
+            <div style="{{v.title}}">Faktura</div>
+            <div class="num" style="{{v.subtitle}}">č. 20260053 · daňový doklad neplátce DPH</div>
+          </div>
+          <div style="text-align:right;font-weight:700;font-size:12px">Jan Novák<br><span style="font-weight:400;opacity:.8">IT Consulting</span></div>
+        </div>
+        <div style="padding:22px 28px;display:flex;flex-direction:column;gap:16px;flex:1">
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px">
+            <div>
+              <div style="{{v.cap}}">Dodavatel</div>
+              <strong style="font-size:12px;color:#0f2537">Jan Novák</strong><br>Masarykova 412/18, 602 00 Brno<br><span class="num">IČO 08912345</span><br>Nejsem plátce DPH
+            </div>
+            <div>
+              <div style="{{v.cap}}">Odběratel</div>
+              <strong style="font-size:12px;color:#0f2537">Studio Lipa s.r.o.</strong><br>Údolní 12, 602 00 Brno<br><span class="num">IČO 05512345 · DIČ CZ05512345</span>
+            </div>
+          </div>
+          <div class="num" style="{{v.strip}}">
+            <div><div style="{{v.cap}}">Vystaveno</div>20. 10. 2026</div>
+            <div><div style="{{v.cap}}">Splatnost</div><strong style="color:#0f2537">{{dueText}}</strong></div>
+            <div><div style="{{v.cap}}">Var. symbol</div>20260053</div>
+            <div><div style="{{v.cap}}">Úhrada</div>Převodem</div>
+          </div>
+          <table class="num" style="width:100%;border-collapse:collapse;font-size:11px">
+            <thead><tr style="{{v.th}}"><th style="text-align:left;padding:6px 8px">Položka</th><th style="text-align:right;padding:6px 8px">Množství</th><th style="text-align:right;padding:6px 8px">Cena</th><th style="text-align:right;padding:6px 8px">Celkem</th></tr></thead>
+            <tbody>
+              <tr data-for="items" data-as="it" style="border-bottom:1px solid #e2e8f0"><td style="padding:7px 8px">{{it.name}}</td><td style="text-align:right;padding:7px 8px">{{it.qty}} {{it.unit}}</td><td style="text-align:right;padding:7px 8px">{{it.price}} Kč</td><td style="text-align:right;padding:7px 8px;font-weight:600">{{it.total}}</td></tr>
+              
+            </tbody>
+          </table>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:auto">
+            <div style="display:flex;gap:10px;align-items:center">
+              <div style="width:78px;height:78px;border:1.5px solid #0f2537;border-radius:6px;display:grid;place-items:center;text-align:center;font-size:9px;font-weight:700;color:#0f2537">QR<br>platba</div>
+              <div style="font-size:10px;color:#475569">Účet <span class="num">1029384756/0800</span><br>Naskenujte v aplikaci banky</div>
+            </div>
+            <div style="{{v.total}}">
+              <div style="font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;opacity:.75">Celkem k úhradě</div>
+              <div class="num" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800">38 500 Kč</div>
+            </div>
+          </div>
+          <div style="border-top:1px solid #e2e8f0;padding-top:10px;font-size:9.5px;color:#64748b">Fyzická osoba zapsaná v živnostenském rejstříku. Nejsem plátce DPH. Vystaveno v systému cistaslozka.cz.</div>
+        </div>
+      </article>
+    </div>
+  </aside>
+</div>
+</div></template>
+<template id="t-Doklady"><div class="shell">
+
+<aside class="side">
+  <a href="#" data-go="Main" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#ffffff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;padding:0 8px">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+    <span>cistaslozka<span style="color:#10b981">.cz</span></span>
+  </a>
+  <a href="#" data-go="Faktura" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#10b981;color:#0f2537;text-decoration:none;font-weight:700;font-size:15px;padding:12px 16px;border-radius:12px">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    Nový doklad
+  </a>
+  <nav class="nav" aria-label="Hlavní menu" style="display:flex;flex-direction:column;gap:2px">
+    <a href="#" data-go="Main">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+      Přehled
+    </a>
+    <a href="#" data-go="Doklady" aria-current="page" style="background:rgba(16,185,129,.16);color:#ffffff">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="13" y2="17"></line></svg>
+      Faktury
+    </a>
+    <a href="#" data-go="Doklady">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+      Smlouvy
+    </a>
+    <a href="#" data-go="Doklady">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.9"></path></svg>
+      <span style="flex:1">HR a zaměstnanci</span>
+      <span style="font-size:11px;font-weight:700;color:#0f2537;background:#a7f3d0;padding:2px 7px;border-radius:999px">PRO</span>
+    </a>
+    <a href="#" data-go="Doklady">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M15 9h3M15 13h3M6 16c.5-1.5 1.7-2 3-2s2.5.5 3 2"></path></svg>
+      Adresář klientů
+    </a>
+    <a href="#" data-go="Doklady">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5" rx="1"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+      Archiv
+    </a>
+  </nav>
+</aside>
+
+<main class="content-d">
+  <section style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+    <div>
+      <h1 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;color:#0f2537;letter-spacing:-.5px">Faktury</h1>
+      <p style="margin:6px 0 0;color:#64748b;font-size:15px">Všechny vystavené faktury, zálohy a upomínky na jednom místě.</p>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <button type="button" style="border:1.5px solid #e2e8f0;background:#ffffff;color:#0f2537;font:inherit;font-weight:600;font-size:14px;padding:10px 16px;border-radius:10px;cursor:pointer">Export pro účetní</button>
+      <a href="#" data-go="Faktura" style="background:#0f2537;color:#ffffff;font-weight:600;font-size:14px;padding:11px 16px;border-radius:10px;text-decoration:none">+ Nová faktura</a>
+    </div>
+  </section>
+
+  <section style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px" aria-label="Souhrn">
+    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:16px 18px"><div style="font-size:13px;color:#64748b;font-weight:600">Vystaveno v říjnu</div><div class="num" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:#0f2537">50 900 Kč</div></div>
+    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:16px 18px"><div style="font-size:13px;color:#64748b;font-weight:600">Čeká na úhradu</div><div class="num" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:#0f2537">86 800 Kč</div></div>
+    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:16px 18px"><div style="font-size:13px;color:#64748b;font-weight:600">Po splatnosti</div><div class="num" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:#b91c1c">35 900 Kč</div></div>
+    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:16px 18px"><div style="font-size:13px;color:#64748b;font-weight:600">Uhrazeno letos</div><div class="num" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:#047857">525 600 Kč</div></div>
+  </section>
+
+  <section style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid #e2e8f0">
+      <div role="group" aria-label="Filtr stavu" style="display:flex;flex-wrap:wrap;gap:4px;background:#f1f5f9;padding:4px;border-radius:12px">
+        <button data-for="tabs" data-as="t" type="button" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}} <span class="num" style="opacity:.7">{{t.count}}</span></button>
+        
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <label for="f-search" style="display:flex;align-items:center;gap:8px;border:1.5px solid #e2e8f0;border-radius:10px;padding:0 12px;min-height:44px;box-sizing:border-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.6" y2="16.6"></line></svg>
+          <input id="f-search" type="search" placeholder="Klient, číslo, IČO" style="border:0;outline:0;font:inherit;font-size:14px;width:170px;background:transparent;color:#0f2537">
+        </label>
+        <label for="f-period" style="position:absolute;left:-9999px">Období</label>
+        <select id="f-period" class="sel"><option>Rok 2026</option><option>Říjen 2026</option><option>Září 2026</option></select>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="tbl-d">
+        <thead><tr><th>Číslo</th><th>Typ</th><th>Klient</th><th>Vystaveno</th><th>Splatnost</th><th style="text-align:right">Částka</th><th>Stav</th><th style="text-align:right">Akce</th></tr></thead>
+        <tbody>
+          <tr data-for="rows" data-as="r">
+              <td class="num" style="font-weight:600;color:#0f2537">{{r.no}}</td>
+              <td style="color:#64748b">{{r.type}}</td>
+              <td><div style="font-weight:600;color:#0f2537">{{r.client}}</div><div class="num" style="font-size:12px;color:#64748b">IČO {{r.ico}}</div></td>
+              <td class="num">{{r.issued}}</td>
+              <td class="num">{{r.due}}</td>
+              <td class="num" style="text-align:right;font-weight:600;color:#0f2537">{{r.amount}}</td>
+              <td><span style="{{r.pill}}">{{r.status}}</span></td>
+              <td style="text-align:right">
+                <div style="display:inline-flex;gap:6px">
+                  <button type="button" style="border:1px solid #e2e8f0;background:#ffffff;color:#0f2537;font:inherit;font-size:13px;font-weight:600;padding:7px 10px;border-radius:8px;cursor:pointer">{{r.action}}</button>
+                  <button type="button" aria-label="Stáhnout PDF" style="width:34px;height:34px;border:1px solid #e2e8f0;background:#ffffff;border-radius:8px;display:grid;place-items:center;cursor:pointer">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0f2537" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          
+        </tbody>
+      </table>
+    </div>
+    <p data-if="empty" style="margin:0;padding:28px;text-align:center;color:#64748b">V tomto stavu teď žádné faktury nemáte.</p>
+    
+  </section>
+</main>
+</div></template>
+<template id="t-Mobil"><div style="width:390px;height:844px;box-sizing:border-box;background:#f4f7fb;font-family:'Inter',system-ui,sans-serif;color:#334155;display:flex;flex-direction:column;overflow:hidden">
+
+  <header style="background:#0f2537;color:#ffffff;padding:20px 20px 64px;display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        cistaslozka<span style="color:#10b981">.cz</span>
+      </div>
+      <div style="width:36px;height:36px;border-radius:50%;background:#10b981;color:#0f2537;display:grid;place-items:center;font-weight:700;font-size:13px">JN</div>
+    </div>
+    <div>
+      <div style="font-size:14px;color:#cbd5e1">Dobrý den, Jane</div>
+      <div style="font-size:13px;color:#94a3b8;margin-top:2px">Neuhrazeno celkem</div>
+      <div class="num" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:34px;font-weight:800;letter-spacing:-.5px">86 800 Kč</div>
+    </div>
+  </header>
+
+  <main style="flex:1;margin-top:-44px;padding:0 16px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+      <a href="#" style="background:#10b981;color:#0f2537;text-decoration:none;font-weight:700;font-size:14px;padding:16px;border-radius:14px;display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 20px -10px rgba(15,37,55,.35)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Nová faktura
+      </a>
+      <a href="#" style="background:#ffffff;color:#0f2537;text-decoration:none;font-weight:700;font-size:14px;padding:16px;border-radius:14px;display:flex;flex-direction:column;gap:8px;border:1px solid #e2e8f0;box-shadow:0 8px 20px -10px rgba(15,37,55,.2)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+        Nová smlouva
+      </a>
+    </div>
+
+    <section style="background:#ffffff;border:1px solid #fecaca;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 style="margin:0;font-size:14px;font-weight:700;color:#0f2537">Po splatnosti</h2>
+        <span class="num" style="font-weight:800;color:#b91c1c">35 900 Kč</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span>Kovář &amp; syn, s.r.o.</span><span style="color:#b91c1c;font-weight:600">6 dní</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span>Bistro Zelená</span><span style="color:#b91c1c;font-weight:600">14 dní</span></div>
+      <a href="#" style="font-size:13px;font-weight:700;text-decoration:none">Poslat upomínky →</a>
+    </section>
+
+    <section style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 style="margin:0;font-size:14px;font-weight:700;color:#0f2537">Limit pro DPH</h2>
+        <span class="num" style="font-size:13px;color:#64748b">31 %</span>
+      </div>
+      <div style="height:8px;border-radius:999px;background:#eef2f7;overflow:hidden"><div style="width:31%;height:100%;background:#10b981"></div></div>
+      <div class="num" style="font-size:12px;color:#64748b">612 400 Kč z 2 000 000 Kč za rok 2026</div>
+    </section>
+
+    <section style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:2px">
+      <h2 style="margin:0 0 6px;font-size:14px;font-weight:700;color:#0f2537">Poslední doklady</h2>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid #e2e8f0;font-size:13px"><span><strong style="color:#0f2537">Studio Lipa</strong><br><span class="num" style="color:#64748b">20260052</span></span><span class="num" style="font-weight:600;color:#0f2537">38 500 Kč</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid #e2e8f0;font-size:13px"><span><strong style="color:#0f2537">Pekárna U Mostu</strong><br><span class="num" style="color:#64748b">20260051</span></span><span class="num" style="font-weight:600;color:#0f2537">12 400 Kč</span></div>
+    </section>
+  </main>
+
+  <nav aria-label="Hlavní menu" style="background:#ffffff;border-top:1px solid #e2e8f0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:8px 8px 14px">
+    <a href="#" aria-current="page" style="display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#047857;font-size:11px;font-weight:700;padding:6px 0;min-height:44px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+      Přehled
+    </a>
+    <a href="#" style="display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#64748b;font-size:11px;font-weight:600;padding:6px 0;min-height:44px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      Faktury
+    </a>
+    <a href="#" style="display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#64748b;font-size:11px;font-weight:600;padding:6px 0;min-height:44px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+      Smlouvy
+    </a>
+    <a href="#" style="display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#64748b;font-size:11px;font-weight:600;padding:6px 0;min-height:44px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M15 9h3M15 13h3"></path></svg>
+      Klienti
+    </a>
+  </nav>
+</div></template>
+<script>
+var C = {};
+function DCLogic(props) { this.props = props || {}; this.state = {}; }
+DCLogic.prototype.setState = function (patch) { Object.assign(this.state, patch); draw(); };
+DCLogic.prototype.forceUpdate = function () { draw(); };
+</script>
+<script>
+// Návrhy obrazovek (logika převzatá z návrhu)
+C.Main = class extends DCLogic {
+  renderVals() {
+    var pill = function (fg, bg) { return 'font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;color:' + fg + ';background:' + bg; };
+    var green = pill('#047857', '#ecfdf5'), red = pill('#b91c1c', '#fef2f2'), grey = pill('#475569', '#f1f5f9'), amber = pill('#92400e', '#fffbeb');
+    var raw = [['Kvě', 52000], ['Čvn', 61500], ['Čvc', 48000], ['Srp', 70200], ['Zář', 66000], ['Říj', 57000]];
+    var max = 70200;
+    var months = raw.map(function (m, i) {
+      var h = Math.round(m[1] / max * 140);
+      var bg = i === 5 ? '#10b981' : '#a7f3d0';
+      return { name: m[0], label: Math.round(m[1] / 1000) + ' tis.', bar: 'display:block;width:100%;max-width:56px;height:' + h + 'px;background:' + bg + ';border-radius:8px 8px 0 0' };
+    });
+    return {
+      months: months,
+      docs: [
+        { no: '20260052', client: 'Studio Lipa s.r.o.', due: '29. 10. 2026', amount: '38 500 Kč', status: 'Čeká na úhradu', pill: grey },
+        { no: '20260051', client: 'Pekárna U Mostu', due: '22. 10. 2026', amount: '12 400 Kč', status: 'Splatná za 2 dny', pill: amber },
+        { no: '20260050', client: 'Kovář & syn, s.r.o.', due: '14. 10. 2026', amount: '27 000 Kč', status: '6 dní po splatnosti', pill: red },
+        { no: '20260049', client: 'Bistro Zelená', due: '6. 10. 2026', amount: '8 900 Kč', status: '14 dní po splatnosti', pill: red },
+        { no: '20260048', client: 'Jana Malá – fotografka', due: '2. 10. 2026', amount: '15 000 Kč', status: 'Uhrazeno', pill: green }
+      ],
+      contracts: [
+        { name: 'Smlouva o dílo', client: 'Studio Lipa s.r.o.', when: 'za 11 dní', pill: amber },
+        { name: 'Dohoda o mlčenlivosti', client: 'Kovář & syn, s.r.o.', when: 'za 26 dní', pill: grey },
+        { name: 'Smlouva o službách', client: 'Bistro Zelená', when: 'za 72 dní', pill: grey }
+      ]
+    };
+  }
+}
+C.Faktura = class extends DCLogic {
+  constructor(p) { super(p); this.state = { tpl: 'minimal', due: 14 }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var tplNames = [['minimal', 'Minimalistický'], ['corporate', 'Korporátní'], ['creative', 'Kreativní']];
+    var tpls = tplNames.map(function (t) {
+      var on = s.tpl === t[0];
+      return { label: t[1], pick: function () { self.setState({ tpl: t[0] }); },
+        style: 'border:0;font:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:9px;cursor:pointer;min-height:36px;' + (on ? 'background:#ffffff;color:#0f2537;box-shadow:0 1px 3px rgba(15,37,55,.15)' : 'background:transparent;color:#475569') };
+    });
+    var dueMap = { 7: '27. 10. 2026', 14: '3. 11. 2026', 30: '19. 11. 2026' };
+    var dues = [7, 14, 30].map(function (n) {
+      var on = s.due === n;
+      return { label: '+' + n + ' dní', pick: function () { self.setState({ due: n }); },
+        style: 'font:inherit;font-size:14px;font-weight:600;padding:9px 14px;border-radius:10px;cursor:pointer;min-height:40px;' + (on ? 'border:1.5px solid #047857;background:#ecfdf5;color:#047857' : 'border:1.5px solid #e2e8f0;background:#ffffff;color:#0f2537') };
+    });
+    var V = {
+      minimal: {
+        head: 'display:flex;justify-content:space-between;align-items:flex-start;padding:28px 28px 16px;border-bottom:1px solid #e2e8f0;color:#0f2537',
+        title: "font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.5px",
+        subtitle: 'font-size:11px;color:#64748b',
+        cap: 'font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#64748b;margin-bottom:3px',
+        strip: 'display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:10px 0;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0',
+        th: 'border-bottom:1.5px solid #0f2537;color:#0f2537',
+        total: 'text-align:right;color:#0f2537'
+      },
+      corporate: {
+        head: 'display:flex;justify-content:space-between;align-items:center;padding:24px 28px;background:#0f2537;color:#ffffff',
+        title: "font-family:'Inter',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase",
+        subtitle: 'font-size:11px;color:#cbd5e1',
+        cap: 'font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#0f2537;margin-bottom:3px',
+        strip: 'display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid #cbd5e1;padding:8px 10px;background:#f8fafc',
+        th: 'background:#e2e8f0;color:#0f2537',
+        total: 'text-align:right;color:#ffffff;background:#0f2537;padding:10px 14px;border-radius:4px'
+      },
+      creative: {
+        head: 'display:flex;justify-content:space-between;align-items:flex-start;padding:28px;background:#ecfdf5;color:#0f2537;border-bottom:6px solid #10b981',
+        title: "font-family:'Plus Jakarta Sans',sans-serif;font-size:34px;font-weight:800;letter-spacing:-1px;color:#047857",
+        subtitle: 'font-size:11px;color:#0f2537',
+        cap: 'font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#047857;margin-bottom:3px',
+        strip: 'display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px',
+        th: 'color:#047857;border-bottom:1.5px solid #10b981',
+        total: 'text-align:right;color:#0f2537;background:#a7f3d0;padding:10px 14px;border-radius:10px'
+      }
+    };
+    return {
+      tpls: tpls, dues: dues, dueText: dueMap[s.due], v: V[s.tpl],
+      items: [
+        { name: 'Návrh a vývoj webu', qty: '1', unit: 'ks', price: '28 000', total: '28 000 Kč' },
+        { name: 'Úprava loga', qty: '6', unit: 'hod', price: '950', total: '5 700 Kč' },
+        { name: 'Hosting na 12 měsíců', qty: '1', unit: 'ks', price: '4 800', total: '4 800 Kč' }
+      ]
+    };
+  }
+}
+C.Doklady = class extends DCLogic {
+  constructor(p) { super(p); this.state = { tab: 'all' }; }
+  renderVals() {
+    var self = this;
+    var pill = function (fg, bg) { return 'font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;color:' + fg + ';background:' + bg; };
+    var P = { paid: pill('#047857', '#ecfdf5'), open: pill('#475569', '#f1f5f9'), soon: pill('#92400e', '#fffbeb'), late: pill('#b91c1c', '#fef2f2') };
+    var all = [
+      { no: '20260052', type: 'Faktura', client: 'Studio Lipa s.r.o.', ico: '05512345', issued: '15. 10. 2026', due: '29. 10. 2026', amount: '38 500 Kč', status: 'Čeká na úhradu', k: 'open', action: 'Označit uhrazenou' },
+      { no: '20260051', type: 'Faktura', client: 'Pekárna U Mostu', ico: '07734120', issued: '8. 10. 2026', due: '22. 10. 2026', amount: '12 400 Kč', status: 'Splatná za 2 dny', k: 'open', action: 'Označit uhrazenou' },
+      { no: '20260050', type: 'Faktura', client: 'Kovář & syn, s.r.o.', ico: '04418823', issued: '30. 9. 2026', due: '14. 10. 2026', amount: '27 000 Kč', status: '6 dní po splatnosti', k: 'late', action: 'Poslat upomínku' },
+      { no: '20260049', type: 'Faktura', client: 'Bistro Zelená', ico: '09125577', issued: '22. 9. 2026', due: '6. 10. 2026', amount: '8 900 Kč', status: '14 dní po splatnosti', k: 'late', action: 'Poslat upomínku' },
+      { no: 'Z2026007', type: 'Zálohová faktura', client: 'Jana Malá – fotografka', ico: '11223344', issued: '20. 9. 2026', due: '27. 9. 2026', amount: '5 000 Kč', status: 'Uhrazeno', k: 'paid', action: 'Vystavit vyúčtování' },
+      { no: '20260048', type: 'Faktura', client: 'Jana Malá – fotografka', ico: '11223344', issued: '18. 9. 2026', due: '2. 10. 2026', amount: '15 000 Kč', status: 'Uhrazeno', k: 'paid', action: 'Duplikovat' }
+    ];
+    all.forEach(function (r) { r.pill = r.status.indexOf('za 2 dny') > 0 ? P.soon : P[r.k]; });
+    var defs = [['all', 'Vše'], ['open', 'Čeká na úhradu'], ['late', 'Po splatnosti'], ['paid', 'Uhrazeno']];
+    var tab = this.state.tab;
+    var tabs = defs.map(function (d) {
+      var on = tab === d[0];
+      var count = d[0] === 'all' ? all.length : all.filter(function (r) { return r.k === d[0]; }).length;
+      return { label: d[1], count: count, pick: function () { self.setState({ tab: d[0] }); },
+        style: 'border:0;font:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:9px;cursor:pointer;min-height:36px;' + (on ? 'background:#ffffff;color:#0f2537;box-shadow:0 1px 3px rgba(15,37,55,.15)' : 'background:transparent;color:#475569') };
+    });
+    var rows = tab === 'all' ? all : all.filter(function (r) { return r.k === tab; });
+    return { tabs: tabs, rows: rows, empty: rows.length === 0 };
+  }
+}
+C.Mobil = class extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+<script>
+(function () {
+  var current = 'Main', instances = {};
+  var HOLE = /\{\{\s*([\w.$]+)\s*\}\}/g;
+
+  function get(scope, path) {
+    if (path === 'true') return true;
+    if (path === 'false') return false;
+    if (/^-?\d+(\.\d+)?$/.test(path)) return Number(path);
+    return path.split('.').reduce(function (o, k) { return o == null ? undefined : o[k]; }, scope);
+  }
+  function fill(str, scope) {
+    return str.replace(HOLE, function (_, p) { var v = get(scope, p); return v == null ? '' : String(v); });
+  }
+  function bindAttrs(el, scope) {
+    Array.prototype.slice.call(el.attributes).forEach(function (a) {
+      if (a.name.indexOf('hint-') === 0) { el.removeAttribute(a.name); return; }
+      var whole = a.value.match(/^\{\{\s*([\w.$]+)\s*\}\}$/);
+      if (/^on[a-z]+$/i.test(a.name) && whole) {
+        var fn = get(scope, whole[1]);
+        el.removeAttribute(a.name);
+        if (typeof fn === 'function') el.addEventListener(a.name.slice(2).toLowerCase(), fn);
+        return;
+      }
+      if (a.value.indexOf('{{') >= 0) {
+        var v = fill(a.value, scope);
+        el.setAttribute(a.name, v);
+        if (a.name === 'value') el.value = v;
+      }
+    });
+  }
+  function walk(node, scope) {
+    var kids = Array.prototype.slice.call(node.childNodes);
+    kids.forEach(function (n) {
+      if (n.nodeType === 3) { if (n.nodeValue.indexOf('{{') >= 0) n.nodeValue = fill(n.nodeValue, scope); return; }
+      if (n.nodeType !== 1) return;
+      if (n.hasAttribute('data-for')) {
+        var list = get(scope, n.getAttribute('data-for')) || [], as = n.getAttribute('data-as');
+        n.removeAttribute('data-for'); n.removeAttribute('data-as');
+        list.forEach(function (item, i) {
+          var c = n.cloneNode(true), s = Object.create(scope);
+          s[as] = item; s.$index = i;
+          n.parentNode.insertBefore(c, n);
+          bindAttrs(c, s); walk(c, s);
+        });
+        n.parentNode.removeChild(n);
+        return;
+      }
+      if (n.hasAttribute('data-if')) {
+        if (!get(scope, n.getAttribute('data-if'))) { n.parentNode.removeChild(n); return; }
+        n.removeAttribute('data-if');
+      }
+      bindAttrs(n, scope); walk(n, scope);
+    });
+  }
+  window.draw = function () {
+    var inst = instances[current] || (instances[current] = new C[current]({}));
+    var frag = document.getElementById('t-' + current).content.cloneNode(true);
+    var holder = document.createElement('div');
+    holder.appendChild(frag);
+    walk(holder, inst.renderVals());
+    var screen = document.getElementById('screen');
+    screen.innerHTML = '';
+    if (current === 'Mobil') {
+      var stage = document.createElement('div'); stage.className = 'phone-stage';
+      while (holder.firstChild) stage.appendChild(holder.firstChild);
+      screen.appendChild(stage);
+    } else {
+      while (holder.firstChild) screen.appendChild(holder.firstChild);
+    }
+    document.querySelectorAll('[data-tab]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-tab') === current); });
+  };
+  function go(name) { if (C[name]) { current = name; draw(); window.scrollTo(0, 0); } }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-tab]');
+    if (t) { go(t.getAttribute('data-tab')); return; }
+    var a = e.target.closest('a');
+    if (a && a.getAttribute('href') === '#') {
+      e.preventDefault();
+      if (a.hasAttribute('data-go')) go(a.getAttribute('data-go'));
+    }
+  });
+  draw();
+})();
+</script>
+</body>
+</html>
