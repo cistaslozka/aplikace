@@ -5,7 +5,7 @@ Na projektu pracují dva lidé, každý se svým AI asistentem. Aby výsledek by
 1. **Než cokoli navrhneš nebo napíšeš, přečti `ZADANI.md`.** Plán, tarify, datový model
    i pravidla jsou tam. Když se tvůj návrh od `ZADANI.md` liší, řekni to a navrhni úpravu
    souboru, neimprovizuj potichu.
-2. Drž se schváleného vzhledu v `navrhy/navrh-aplikace.html` a barev v `src/app/globals.css`.
+2. Drž se schváleného vzhledu v `public/navrh-aplikace.html` a barev v `src/app/globals.css`.
    Nové barvy ani písma nepřidávej.
 3. Texty v aplikaci jsou česky, s háčky a čárkami, srozumitelně pro živnostníka (ne „entity",
    ale „klienti"; ne „submit", ale „Uložit").
@@ -31,4 +31,4 @@ Nastavení: zkopíruj `.env.example` jako `.env.local`.
 - `src/app/(aplikace)/…` – stránky po přihlášení (přehled, faktury, smlouvy, HR, klienti, nastavení)
 - `src/components/` – sdílené části (boční menu, logo, ikony)
 - `src/lib/supabase/` – připojení k Supabase (`client.ts` pro prohlížeč, `server.ts` pro server)
-- `navrhy/` – schválené HTML návrhy, slouží jen jako předloha vzhledu
+- `public/navrh-aplikace.html`, `public/uvod_cistaslozka.html` – schválené HTML návrhy (na webu `/navrh` a `/`), slouží jako předloha vzhledu

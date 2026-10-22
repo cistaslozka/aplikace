@@ -21,8 +21,9 @@ místě. Uživatel vyplní formulář, údaje o firmách se doplní z ARES a dok
 
 ## Vzhled
 
-Schválený návrh je v `navrhy/navrh-aplikace.html` (přehled, nová faktura, seznam faktur,
-mobil). Úvodní a přihlašovací stránka: `navrhy/uvod_cistaslozka.html`.
+Schválený návrh je v `public/navrh-aplikace.html` (na webu `/navrh`) (přehled, nová faktura, seznam faktur,
+mobil). Úvodní a přihlašovací stránka: `public/uvod_cistaslozka.html` (na webu hlavní adresa `/`).
+Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky.
 
 - Barvy a písma jsou v `src/app/globals.css` (`bg-navy`, `text-green-ink`, `border-line` …).
   Nové hex kódy nevymýšlej, používej tyto.
@@ -42,7 +43,7 @@ mobil). Úvodní a přihlašovací stránka: `navrhy/uvod_cistaslozka.html`.
 
 | Krok | Co | Stav |
 |---|---|---|
-| 0 | Kostra aplikace, pravidla, napojení Supabase | hotovo |
+| 0 | Kostra aplikace, pravidla, napojení Supabase, Vercel | hotovo |
 | 1 | Registrace a přihlášení (e-mail + heslo), ochrana stránek | další na řadě |
 | 2 | Nastavení firmy: IČO → ARES, adresa, účet, plátce / neplátce DPH | |
 | 3 | Adresář klientů (z ARES) | |

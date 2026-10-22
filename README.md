@@ -4,7 +4,7 @@ Faktury, smlouvy a HR dokumenty pro živnostníky a firmy na jednom místě.
 
 - Co a jak stavíme: [ZADANI.md](ZADANI.md)
 - Pokyny pro AI asistenty a příkazy: [CLAUDE.md](CLAUDE.md)
-- Schválený vzhled: [navrhy/navrh-aplikace.html](navrhy/navrh-aplikace.html)
+- Schválený vzhled: [public/navrh-aplikace.html](public/navrh-aplikace.html) (na webu `/navrh`)
 
 ## Spuštění
 
