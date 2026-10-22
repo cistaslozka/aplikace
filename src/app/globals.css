@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/*
+  Barvy a písma čistásložka.cz – podle schváleného návrhu (navrhy/navrh-aplikace.html).
+  V komponentách používej tyto názvy (bg-navy, text-green-ink, border-line …),
+  ne vlastní hex kódy.
+*/
+@theme {
+  --color-navy: #0f2537;
+  --color-navy-2: #1a3852;
+  --color-green: #10b981;
+  --color-green-ink: #047857;
+  --color-green-soft: #a7f3d0;
+  --color-green-tint: #ecfdf5;
+  --color-page: #f4f7fb;
+  --color-surface: #ffffff;
+  --color-line: #e2e8f0;
+  --color-ink: #334155;
+  --color-muted: #64748b;
+  --color-red: #b91c1c;
+  --color-red-tint: #fef2f2;
+  --color-amber: #92400e;
+  --color-amber-tint: #fffbeb;
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-page font-sans text-ink antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display text-navy;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-green);
+    outline-offset: 2px;
+  }
+}
+
+@utility num {
+  font-variant-numeric: tabular-nums;
+}
