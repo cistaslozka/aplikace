@@ -38,14 +38,27 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
   region Paříž (EU).
 - **Vercel**: hosting, napojený na GitHub (každý push = nová verze webu).
 - Kód: GitHub `cistaslozka/aplikace`. Úkoly: Trello „Čistá složka". Oznámení změn: Discord.
+- Web: https://aplikace-blush.vercel.app (`/` úvod a přihlášení, `/navrh` návrh, `/prehled` aplikace)
+
+## Přihlášení (jak funguje)
+
+- E-mail + heslo přes Supabase Auth, heslo aspoň 8 znaků.
+- Stránky: `/prihlaseni`, `/registrace`, `/zapomenute-heslo`, `/nove-heslo`.
+  Formulář na úvodní stránce posílá data na `/auth/prihlaseni` a `/auth/registrace`.
+- Odkazy z e-mailů (potvrzení účtu, nové heslo) vedou na `/auth/callback`.
+- Nepřihlášeného uživatele aplikace pošle na přihlášení (`src/lib/supabase/middleware.ts`).
+- V Supabase (Authentication → URL Configuration) musí být Site URL adresa webu a v Redirect URLs
+  `https://aplikace-blush.vercel.app/**`, `https://*-cista-slozka.vercel.app/**` a `http://localhost:3000/**`.
+- Před spuštěním pro veřejnost: vlastní odesílání e-mailů (SMTP, např. Resend), výchozí e-maily
+  Supabase chodí jen členům týmu a jen pár za hodinu.
 
 ## Plán (pořadí kroků)
 
 | Krok | Co | Stav |
 |---|---|---|
 | 0 | Kostra aplikace, pravidla, napojení Supabase, Vercel | hotovo |
-| 1 | Registrace a přihlášení (e-mail + heslo), ochrana stránek | další na řadě |
-| 2 | Nastavení firmy: IČO → ARES, adresa, účet, plátce / neplátce DPH | |
+| 1 | Registrace a přihlášení (e-mail + heslo), ochrana stránek | hotovo |
+| 2 | Nastavení firmy: IČO → ARES, adresa, účet, plátce / neplátce DPH | další na řadě |
 | 3 | Adresář klientů (z ARES) | |
 | 4 | Faktury: vystavení, číselná řada, položky, QR platba, PDF, stavy, upomínky | |
 | 5 | Přehled s dlaždicemi (skutečná čísla, vlastní rozložení) | |

@@ -1111,24 +1111,24 @@
                             <p id="auth-subtitle">Vstupte do své čisté složky a spravujte agendu.</p>
                         </div>
 
-                        <form onsubmit="event.preventDefault(); window.location.href = '/navrh';">
+                        <form id="auth-form" method="post" action="/auth/prihlaseni">
                             <div class="form-group">
                                 <div class="form-label">E-mailová adresa</div>
-                                <input type="email" class="form-input" placeholder="vase@firma.cz" required>
+                                <input type="email" name="email" autocomplete="email" class="form-input" placeholder="vase@firma.cz" required>
                             </div>
 
                             <div class="form-group">
                                 <div class="form-label">
                                     <span>Bezpečné heslo</span>
-                                    <a href="#" id="link-forgot-pass">Zapomenuté heslo?</a>
+                                    <a href="/zapomenute-heslo" id="link-forgot-pass">Zapomenuté heslo?</a>
                                 </div>
-                                <input type="password" class="form-input" placeholder="••••••••" required>
+                                <input type="password" name="password" autocomplete="current-password" class="form-input" placeholder="••••••••" required>
                             </div>
 
                             <!-- Zobrazí se při přepnutí na Registraci -->
                             <div class="form-group hidden" id="box-password-confirm">
                                 <div class="form-label">Potvrzení hesla</div>
-                                <input type="password" class="form-input" placeholder="Zadejte heslo znovu pro kontrolu">
+                                <input type="password" name="password_confirm" autocomplete="new-password" class="form-input" placeholder="Zadejte heslo znovu pro kontrolu">
                             </div>
 
                             <button type="submit" class="btn-submit" id="btn-main-action">Přihlásit se do systému</button>
@@ -1530,6 +1530,8 @@
             const btnSwitch = document.getElementById('btn-switch-mode');
             const linkForgot = document.getElementById('link-forgot-pass');
             const boxConfirm = document.getElementById('box-password-confirm');
+            const form = document.getElementById('auth-form');
+            const confirmInput = boxConfirm.querySelector('input');
 
             if (isLoginMode) {
                 title.textContent = 'Přihlášení do účtu';
@@ -1539,6 +1541,8 @@
                 btnSwitch.textContent = 'Založit nový účet (7 dní zdarma)';
                 linkForgot.style.display = 'block';
                 boxConfirm.classList.add('hidden');
+                form.action = '/auth/prihlaseni';
+                confirmInput.required = false;
             } else {
                 title.textContent = 'Založení nového účtu';
                 subtitle.textContent = 'Získejte přístup k tarifu Basic na 7 dní zcela zdarma.';
@@ -1547,6 +1551,8 @@
                 btnSwitch.textContent = 'Zpět na Přihlášení';
                 linkForgot.style.display = 'none';
                 boxConfirm.classList.remove('hidden');
+                form.action = '/auth/registrace';
+                confirmInput.required = true;
             }
         }
 

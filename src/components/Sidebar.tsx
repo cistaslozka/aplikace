@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
+import { odhlasitAkce } from "@/app/(auth)/actions";
 import { IconClients, IconContract, IconDashboard, IconInvoice, IconPeople, IconPlus, IconSettings } from "./icons";
 
 const NAV = [
@@ -32,7 +33,25 @@ function NavLink({ href, label, Icon, pro }: (typeof NAV)[number]) {
   );
 }
 
-export function Sidebar() {
+function Odhlasit({ email, className = "" }: { email: string; className?: string }) {
+  return (
+    <form action={odhlasitAkce} className={"flex items-center gap-3 rounded-xl bg-white/5 p-3 " + className}>
+      <div className="grid size-9 shrink-0 place-items-center rounded-full bg-green text-sm font-bold text-navy" aria-hidden="true">
+        {email.slice(0, 1).toUpperCase()}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-semibold text-white" title={email}>
+          {email}
+        </div>
+        <button type="submit" className="text-[13px] font-semibold text-green-soft hover:text-white">
+          Odhlásit se
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export function Sidebar({ email }: { email: string }) {
   return (
     <aside className="flex flex-col gap-6 bg-navy px-4 py-5 text-slate-300 md:sticky md:top-0 md:h-screen md:w-62 md:shrink-0 md:py-6">
       <div className="flex items-center justify-between gap-3">
@@ -58,9 +77,12 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <nav aria-label="Účet" className="hidden md:mt-auto md:block">
-        <NavLink href="/nastaveni" label="Nastavení firmy" Icon={IconSettings} />
-      </nav>
+      <div className="flex flex-col gap-2 md:mt-auto">
+        <nav aria-label="Účet" className="hidden md:block">
+          <NavLink href="/nastaveni" label="Nastavení firmy" Icon={IconSettings} />
+        </nav>
+        <Odhlasit email={email} />
+      </div>
     </aside>
   );
 }
