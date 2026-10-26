@@ -33,25 +33,35 @@ function NavLink({ href, label, Icon, pro }: (typeof NAV)[number]) {
   );
 }
 
-function Odhlasit({ email, className = "" }: { email: string; className?: string }) {
+function Odhlasit({ email, firma }: { email: string; firma: string | null }) {
   return (
-    <form action={odhlasitAkce} className={"flex items-center gap-3 rounded-xl bg-white/5 p-3 " + className}>
+    <form action={odhlasitAkce} className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
       <div className="grid size-9 shrink-0 place-items-center rounded-full bg-green text-sm font-bold text-navy" aria-hidden="true">
-        {email.slice(0, 1).toUpperCase()}
+        {(firma || email).slice(0, 1).toUpperCase()}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold text-white" title={email}>
+        {firma && (
+          <div className="truncate text-sm font-semibold text-white" title={firma}>
+            {firma}
+          </div>
+        )}
+        <div className={"truncate " + (firma ? "text-[12px] text-slate-400" : "text-sm font-semibold text-white")} title={email}>
           {email}
         </div>
-        <button type="submit" className="text-[13px] font-semibold text-green-soft hover:text-white">
-          Odhlásit se
-        </button>
+        <div className="mt-0.5 flex gap-3">
+          <Link href="/nastaveni" className="text-[13px] font-semibold text-green-soft hover:text-white md:hidden">
+            Nastavení
+          </Link>
+          <button type="submit" className="text-[13px] font-semibold text-green-soft hover:text-white">
+            Odhlásit se
+          </button>
+        </div>
       </div>
     </form>
   );
 }
 
-export function Sidebar({ email }: { email: string }) {
+export function Sidebar({ email, firma }: { email: string; firma: string | null }) {
   return (
     <aside className="flex flex-col gap-6 bg-navy px-4 py-5 text-slate-300 md:sticky md:top-0 md:h-screen md:w-62 md:shrink-0 md:py-6">
       <div className="flex items-center justify-between gap-3">
@@ -81,7 +91,7 @@ export function Sidebar({ email }: { email: string }) {
         <nav aria-label="Účet" className="hidden md:block">
           <NavLink href="/nastaveni" label="Nastavení firmy" Icon={IconSettings} />
         </nav>
-        <Odhlasit email={email} />
+        <Odhlasit email={email} firma={firma} />
       </div>
     </aside>
   );

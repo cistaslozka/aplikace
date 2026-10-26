@@ -58,8 +58,8 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 |---|---|---|
 | 0 | Kostra aplikace, pravidla, napojení Supabase, Vercel | hotovo |
 | 1 | Registrace a přihlášení (e-mail + heslo), ochrana stránek | hotovo |
-| 2 | Nastavení firmy: IČO → ARES, adresa, účet, plátce / neplátce DPH | další na řadě |
-| 3 | Adresář klientů (z ARES) | |
+| 2 | Nastavení firmy: IČO → ARES, adresa, účet, plátce / neplátce DPH | hotovo |
+| 3 | Adresář klientů (z ARES) | další na řadě |
 | 4 | Faktury: vystavení, číselná řada, položky, QR platba, PDF, stavy, upomínky | |
 | 5 | Přehled s dlaždicemi (skutečná čísla, vlastní rozložení) | |
 | 6 | Placení tarifů | |
@@ -74,8 +74,12 @@ Data patří **firmě**, ne uživateli. Jeden uživatel může mít víc firem a
 uživatelů (týmový přístup v Pro).
 
 - `organizations` – firma / živnostník: název, IČO, DIČ, adresa, účet, `vat_payer`,
-  `legal_form` (osvc / sro / …), `plan` (basic / pro)
-- `memberships` – kdo má přístup k jaké firmě a s jakou rolí (owner / member)
+  `legal_form` (osvc / sro / jina), `registry_note` (zápis v rejstříku), `plan` (basic / pro),
+  `trial_ends_at` (7 dní od založení). **Hotovo v kroku 2.**
+  Zakládá se jen funkcí `zalozit_firmu(…)` (vytvoří firmu i členství vlastníka najednou).
+  `plan` a `trial_ends_at` uživatel sám měnit nesmí, mění je jen server (placení v kroku 6).
+- `memberships` – kdo má přístup k jaké firmě a s jakou rolí (owner / member). **Hotovo v kroku 2.**
+  Pravidla používají `private.je_clen(org)`; schéma `private` není vidět přes API.
 - `clients` – adresář odběratelů (patří firmě)
 - `number_series` – číselné řady dokladů (např. faktury 2026xxxx)
 - `invoices` + `invoice_items` – faktury a jejich položky
