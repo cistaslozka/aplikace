@@ -52,3 +52,10 @@ export function dataUlozeneSmlouvy(s: SmlouvaRadek): DataSmlouvy {
     stav: s.status,
   };
 }
+
+/** Náhled čísla další smlouvy (nic nerezervuje). */
+export async function dalsiCisloSmlouvy(organizationId: string, rok: number): Promise<string> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("number_series").select("last_number").eq("organization_id", organizationId).eq("kind", "smlouva").eq("year", rok).maybeSingle();
+  return `S${rok}${String((data?.last_number ?? 0) + 1).padStart(4, "0")}`;
+}
