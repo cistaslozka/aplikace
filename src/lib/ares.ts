@@ -1,4 +1,5 @@
 import "server-only";
+import { createClient } from "@/lib/supabase/server";
 import { normalizujPsc } from "./validace";
 
 // ARES – veřejný registr ekonomických subjektů Ministerstva financí.
@@ -85,7 +86,25 @@ export function prevedAres(d: AresOdpoved): FirmaZAres | null {
 
 export type VysledekAres = { ok: true; firma: FirmaZAres } | { ok: false; chyba: string };
 
-export async function nactiZAres(ico: string): Promise<VysledekAres> {
+/**
+ * Načtení z ARES s hlídáním limitu (20 dotazů za minutu na uživatele, 250 za celou aplikaci).
+ * Limit počítá databáze (funkce ares_smim_se_zeptat), protože server běží ve více kopiích.
+ */
+export async function nactiZAresSLimitem(ico: string): Promise<VysledekAres> {
+  const supabase = await createClient();
+  const { data: povoleno, error } = await supabase.rpc("ares_smim_se_zeptat");
+  if (error) {
+    console.error("Kontrola limitu ARES selhala:", error.message);
+    return { ok: false, chyba: "Načtení z ARES se teď nepovedlo. Zkuste to za chvíli, nebo údaje vyplňte ručně." };
+  }
+  if (povoleno === "uzivatel")
+    return { ok: false, chyba: "Načítáte z ARES moc rychle za sebou. Počkejte prosím minutku a zkuste to znovu." };
+  if (povoleno === "celkem")
+    return { ok: false, chyba: "ARES je teď vytížený. Zkuste to prosím za minutku, nebo údaje vyplňte ručně." };
+  return nactiZAres(ico);
+}
+
+async function nactiZAres(ico: string): Promise<VysledekAres> {
   try {
     const odpoved = await fetch(ARES_URL + ico, {
       headers: { Accept: "application/json" },
