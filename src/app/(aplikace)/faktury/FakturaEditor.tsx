@@ -18,6 +18,7 @@ import {
   ZPUSOBY_UHRADY,
   type PoziceLoga,
   type Polozka,
+  type Rekapitulace,
   type SazbaDph,
   type Strana,
   type Vzhled,
@@ -60,6 +61,8 @@ export function FakturaEditor({
   vychoziDruh = "faktura",
   logo,
   vychozi,
+  predloha,
+  vyuctovani,
 }: {
   dodavatel: Strana;
   platce: boolean;
@@ -71,20 +74,25 @@ export function FakturaEditor({
   /** Adresa nahraného loga firmy, nebo null */
   logo: string | null;
   vychozi?: VychoziFaktura;
+  /** Předvyplnění nové faktury (např. ze zálohy), bez čísla a id */
+  predloha?: VychoziFaktura;
+  /** Konečná faktura: vyúčtovává tuto zaplacenou zálohu */
+  vyuctovani?: { id: string; cislo: string; castka: number; rekapitulace: Rekapitulace[] };
 }) {
+  const zdroj = vychozi ?? predloha;
   const vychoziSazba: SazbaDph = platce ? 21 : 0;
-  const [druh, setDruh] = useState<"faktura" | "zalohova">(vychozi?.kind === "zalohova" ? "zalohova" : vychozi ? "faktura" : vychoziDruh);
+  const [druh, setDruh] = useState<"faktura" | "zalohova">(vychozi?.kind === "zalohova" ? "zalohova" : vychozi || vyuctovani ? "faktura" : vychoziDruh);
   const zaloha = druh === "zalohova";
   // DUZP a daňový doklad jen u faktury plátce; zálohová faktura není daňový doklad
   const danovy = platce && !zaloha;
   const cisloDokladu = vychozi?.cislo ?? (zaloha ? dalsiCisloZalohy : dalsiCislo);
   const vsDokladu = vychozi?.vs ?? (zaloha ? "9" + cisloDokladu.replace(/^ZF/, "") : cisloDokladu);
   const [odberatel, setOdberatel] = useState<{ id: string | null; s: Strana } | null>(
-    vychozi?.customer ? { id: vychozi.client_id, s: vychozi.customer } : null,
+    zdroj?.customer ? { id: zdroj.client_id, s: zdroj.customer } : null,
   );
   const [radky, setRadky] = useState<RadekFormulare[]>(() =>
-    vychozi?.polozky.length
-      ? vychozi.polozky.map((p, i) => ({
+    zdroj?.polozky.length
+      ? zdroj.polozky.map((p, i) => ({
           klic: i + 1,
           description: p.description,
           quantity: textCisla(p.quantity),
@@ -94,14 +102,14 @@ export function FakturaEditor({
         }))
       : [novyRadek(1, vychoziSazba)],
   );
-  const [vystaveno, setVystaveno] = useState(vychozi?.issue_date ?? dnes);
-  const [duzp, setDuzp] = useState(vychozi?.taxable_date ?? vychozi?.issue_date ?? dnes);
-  const [splatnost, setSplatnost] = useState(vychozi?.due_date ?? pridatDny(dnes, 14));
-  const [uhrada, setUhrada] = useState<ZpusobUhrady>(vychozi?.payment_method ?? "prevod");
-  const [vzhled, setVzhled] = useState<Vzhled>(vychozi?.template ?? "minimal");
-  const [poznamka, setPoznamka] = useState(vychozi?.note ?? "");
-  const [uvod, setUvod] = useState(vychozi?.intro_text ?? "");
-  const [logoPozice, setLogoPozice] = useState<PoziceLoga | null>(vychozi ? vychozi.logo_position : logo ? "vpravo" : null);
+  const [vystaveno, setVystaveno] = useState(zdroj?.issue_date ?? dnes);
+  const [duzp, setDuzp] = useState(zdroj?.taxable_date ?? zdroj?.issue_date ?? dnes);
+  const [splatnost, setSplatnost] = useState(zdroj?.due_date ?? pridatDny(dnes, 14));
+  const [uhrada, setUhrada] = useState<ZpusobUhrady>(zdroj?.payment_method ?? "prevod");
+  const [vzhled, setVzhled] = useState<Vzhled>(zdroj?.template ?? "minimal");
+  const [poznamka, setPoznamka] = useState(zdroj?.note ?? "");
+  const [uvod, setUvod] = useState(zdroj?.intro_text ?? "");
+  const [logoPozice, setLogoPozice] = useState<PoziceLoga | null>(zdroj ? zdroj.logo_position : logo ? "vpravo" : null);
   const [chyba, setChyba] = useState<string | null>(null);
   const [novyKlient, setNovyKlient] = useState(false);
   const [ukladam, startUkladani] = useTransition();
@@ -146,6 +154,7 @@ export function FakturaEditor({
     if (!odberatel) return setChyba("Vyberte odběratele.");
     const vyplnene = radky.filter((r) => r.description.trim() || r.unit_price.trim());
     if (!vyplnene.length) return setChyba("Přidejte aspoň jednu položku.");
+    if (vyuctovani && soucty.celkem < vyuctovani.castka) return setChyba("Konečná faktura musí být aspoň ve výši zaplacené zálohy.");
     for (const [i, r] of vyplnene.entries()) {
       if (!r.description.trim()) return setChyba(`Položka ${i + 1}: doplňte popis.`);
       if (!Number.isFinite(cislo(r.quantity)) || cislo(r.quantity) === 0) return setChyba(`Položka ${i + 1}: zadejte množství.`);
@@ -153,6 +162,7 @@ export function FakturaEditor({
     }
     const data: NovaFaktura = {
       id: vychozi?.id,
+      zaloha_id: vyuctovani?.id,
       client_id: odberatel.id,
       customer: { name: odberatel.s.name, ico: odberatel.s.ico, dic: odberatel.s.dic, street: odberatel.s.street, city: odberatel.s.city, zip: odberatel.s.zip, country: odberatel.s.country, email: odberatel.s.email },
       issue_date: vystaveno,
@@ -208,7 +218,13 @@ export function FakturaEditor({
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
-          {!vychozi && (
+          {vyuctovani && (
+            <Hlaska typ="info">
+              Konečná faktura k zálohové faktuře <strong className="num">{vyuctovani.cislo}</strong>. Zaplacená záloha{" "}
+              <strong className="num">{castka(vyuctovani.castka)}</strong> se na faktuře odečte, odběratel doplatí jen rozdíl.
+            </Hlaska>
+          )}
+          {!vychozi && !vyuctovani && (
             <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Druh dokladu">
               {(
                 [
@@ -347,7 +363,21 @@ export function FakturaEditor({
                     Základ {castka(soucty.zaklad)} · DPH {castka(soucty.dph)}
                   </div>
                 )}
-                Celkem k úhradě <strong className="ml-1 font-display text-2xl text-navy">{castka(soucty.celkem)}</strong>
+                {vyuctovani ? (
+                  <>
+                    <div className="text-[13px] text-muted">
+                      Celkem {castka(soucty.celkem)} · záloha −{castka(vyuctovani.castka)}
+                    </div>
+                    Zbývá uhradit{" "}
+                    <strong className={"ml-1 font-display text-2xl " + (soucty.celkem < vyuctovani.castka ? "text-red" : "text-navy")}>
+                      {castka(soucty.celkem - vyuctovani.castka)}
+                    </strong>
+                  </>
+                ) : (
+                  <>
+                    Celkem k úhradě <strong className="ml-1 font-display text-2xl text-navy">{castka(soucty.celkem)}</strong>
+                  </>
+                )}
               </div>
             </div>
           </section>
@@ -465,6 +495,7 @@ export function FakturaEditor({
                     polozky,
                     ...{ rekapitulace: soucty.rekapitulace, zaklad: soucty.zaklad, dph: soucty.dph, celkem: soucty.celkem },
                     poznamka,
+                    odpocet: vyuctovani ? { cislo: vyuctovani.cislo, castka: vyuctovani.castka, rekapitulace: platce ? vyuctovani.rekapitulace : [] } : null,
                     uvod,
                     logo,
                     logoPozice,

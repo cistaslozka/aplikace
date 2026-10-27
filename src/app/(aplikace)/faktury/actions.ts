@@ -9,6 +9,8 @@ import { createClient } from "@/lib/supabase/server";
 export type NovaFaktura = {
   id?: string;
   kind?: "faktura" | "zalohova";
+  /** Konečná faktura: id zaplacené zálohy, která se odečte */
+  zaloha_id?: string;
   client_id: string | null;
   customer: {
     name: string;
@@ -53,40 +55,42 @@ export async function ulozitFakturuAkce(f: NovaFaktura): Promise<VysledekUlozeni
   if (!polozky.length) return { ok: false, chyba: "Přidejte aspoň jednu položku." };
   for (const [i, p] of polozky.entries()) {
     if (!p.description) return { ok: false, chyba: `Položka ${i + 1}: doplňte popis.` };
-    if (!Number.isFinite(p.quantity) || p.quantity === 0) return { ok: false, chyba: `Položka ${i + 1}: množství musí být nenulové číslo.` };
+    if (!Number.isFinite(p.quantity) || p.quantity === 0)
+      return { ok: false, chyba: `Položka ${i + 1}: množství musí být nenulové číslo.` };
     if (!Number.isFinite(p.unit_price)) return { ok: false, chyba: `Položka ${i + 1}: zkontrolujte cenu.` };
     if (!SAZBY_DPH.includes(p.vat_rate)) return { ok: false, chyba: `Položka ${i + 1}: vyberte sazbu DPH.` };
   }
 
   const c = f.customer;
   const supabase = await createClient();
-  const { data: id, error } = await supabase.rpc("ulozit_fakturu", {
-    p_faktura: {
-      id: f.id ?? null,
-      kind: f.kind === "zalohova" ? "zalohova" : "faktura",
-      organization_id: firma.id,
-      client_id: f.client_id,
-      customer: {
-        name: c.name.trim(),
-        ico: c.ico || null,
-        dic: c.dic || null,
-        street: c.street || null,
-        city: c.city || null,
-        zip: c.zip || null,
-        country: c.country || "CZ",
-        email: c.email || null,
-      },
-      issue_date: f.issue_date,
-      taxable_date: f.taxable_date,
-      due_date: f.due_date,
-      payment_method: f.payment_method,
-      template: f.template,
-      note: f.note.trim().slice(0, 1000),
-      intro_text: (f.intro_text ?? "").trim().slice(0, 1000),
-      logo_position: f.logo_position && ["vlevo", "vpravo", "dole"].includes(f.logo_position) ? f.logo_position : null,
+  const zaloha = !f.id && f.zaloha_id && /^[0-9a-f-]{36}$/i.test(f.zaloha_id) ? f.zaloha_id : null;
+  const p_faktura = {
+    id: f.id ?? null,
+    kind: f.kind === "zalohova" ? "zalohova" : "faktura",
+    organization_id: firma.id,
+    client_id: f.client_id,
+    customer: {
+      name: c.name.trim(),
+      ico: c.ico || null,
+      dic: c.dic || null,
+      street: c.street || null,
+      city: c.city || null,
+      zip: c.zip || null,
+      country: c.country || "CZ",
+      email: c.email || null,
     },
-    p_polozky: polozky,
-  });
+    issue_date: f.issue_date,
+    taxable_date: f.taxable_date,
+    due_date: f.due_date,
+    payment_method: f.payment_method,
+    template: f.template,
+    note: f.note.trim().slice(0, 1000),
+    intro_text: (f.intro_text ?? "").trim().slice(0, 1000),
+    logo_position: f.logo_position && ["vlevo", "vpravo", "dole"].includes(f.logo_position) ? f.logo_position : null,
+  };
+  const { data: id, error } = zaloha
+    ? await supabase.rpc("ulozit_konecnou_fakturu", { p_faktura, p_polozky: polozky, p_zaloha: zaloha })
+    : await supabase.rpc("ulozit_fakturu", { p_faktura, p_polozky: polozky });
 
   if (error || !id) {
     console.error("Uložení faktury selhalo:", error?.code, error?.message);
@@ -143,7 +147,8 @@ export async function vystavitDdppAkce(form: FormData) {
   const { data, error } = await supabase.rpc("vystavit_ddpp", { p_zaloha: id, p_datum_platby: platba, p_dnes: dnesIso() });
   if (error || !data) {
     console.error("Vystavení daňového dokladu selhalo:", error?.code, error?.message);
-    const zprava = error && ["P0001", "22023"].includes(error.code) ? error.message : "Daňový doklad se nepodařilo vystavit. Zkuste to prosím znovu.";
+    const zprava =
+      error && ["P0001", "22023"].includes(error.code) ? error.message : "Daňový doklad se nepodařilo vystavit. Zkuste to prosím znovu.";
     redirect(`/faktury/${id}?chyba=${encodeURIComponent(zprava)}`);
   }
   revalidatePath("/faktury");
