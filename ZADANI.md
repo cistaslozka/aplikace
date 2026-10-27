@@ -79,8 +79,9 @@ První verze pro skutečné uživatele = kroky 0–5.
 - **Hotovo naposledy:** krok 7a – smlouva o dílo (tabulka `contracts`, funkce `ulozit_smlouvu`, číslo S20260001,
   editor s náhledem, seznam `/smlouvy`, detail, PDF). Vzory jsou v `src/lib/smlouvy/` – každý vzor má
   `formular` (pole), `clanky` (text), `chyby` (povinné údaje) a zapisuje se do `src/lib/smlouvy/vzory.ts`.
-- **Další na řadě:** krok 7b – další vzory stejným způsobem (služby, licence, NDA, předávací protokol,
-  cestovní příkaz), pak 7c (podpis na obrazovce, dlaždice Končící smlouvy podle `contracts.valid_until`).
+- **Teď rozpracováno:** krok 7b – vzory smlouva o službách, licenční smlouva, NDA, předávací protokol
+  (větev `krok-7b-dalsi-vzory`). Cestovní příkaz se přesouvá ke kroku 10 (HR) – potřebuje sazby stravného.
+  Potom 7c (podpis na obrazovce, dlaždice Končící smlouvy podle `contracts.valid_until`).
 - **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
