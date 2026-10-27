@@ -79,6 +79,8 @@ První verze pro skutečné uživatele = kroky 0–5.
 - **Teď rozpracováno:** krok 7c (větev `krok-7c-podpis`): sloupec `contracts.signatures` (podpisy jako obrázek
   PNG + jméno + čas), funkce `podepsat_smlouvu`, po podpisu obou stran stav „uzavřená“; podepsanou smlouvu nejde
   upravit. Dlaždice Končící smlouvy (uzavřené, `valid_until` do 30 dnů). Pak krok 8.
+  - **Stav:** změna databáze je připravená v `supabase/navrhy/podpis_smlouvy.sql`, ale **ještě není nahraná**
+    (Supabase si vyžádal potvrzení a nikdo ho nestihl odkliknout). Začít jejím nahráním, pak aplikace.
 - **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
