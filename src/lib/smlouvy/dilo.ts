@@ -1,4 +1,4 @@
-import { cislo, datum, kc, text, vycistit, type Clanek, type DataSmlouvy } from "./index";
+import { cislo, datum, kc, text, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
 
 /*
   Smlouva o dílo podle § 2586 a násl. zákona č. 89/2012 Sb., občanský zákoník.
@@ -137,3 +137,65 @@ export function clankyDilo(d: DataSmlouvy): Clanek[] {
     },
   ]);
 }
+
+export const FORMULAR_DILO: SekceFormulare[] = [
+  {
+    nadpis: "Dílo",
+    pole: [
+      { k: "predmet", label: "Co se má udělat", typ: "textarea", placeholder: "Např. návrh a programování webových stránek firmy", sirka: "cela" },
+      { k: "specifikace", label: "Podrobnosti (nepovinné)", typ: "textarea", placeholder: "Rozsah, počet stran, materiál, odkaz na nabídku…", sirka: "cela" },
+    ],
+  },
+  {
+    nadpis: "Termíny a místo",
+    pole: [
+      { k: "zahajeni", label: "Zahájení (nepovinné)", typ: "date", sirka: "tretina" },
+      { k: "dokonceni", label: "Dokončení a předání", typ: "date", sirka: "tretina" },
+      { k: "misto_plneni", label: "Místo plnění (nepovinné)", typ: "text", placeholder: "Např. sídlo objednatele", sirka: "tretina" },
+    ],
+  },
+  {
+    nadpis: "Cena a platba",
+    pole: [
+      { k: "cena", label: "Cena díla", typ: "kc", placeholder: "0", sirka: "tretina" },
+      {
+        k: "cena_typ",
+        label: "Cena je",
+        typ: "select",
+        moznosti: [
+          ["bez_dph", "bez DPH (připočte se DPH)"],
+          ["vcetne_dph", "včetně DPH"],
+          ["neplatce", "zhotovitel není plátce DPH"],
+        ],
+        sirka: "tretina",
+      },
+      { k: "splatnost", label: "Splatnost faktury (dní)", typ: "cislo", sirka: "tretina" },
+      { k: "zaloha", label: "Záloha (nepovinné)", typ: "kc", placeholder: "0", napoveda: "Zaplatí se do 7 dnů od podpisu.", sirka: "tretina" },
+    ],
+  },
+  {
+    nadpis: "Záruka a smluvní pokuta",
+    pole: [
+      { k: "zaruka", label: "Záruka (měsíců, nepovinné)", typ: "cislo", placeholder: "Např. 24", sirka: "pul" },
+      { k: "pokuta", label: "Pokuta za zpoždění (% ceny za den)", typ: "cislo", placeholder: "Např. 0,05", napoveda: "Nepovinné. Platí při zpoždění zhotovitele.", sirka: "pul" },
+    ],
+  },
+  {
+    nadpis: "Další údaje",
+    pole: [
+      { k: "ostatni", label: "Další ujednání (nepovinné)", typ: "textarea", placeholder: "Každý odstavec na nový řádek", sirka: "cela" },
+      { k: "zastupce_my", label: "Za nás jedná (nepovinné)", typ: "text", placeholder: "Jméno a funkce, např. Jan Novák, jednatel", sirka: "pul" },
+      { k: "zastupce_oni", label: "Za druhou stranu jedná (nepovinné)", typ: "text", placeholder: "Jméno a funkce", sirka: "pul" },
+      {
+        k: "vyhotoveni",
+        label: "Vyhotovení",
+        typ: "select",
+        moznosti: [
+          ["dva", "dva papírové stejnopisy"],
+          ["elektronicky", "elektronicky"],
+        ],
+        sirka: "pul",
+      },
+    ],
+  },
+];

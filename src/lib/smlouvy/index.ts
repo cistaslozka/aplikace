@@ -75,3 +75,15 @@ export function popisStrany(s: Strana): string[] {
     s.registry_note ?? "",
   ].filter(Boolean);
 }
+
+/** Popis pole ve formuláři smlouvy. Formulář se vykreslí podle tohoto popisu u všech vzorů stejně. */
+export type PoleFormulare = {
+  k: string;
+  label: string;
+  typ: "text" | "textarea" | "date" | "cislo" | "kc" | "select";
+  moznosti?: [string, string][];
+  napoveda?: string;
+  placeholder?: string;
+  sirka?: "cela" | "pul" | "tretina";
+};
+export type SekceFormulare = { nadpis: string; pole: PoleFormulare[] };
