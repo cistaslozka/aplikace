@@ -18,12 +18,13 @@ export type Firma = {
   email: string | null;
   phone: string | null;
   web: string | null;
+  logo_path: string | null;
   plan: "basic" | "pro";
   trial_ends_at: string;
 };
 
 const SLOUPCE =
-  "id, name, legal_form, ico, dic, vat_payer, street, city, zip, registry_note, bank_account, iban, email, phone, web, plan, trial_ends_at";
+  "id, name, legal_form, ico, dic, vat_payer, street, city, zip, registry_note, bank_account, iban, email, phone, web, logo_path, plan, trial_ends_at";
 
 /**
  * Firma, se kterou uživatel právě pracuje. Zatím první firma, kterou založil;

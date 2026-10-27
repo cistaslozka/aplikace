@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { dnesIso } from "@/lib/faktura";
+import { adresaLoga, dnesIso } from "@/lib/faktura";
 import { aktivniFirma } from "@/lib/firma";
 import { dodavatelZFirmy, nactiFakturu } from "@/lib/faktury";
 import { FakturaEditor } from "../../FakturaEditor";
@@ -23,6 +23,7 @@ export default async function UpravitFakturuPage({ params }: { params: Promise<{
       platce={f.vat_payer}
       dnes={dnesIso()}
       dalsiCislo={f.number}
+      logo={adresaLoga(firma.logo_path)}
       vychozi={{
         id: f.id,
         cislo: f.number,
@@ -35,6 +36,8 @@ export default async function UpravitFakturuPage({ params }: { params: Promise<{
         payment_method: f.payment_method,
         template: f.template,
         note: f.note ?? "",
+        intro_text: f.intro_text ?? "",
+        logo_position: f.logo_position,
         polozky: n.polozky,
       }}
     />

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { SAZBY_DPH, ZPUSOBY_UHRADY, dnesIso, type SazbaDph, type Vzhled, type ZpusobUhrady } from "@/lib/faktura";
+import { SAZBY_DPH, ZPUSOBY_UHRADY, dnesIso, type PoziceLoga, type SazbaDph, type Vzhled, type ZpusobUhrady } from "@/lib/faktura";
 import { aktivniFirma } from "@/lib/firma";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,6 +25,8 @@ export type NovaFaktura = {
   payment_method: ZpusobUhrady;
   template: Vzhled;
   note: string;
+  intro_text: string;
+  logo_position: PoziceLoga | null;
   polozky: { description: string; quantity: number; unit: string; unit_price: number; vat_rate: SazbaDph }[];
 };
 
@@ -78,6 +80,8 @@ export async function ulozitFakturuAkce(f: NovaFaktura): Promise<VysledekUlozeni
       payment_method: f.payment_method,
       template: f.template,
       note: f.note.trim().slice(0, 1000),
+      intro_text: (f.intro_text ?? "").trim().slice(0, 1000),
+      logo_position: f.logo_position && ["vlevo", "vpravo", "dole"].includes(f.logo_position) ? f.logo_position : null,
     },
     p_polozky: polozky,
   });

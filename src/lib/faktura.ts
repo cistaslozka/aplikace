@@ -34,6 +34,20 @@ export type Polozka = {
 export type Rekapitulace = { rate: number; base: number; vat: number };
 
 export type Vzhled = "minimal" | "corporate" | "creative";
+export type PoziceLoga = "vlevo" | "vpravo" | "dole";
+export const POZICE_LOGA: [PoziceLoga | null, string][] = [
+  [null, "Bez loga"],
+  ["vlevo", "Vlevo nahoře"],
+  ["vpravo", "Vpravo nahoře"],
+  ["dole", "Dole"],
+];
+
+/** Veřejná adresa loga v úložišti Supabase. */
+export function adresaLoga(cesta: string | null | undefined): string | null {
+  if (!cesta) return null;
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/loga/${cesta}`;
+}
+
 export type ZpusobUhrady = "prevod" | "hotove" | "karta" | "dobirka";
 
 export const ZPUSOBY_UHRADY: Record<ZpusobUhrady, string> = {

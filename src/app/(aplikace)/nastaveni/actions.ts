@@ -129,3 +129,23 @@ export async function ulozitFirmuAkce(_: StavFirmy, form: FormData): Promise<Sta
   revalidatePath("/", "layout");
   redirect("/prehled?vitejte=1");
 }
+
+export type VysledekLoga = { ok: true } | { ok: false; chyba: string };
+
+/** Uloží (nebo odebere) cestu k logu firmy. Soubor už nahrál prohlížeč do úložiště „loga“. */
+export async function ulozitLogoAkce(cesta: string | null): Promise<VysledekLoga> {
+  const firma = await aktivniFirma();
+  if (!firma) return { ok: false, chyba: "Nejdřív uložte údaje o firmě." };
+  if (cesta !== null && !new RegExp(`^${firma.id}/logo-[0-9]+\\.(png|jpg|webp)$`).test(cesta)) {
+    return { ok: false, chyba: "Logo se nepodařilo uložit." };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.from("organizations").update({ logo_path: cesta }).eq("id", firma.id);
+  if (error) {
+    console.error("Uložení loga selhalo:", error.message);
+    return { ok: false, chyba: "Logo se nepodařilo uložit. Zkuste to prosím znovu." };
+  }
+  revalidatePath("/nastaveni");
+  revalidatePath("/faktury/nova");
+  return { ok: true };
+}

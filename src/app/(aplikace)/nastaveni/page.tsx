@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { aktivniFirma } from "@/lib/firma";
 import { formatujIban } from "@/lib/validace";
 import { FirmaFormular, type HodnotyFirmy } from "./FirmaFormular";
+import { LogoFirmy } from "./LogoFirmy";
 
 export const metadata: Metadata = { title: "Nastavení firmy" };
 
@@ -44,6 +45,7 @@ export default async function NastaveniPage() {
         )}
       </section>
       <FirmaFormular vychozi={vychozi} nova={!firma} />
+      {firma && <LogoFirmy firmaId={firma.id} cesta={firma.logo_path} />}
     </>
   );
 }
