@@ -2,7 +2,8 @@ import "server-only";
 import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
 import { B, registrovatPisma } from "@/components/faktura/FakturaPdf";
 import { datumCz } from "@/lib/faktura";
-import { DRUHY_SMLUV, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
+import { DRUHY_SMLUV, malym, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
+import { VZORY } from "@/lib/smlouvy/vzory";
 
 // PDF smlouvy (víc stran). Rozvržení odpovídá SmlouvaA4.tsx – když měníš jedno, uprav i druhé.
 
@@ -42,12 +43,12 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
           <Text style={h.nadpis}>{d.vzhled === "corporate" ? d.nazev.toUpperCase() : d.nazev}</Text>
           <Text style={[{ marginTop: 4, fontSize: 9 }, h.pod]}>
             č. {d.cislo}
-            {d.druh === "dilo" ? " · uzavřená podle § 2586 a násl. zákona č. 89/2012 Sb., občanský zákoník" : ""}
+            {VZORY[d.druh]?.podtitul ? ` · ${VZORY[d.druh]!.podtitul}` : ""}
           </Text>
         </View>
 
         <View style={{ marginTop: 18 }}>
-          <Text style={[s.stitek, { color: h.akcent }]}>SMLUVNÍ STRANY</Text>
+          <Text style={[s.stitek, { color: h.akcent }]}>{d.druh === "predavaci" ? "STRANY" : "SMLUVNÍ STRANY"}</Text>
           {strany.map((x, i) => (
             <View key={i} style={{ flexDirection: "row", marginBottom: 8 }} wrap={false}>
               <Text style={{ width: 84, fontWeight: 600, color: B.navy }}>{x.r}</Text>
@@ -58,11 +59,11 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
                   </Text>
                 ))}
                 {x.z ? <Text>zastoupen(a): {x.z}</Text> : null}
-                <Text style={{ color: B.muted }}>(dále jen „{x.r.toLowerCase()}“)</Text>
+                <Text style={{ color: B.muted }}>(dále jen „{malym(x.r)}“)</Text>
               </View>
             </View>
           ))}
-          <Text>uzavírají níže uvedeného dne, měsíce a roku tuto smlouvu:</Text>
+          <Text>{VZORY[d.druh]?.uvod ?? "uzavírají tuto smlouvu:"}</Text>
         </View>
 
         {clanky.map((c, i) => (

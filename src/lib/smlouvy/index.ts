@@ -57,6 +57,12 @@ export const datum = (pole: Record<string, unknown>, k: string) => {
 };
 export const kc = (x: number) => castka(x).replace(",00 Kč", " Kč");
 
+/** „Zhotovitel“ → „zhotovitel“, „Strana A“ → „strana A“ (jen první písmeno). */
+export const malym = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
+
+/** Text jako věta: bez zdvojené tečky na konci, s tečkou, pokud chybí. */
+export const veta = (t: string) => t.replace(/[.\s]+$/, "") + ".";
+
 /** Odstraní prázdné články a odstavce (nepovinné části smlouvy). */
 export function vycistit(clanky: (Clanek | null)[]): Clanek[] {
   return clanky

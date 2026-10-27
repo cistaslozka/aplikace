@@ -8,7 +8,7 @@ import { SmlouvaA4 } from "@/components/smlouva/SmlouvaA4";
 import { VyberKlienta } from "@/components/VyberKlienta";
 import type { Strana, Vzhled } from "@/lib/faktura";
 import type { KlientNavrh } from "@/lib/klienti";
-import { DRUHY_SMLUV, role, type DataSmlouvy, type DruhSmlouvy, type PoleFormulare } from "@/lib/smlouvy";
+import { DRUHY_SMLUV, malym, role, type DataSmlouvy, type DruhSmlouvy, type PoleFormulare } from "@/lib/smlouvy";
 import { VZORY } from "@/lib/smlouvy/vzory";
 import { ulozitSmlouvuAkce, type NovaSmlouva } from "./actions";
 
@@ -119,7 +119,7 @@ export function SmlouvaEditor({
             ← Smlouvy
           </Link>
           <h1 className="text-2xl font-extrabold tracking-tight">
-            {vychozi ? "Úprava smlouvy" : `Nová ${DRUHY_SMLUV[druh].nazev.toLowerCase()}`}{" "}
+            {vychozi ? "Úprava smlouvy" : `Nová ${malym(DRUHY_SMLUV[druh].nazev)}`}{" "}
             <span className="num font-semibold text-muted">č. {vychozi?.cislo ?? dalsiCislo}</span>
           </h1>
         </div>
@@ -141,10 +141,10 @@ export function SmlouvaEditor({
             <h2 className="text-base font-bold">Smluvní strany</h2>
             <div className="flex flex-wrap gap-2" role="group" aria-label="Vaše role ve smlouvě">
               <button type="button" aria-pressed={myDodavame} onClick={() => setMyDodavame(true)} className={volba(myDodavame)}>
-                Jsem {DRUHY_SMLUV[druh].my.toLowerCase()}
+                Jsem {malym(DRUHY_SMLUV[druh].my)}
               </button>
               <button type="button" aria-pressed={!myDodavame} onClick={() => setMyDodavame(false)} className={volba(!myDodavame)}>
-                Jsem {DRUHY_SMLUV[druh].oni.toLowerCase()}
+                Jsem {malym(DRUHY_SMLUV[druh].oni)}
               </button>
             </div>
             <p className="text-sm">
