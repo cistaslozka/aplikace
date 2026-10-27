@@ -27,7 +27,7 @@ function sedi(f: FakturaRadek, filtr: Filtr, dnes: string) {
     case "uhrazeno":
       return f.status === "uhrazena";
     case "zalohy":
-      return f.kind === "zalohova";
+      return f.kind === "zalohova" || f.kind === "ddpp";
     case "storno":
       return f.status === "stornovana";
     default:
@@ -135,6 +135,7 @@ export default async function FakturyPage({ searchParams }: Props) {
                       <div className="truncate font-semibold text-navy">{f.customer.name}</div>
                       <div className="num text-[13px] text-muted">
                         {f.kind === "zalohova" && "Záloha · "}
+                        {f.kind === "ddpp" && "Daňový doklad · "}
                         {f.number} · splatnost {datumCz(f.due_date)}
                       </div>
                     </div>
@@ -169,6 +170,9 @@ export default async function FakturyPage({ searchParams }: Props) {
                     <td className="max-w-64 truncate px-3 py-3.5">
                       {f.kind === "zalohova" && (
                         <span className="mr-2 rounded-full bg-amber-tint px-2 py-0.5 text-[11.5px] font-semibold text-amber">Záloha</span>
+                      )}
+                      {f.kind === "ddpp" && (
+                        <span className="mr-2 rounded-full bg-green-tint px-2 py-0.5 text-[11.5px] font-semibold text-green-ink">Daňový doklad</span>
                       )}
                       {f.customer.name}
                     </td>

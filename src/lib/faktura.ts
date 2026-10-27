@@ -63,6 +63,12 @@ export const NAZVY_DOKLADU: Record<DruhDokladu, string> = {
   zalohova: "Zálohová faktura",
   ddpp: "Daňový doklad k přijaté platbě",
 };
+/** Nadpis na dokladu: u daňového dokladu k platbě je dlouhý název rozdělený do dvou řádků. */
+export function nadpisDokladu(druh: DruhDokladu): { nadpis: string; dodatek: string } {
+  if (druh === "ddpp") return { nadpis: "Daňový doklad", dodatek: "k přijaté platbě · " };
+  return { nadpis: NAZVY_DOKLADU[druh], dodatek: "" };
+}
+
 /** Název souboru ke stažení: faktura-20260001, zalohova-faktura-ZF20260001 … */
 export function nazevSouboru(druh: DruhDokladu, cislo: string): string {
   return `${druh === "zalohova" ? "zalohova-faktura" : druh === "ddpp" ? "danovy-doklad" : "faktura"}-${cislo}`;

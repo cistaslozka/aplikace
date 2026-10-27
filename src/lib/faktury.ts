@@ -148,3 +148,17 @@ export async function nactiUpominky(invoiceId: string): Promise<Upominka[]> {
   if (error) console.error("Načtení upomínek selhalo:", error.message);
   return (data ?? []).map((u) => ({ ...u, amount: Number(u.amount) }));
 }
+
+export type SouvisejiciDoklad = { id: string; kind: DruhDokladu; number: string; status: StavFaktury; issue_date: string };
+
+/** Doklady navázané na zálohu (daňový doklad k platbě, později konečná faktura) a záloha, ke které doklad patří. */
+export async function nactiSouvisejici(f: Pick<FakturaRadek, "id" | "related_invoice_id">): Promise<{ navazane: SouvisejiciDoklad[]; zaloha: SouvisejiciDoklad | null }> {
+  const supabase = await createClient();
+  const sloupce = "id, kind, number, status, issue_date";
+  const [navazane, zaloha] = await Promise.all([
+    supabase.from("invoices").select(sloupce).eq("related_invoice_id", f.id).order("created_at"),
+    f.related_invoice_id ? supabase.from("invoices").select(sloupce).eq("id", f.related_invoice_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+  ]);
+  if (navazane.error) console.error("Načtení navázaných dokladů selhalo:", navazane.error.message);
+  return { navazane: (navazane.data ?? []) as SouvisejiciDoklad[], zaloha: (zaloha.data as SouvisejiciDoklad | null) ?? null };
+}
