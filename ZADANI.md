@@ -97,6 +97,10 @@ uživatelů (týmový přístup v Pro).
   Uživatel smí přímo měnit jen stav (vystavená / uhrazená / stornovaná) a datum úhrady.
   Faktury se nemažou, jen stornují (číslo se znovu nepoužije). Stornovanou nejde upravit.
   Výpočty pro náhled: `src/lib/faktura.ts` (stejné zaokrouhlení jako databáze).
+- Logo firmy (nepovinné): `organizations.logo_path`, soubor v úložišti `loga` ve složce `<id firmy>/`
+  (PNG / JPG / WEBP do 1 MB, nahrávat smí jen členové firmy). Faktura si pamatuje `logo_position`
+  (vlevo / vpravo / dole) a kopii `logo_path`, takže nové logo starou fakturu nezmění.
+  Vlastní text na faktuře: `intro_text` (nad položkami) a `note` (pod položkami).
 - `dashboard_layouts` – rozložení dlaždic na přehledu pro každého uživatele
 - `waitlist` – zájemci o spuštění z webu awao.cz (už existuje; číst ho smí jen správce)
 

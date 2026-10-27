@@ -5,6 +5,7 @@ import {
   qrPlatba,
   zakladPolozky,
   ZPUSOBY_UHRADY,
+  type PoziceLoga,
   type Polozka,
   type Rekapitulace,
   type Strana,
@@ -33,6 +34,11 @@ export type DataFaktury = {
   vzhled: Vzhled;
   stav?: "vystavena" | "uhrazena" | "stornovana";
   uhrazeno?: string | null;
+  /** Adresa obrázku loga (nepovinné) a kde na faktuře je */
+  logo?: string | null;
+  logoPozice?: PoziceLoga | null;
+  /** Vlastní text nad položkami */
+  uvod?: string | null;
 };
 
 // Styly tří vzhledů. Obsah faktury je ve všech stejný, mění se jen vzhled.
@@ -66,6 +72,15 @@ const V = {
   },
 } satisfies Record<Vzhled, Record<string, string>>;
 
+function Logo({ src, vyska = 56 }: { src: string; vyska?: number }) {
+  return (
+    <span className="inline-flex shrink-0 items-center rounded-md bg-white p-1">
+      {/* eslint-disable-next-line @next/next/no-img-element -- obyčejný obrázek kvůli tisku do PDF */}
+      <img src={src} alt="Logo" style={{ maxHeight: vyska, maxWidth: 170 }} className="block h-auto w-auto object-contain" />
+    </span>
+  );
+}
+
 function Adresa({ s }: { s: Strana }) {
   const obec = [s.zip, s.city].filter(Boolean).join(" ");
   return (
@@ -83,11 +98,18 @@ function Adresa({ s }: { s: Strana }) {
  */
 export function FakturaA4({ d }: { d: DataFaktury }) {
   const v = V[d.vzhled];
+  const logo = d.logo && d.logoPozice ? d.logoPozice : null;
   const iban = d.dodavatel.iban ? formatujIban(d.dodavatel.iban) : null;
   const prevod = d.uhrada === "prevod";
   const qr =
     prevod && d.dodavatel.iban && d.celkem > 0 && d.stav !== "stornovana" && d.stav !== "uhrazena"
-      ? qrPlatba({ iban: d.dodavatel.iban, castka: d.celkem, vs: d.vs, splatnost: d.splatnost, zprava: `Faktura ${d.cislo}` })
+      ? qrPlatba({
+          iban: d.dodavatel.iban,
+          castka: d.celkem,
+          vs: d.vs,
+          splatnost: d.splatnost,
+          zprava: `Faktura ${d.cislo}`,
+        })
       : null;
 
   return (
@@ -104,16 +126,22 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
       )}
 
       <header className={v.hlavicka}>
-        <div>
-          <div className={v.nadpis}>Faktura</div>
-          <div className={"num " + v.podnadpis}>
-            č. {d.cislo}
-            {d.platce ? " · daňový doklad" : ""}
+        <div className="flex items-center gap-4">
+          {logo === "vlevo" && <Logo src={d.logo!} />}
+          <div>
+            <div className={v.nadpis}>Faktura</div>
+            <div className={"num " + v.podnadpis}>
+              č. {d.cislo}
+              {d.platce ? " · daňový doklad" : ""}
+            </div>
           </div>
         </div>
-        <div className="text-right text-[13px] leading-tight font-bold">
-          {d.dodavatel.name}
-          {d.dodavatel.web && <div className="mt-1 text-[11px] font-normal opacity-80">{d.dodavatel.web}</div>}
+        <div className="flex flex-col items-end gap-2 text-right text-[13px] leading-tight font-bold">
+          {logo === "vpravo" && <Logo src={d.logo!} />}
+          <div>
+            {d.dodavatel.name}
+            {d.dodavatel.web && <div className="mt-1 text-[11px] font-normal opacity-80">{d.dodavatel.web}</div>}
+          </div>
         </div>
       </header>
 
@@ -198,6 +226,8 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
           </div>
         )}
 
+        {d.uvod && <p className="text-[12px] whitespace-pre-line text-slate-800">{d.uvod}</p>}
+
         <table className="num w-full border-collapse text-[11.5px]">
           <thead>
             <tr className={v.hlavaTabulky}>
@@ -271,6 +301,7 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
           ) : (
             <span />
           )}
+          {logo === "dole" && <Logo src={d.logo!} vyska={48} />}
           {d.stav === "uhrazena" && d.uhrazeno && (
             <div className="rounded-lg border-2 border-green-ink px-3 py-1.5 text-center text-[11px] font-bold text-green-ink">
               UHRAZENO {datumCz(d.uhrazeno)}
@@ -280,7 +311,14 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
       </div>
 
       <footer className="border-t border-line px-[44px] py-3 text-[9.5px] text-muted">
-        {[d.dodavatel.registry_note, d.platce ? null : "Nejsem plátce DPH.", "Vystaveno v systému čistásložka.cz."].filter(Boolean).map((t) => String(t).trim().replace(/[.\s]*$/, ".")).join(" ")}
+        {[d.dodavatel.registry_note, d.platce ? null : "Nejsem plátce DPH.", "Vystaveno v systému čistásložka.cz."]
+          .filter(Boolean)
+          .map((t) =>
+            String(t)
+              .trim()
+              .replace(/[.\s]*$/, "."),
+          )
+          .join(" ")}
       </footer>
     </article>
   );

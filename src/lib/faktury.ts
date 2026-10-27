@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { Polozka, Rekapitulace, SazbaDph, StavFaktury, Strana, Vzhled, ZpusobUhrady } from "./faktura";
+import type { PoziceLoga, Polozka, Rekapitulace, SazbaDph, StavFaktury, Strana, Vzhled, ZpusobUhrady } from "./faktura";
 
 export type FakturaRadek = {
   id: string;
@@ -16,6 +16,9 @@ export type FakturaRadek = {
   vat_payer: boolean;
   template: Vzhled;
   note: string | null;
+  intro_text: string | null;
+  logo_position: PoziceLoga | null;
+  logo_path: string | null;
   status: StavFaktury;
   paid_at: string | null;
   subtotal: number;
@@ -26,7 +29,7 @@ export type FakturaRadek = {
 };
 
 const SLOUPCE =
-  "id, number, variable_symbol, client_id, supplier, customer, issue_date, taxable_date, due_date, payment_method, vat_payer, template, note, status, paid_at, subtotal, vat_total, total, vat_recap, created_at";
+  "id, number, variable_symbol, client_id, supplier, customer, issue_date, taxable_date, due_date, payment_method, vat_payer, template, note, intro_text, logo_position, logo_path, status, paid_at, subtotal, vat_total, total, vat_recap, created_at";
 
 // Supabase vrací numeric jako text, převedeme na čísla.
 function cisla(f: Record<string, unknown>): FakturaRadek {

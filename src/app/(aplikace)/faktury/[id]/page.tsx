@@ -5,7 +5,7 @@ import { FakturaA4 } from "@/components/faktura/FakturaA4";
 import { Meritko } from "@/components/faktura/Meritko";
 import { StavPill } from "@/components/faktura/StavPill";
 import { Hlaska } from "@/components/Formular";
-import { castka, datumCz } from "@/lib/faktura";
+import { adresaLoga, castka, datumCz } from "@/lib/faktura";
 import { aktivniFirma } from "@/lib/firma";
 import { nactiFakturu } from "@/lib/faktury";
 import { zmenitStavAkce } from "../actions";
@@ -110,6 +110,9 @@ export default async function FakturaPage({ params, searchParams }: Props) {
                 dph: f.vat_total,
                 celkem: f.total,
                 poznamka: f.note,
+                uvod: f.intro_text,
+                logo: adresaLoga(f.logo_path),
+                logoPozice: f.logo_position,
                 vzhled: f.template,
                 stav: f.status,
                 uhrazeno: f.paid_at,

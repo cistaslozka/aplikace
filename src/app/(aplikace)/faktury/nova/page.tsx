@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { dnesIso } from "@/lib/faktura";
+import { adresaLoga, dnesIso } from "@/lib/faktura";
 import { aktivniFirma } from "@/lib/firma";
 import { dalsiCisloFaktury, dodavatelZFirmy } from "@/lib/faktury";
 import { FakturaEditor } from "../FakturaEditor";
@@ -12,5 +12,5 @@ export default async function NovaFakturaPage() {
   if (!firma) redirect("/nastaveni");
   const dnes = dnesIso();
   const cislo = await dalsiCisloFaktury(firma.id, Number(dnes.slice(0, 4)));
-  return <FakturaEditor dodavatel={dodavatelZFirmy(firma)} platce={firma.vat_payer} dnes={dnes} dalsiCislo={cislo} />;
+  return <FakturaEditor dodavatel={dodavatelZFirmy(firma)} platce={firma.vat_payer} dnes={dnes} dalsiCislo={cislo} logo={adresaLoga(firma.logo_path)} />;
 }

@@ -14,7 +14,9 @@ import {
   SAZBY_DPH,
   spocitej,
   zakladPolozky,
+  POZICE_LOGA,
   ZPUSOBY_UHRADY,
+  type PoziceLoga,
   type Polozka,
   type SazbaDph,
   type Strana,
@@ -44,8 +46,8 @@ function textCisla(x: number): string {
   return String(x).replace(".", ",");
 }
 
-let dalsiKlic = 1;
-const novyRadek = (vat: SazbaDph): RadekFormulare => ({ klic: dalsiKlic++, description: "", quantity: "1", unit: "ks", unit_price: "", vat_rate: vat });
+// Klíč řádku: první řádky mají 1, 2, 3… (stejně na serveru i v prohlížeči), nové dostanou další číslo.
+const novyRadek = (klic: number, vat: SazbaDph): RadekFormulare => ({ klic, description: "", quantity: "1", unit: "ks", unit_price: "", vat_rate: vat });
 
 export type VychoziFaktura = Omit<NovaFaktura, "polozky"> & { polozky: Polozka[]; cislo: string; vs: string };
 
@@ -54,12 +56,15 @@ export function FakturaEditor({
   platce,
   dnes,
   dalsiCislo,
+  logo,
   vychozi,
 }: {
   dodavatel: Strana;
   platce: boolean;
   dnes: string;
   dalsiCislo: string;
+  /** Adresa nahraného loga firmy, nebo null */
+  logo: string | null;
   vychozi?: VychoziFaktura;
 }) {
   const vychoziSazba: SazbaDph = platce ? 21 : 0;
@@ -68,15 +73,15 @@ export function FakturaEditor({
   );
   const [radky, setRadky] = useState<RadekFormulare[]>(() =>
     vychozi?.polozky.length
-      ? vychozi.polozky.map((p) => ({
-          klic: dalsiKlic++,
+      ? vychozi.polozky.map((p, i) => ({
+          klic: i + 1,
           description: p.description,
           quantity: textCisla(p.quantity),
           unit: p.unit,
           unit_price: textCisla(p.unit_price),
           vat_rate: p.vat_rate,
         }))
-      : [novyRadek(vychoziSazba)],
+      : [novyRadek(1, vychoziSazba)],
   );
   const [vystaveno, setVystaveno] = useState(vychozi?.issue_date ?? dnes);
   const [duzp, setDuzp] = useState(vychozi?.taxable_date ?? vychozi?.issue_date ?? dnes);
@@ -84,6 +89,8 @@ export function FakturaEditor({
   const [uhrada, setUhrada] = useState<ZpusobUhrady>(vychozi?.payment_method ?? "prevod");
   const [vzhled, setVzhled] = useState<Vzhled>(vychozi?.template ?? "minimal");
   const [poznamka, setPoznamka] = useState(vychozi?.note ?? "");
+  const [uvod, setUvod] = useState(vychozi?.intro_text ?? "");
+  const [logoPozice, setLogoPozice] = useState<PoziceLoga | null>(vychozi ? vychozi.logo_position : logo ? "vpravo" : null);
   const [chyba, setChyba] = useState<string | null>(null);
   const [novyKlient, setNovyKlient] = useState(false);
   const [ukladam, startUkladani] = useTransition();
@@ -143,6 +150,8 @@ export function FakturaEditor({
       payment_method: uhrada,
       template: vzhled,
       note: poznamka,
+      intro_text: uvod,
+      logo_position: logo ? logoPozice : null,
       polozky: vyplnene.map((r) => ({
         description: r.description.trim(),
         quantity: cislo(r.quantity),
@@ -295,7 +304,7 @@ export function FakturaEditor({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
-                onClick={() => setRadky((rs) => [...rs, novyRadek(rs[rs.length - 1]?.vat_rate ?? vychoziSazba)])}
+                onClick={() => setRadky((rs) => [...rs, novyRadek(Math.max(0, ...rs.map((x) => x.klic)) + 1, rs[rs.length - 1]?.vat_rate ?? vychoziSazba)])}
                 className="min-h-11 rounded-xl border-[1.5px] border-dashed border-slate-400 px-4 text-sm font-semibold text-navy hover:border-navy"
               >
                 + Přidat položku
@@ -319,7 +328,7 @@ export function FakturaEditor({
                 <input id="vystaveno" type="date" value={vystaveno} onChange={(e) => zmenVystaveno(e.target.value)} className={tridyVstupu() + " num"} />
               </Pole>
               {platce && (
-                <Pole id="duzp" label="Datum zdanitelného plnění" napoveda="Kdy jste dodali zboží nebo službu.">
+                <Pole id="duzp" label="Datum plnění (DUZP)" napoveda="Den, kdy jste dodali zboží nebo službu.">
                   <input id="duzp" type="date" value={duzp} onChange={(e) => e.target.value && setDuzp(e.target.value)} className={tridyVstupu() + " num"} />
                 </Pole>
               )}
@@ -352,9 +361,39 @@ export function FakturaEditor({
                 </Link>
               </Hlaska>
             )}
-            <Pole id="poznamka" label="Poznámka na faktuře (nepovinné)">
-              <textarea id="poznamka" rows={2} value={poznamka} onChange={(e) => setPoznamka(e.target.value)} placeholder="Např. Děkujeme za spolupráci." className={tridyVstupu()} />
+          </section>
+
+          {/* Vlastní text a logo */}
+          <section className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5">
+            <div>
+              <h2 className="text-base font-bold">Vlastní text a logo</h2>
+              <p className="mt-0.5 text-[13px] text-muted">Všechno nepovinné. Uvidíte to hned v náhledu.</p>
+            </div>
+            <Pole id="uvod" label="Text nad položkami">
+              <textarea id="uvod" rows={2} maxLength={1000} value={uvod} onChange={(e) => setUvod(e.target.value)} placeholder="Např. Fakturujeme Vám za práce podle objednávky č. 15/2026:" className={tridyVstupu()} />
             </Pole>
+            <Pole id="poznamka" label="Text pod položkami">
+              <textarea id="poznamka" rows={2} maxLength={1000} value={poznamka} onChange={(e) => setPoznamka(e.target.value)} placeholder="Např. Děkujeme za spolupráci." className={tridyVstupu()} />
+            </Pole>
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-bold text-navy">Logo</span>
+              {logo ? (
+                <div className="flex flex-wrap gap-2" role="group" aria-label="Umístění loga">
+                  {POZICE_LOGA.map(([k, t]) => (
+                    <button key={t} type="button" aria-pressed={logoPozice === k} onClick={() => setLogoPozice(k)} className={tlacitkoVolby(logoPozice === k)}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[13px] text-muted">
+                  Zatím nemáte nahrané logo.{" "}
+                  <Link href="/nastaveni" className="font-semibold text-green-ink hover:underline">
+                    Nahrát v Nastavení
+                  </Link>
+                </p>
+              )}
+            </div>
           </section>
         </div>
 
@@ -393,6 +432,9 @@ export function FakturaEditor({
                     polozky,
                     ...{ rekapitulace: soucty.rekapitulace, zaklad: soucty.zaklad, dph: soucty.dph, celkem: soucty.celkem },
                     poznamka,
+                    uvod,
+                    logo,
+                    logoPozice,
                     vzhled,
                   }}
                 />
