@@ -121,3 +121,17 @@ export async function zmenitStavAkce(form: FormData) {
   revalidatePath("/prehled");
   redirect(`/faktury/${id}`);
 }
+
+export async function vytvoritUpominkuAkce(form: FormData) {
+  const firma = await aktivniFirma();
+  const id = String(form.get("id") ?? "");
+  if (!firma || !/^[0-9a-f-]{36}$/i.test(id)) return;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("vytvorit_upominku", { p_faktura: id, p_dnes: dnesIso() });
+  if (error) {
+    console.error("Vytvoření upomínky selhalo:", error.code, error.message);
+    redirect(`/faktury/${id}?upominka=chyba`);
+  }
+  revalidatePath(`/faktury/${id}`);
+  redirect(`/faktury/${id}?upominka=${data}`);
+}

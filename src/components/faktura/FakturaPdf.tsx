@@ -331,15 +331,13 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
   );
 }
 
-/** Vytvoří PDF faktury. Logo se stáhne předem, aby PDF nespadlo na nedostupném obrázku. */
-export async function pdfFaktury(d: DataFaktury): Promise<Buffer> {
-  registrovatPisma();
+/** Logo se stáhne předem (jako data URL), aby PDF nespadlo na nedostupném obrázku. PDF umí jen PNG a JPG. */
+async function pripravitLogo(d: DataFaktury): Promise<DataFaktury> {
   let logo: string | null = null;
   if (d.logo && d.logoPozice) {
     try {
       const r = await fetch(d.logo, { signal: AbortSignal.timeout(5000) });
       const typ = r.headers.get("content-type") ?? "";
-      // PDF umí jen PNG a JPG
       if (r.ok && (typ.includes("png") || typ.includes("jpeg"))) {
         logo = `data:${typ.split(";")[0]};base64,${Buffer.from(await r.arrayBuffer()).toString("base64")}`;
       }
@@ -347,5 +345,172 @@ export async function pdfFaktury(d: DataFaktury): Promise<Buffer> {
       console.error("Logo pro PDF se nenačetlo:", (e as Error).message);
     }
   }
-  return renderToBuffer(<FakturaDokument d={{ ...d, logo, logoPozice: logo ? d.logoPozice : null }} />);
+  return { ...d, logo, logoPozice: logo ? d.logoPozice : null };
+}
+
+/** Vytvoří PDF faktury. */
+export async function pdfFaktury(d: DataFaktury): Promise<Buffer> {
+  registrovatPisma();
+  return renderToBuffer(<FakturaDokument d={await pripravitLogo(d)} />);
+}
+
+export type DataUpominky = { level: number; amount: number; new_due_date: string; created_at: string };
+
+const TEXTY_UPOMINKY = {
+  1: (c: string, vyst: string, spl: string) =>
+    `dovolujeme si Vás upozornit, že jsme dosud neobdrželi úhradu faktury č. ${c} vystavené ${vyst} se splatností ${spl}. Pokud jste platbu již odeslali, považujte prosím tuto upomínku za bezpředmětnou.`,
+  2: (c: string, vyst: string, spl: string) =>
+    `znovu Vás upozorňujeme, že faktura č. ${c} vystavená ${vyst} se splatností ${spl} je stále neuhrazená. Prosíme o její úhradu bez dalšího odkladu.`,
+  3: (c: string, vyst: string, spl: string) =>
+    `opakovaně jsme Vás upozorňovali na neuhrazenou fakturu č. ${c} vystavenou ${vyst} se splatností ${spl}. Toto je poslední upomínka. Pokud částku neuhradíte v níže uvedeném termínu, budeme nuceni pohledávku vymáhat dalšími prostředky.`,
+} as const;
+
+function UpominkaDokument({ d, u }: { d: DataFaktury; u: DataUpominky }) {
+  const v = V[d.vzhled];
+  const iban = d.dodavatel.iban ? formatujIban(d.dodavatel.iban) : null;
+  const datum = new Date(u.created_at).toLocaleDateString("sv-SE", { timeZone: "Europe/Prague" });
+  const poSplatnosti = Math.max(0, Math.round((Date.parse(datum) - Date.parse(d.splatnost)) / 86_400_000));
+  const qr = d.dodavatel.iban && u.amount > 0
+    ? qrPlatba({ iban: d.dodavatel.iban, castka: u.amount, vs: d.vs, splatnost: u.new_due_date, zprava: `Faktura ${d.cislo}` })
+    : null;
+  const logo = d.logo && d.logoPozice ? d.logoPozice : null;
+  const text = TEXTY_UPOMINKY[u.level as 1 | 2 | 3](d.cislo, datumCz(d.vystaveno), datumCz(d.splatnost));
+  const nazev = `${u.level}. upomínka`;
+
+  return (
+    <Document title={`${nazev} k faktuře ${d.cislo}`} author={d.dodavatel.name} creator="čistásložka.cz" producer="čistásložka.cz" language="cs">
+      <Page size="A4" style={s.page}>
+        <View style={v.hlavicka}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            {logo === "vlevo" && <Logo src={d.logo!} />}
+            <View>
+              <Text style={v.nadpis}>{d.vzhled === "corporate" ? "UPOMÍNKA" : "Upomínka"}</Text>
+              <Text style={v.podnadpis}>
+                {nazev} k faktuře č. {d.cislo}
+              </Text>
+            </View>
+          </View>
+          <View style={{ alignItems: "flex-end", gap: 6 }}>
+            {logo === "vpravo" && <Logo src={d.logo!} />}
+            <Text style={{ fontSize: 9.75, fontWeight: 700, textAlign: "right" }}>{d.dodavatel.name}</Text>
+            {d.dodavatel.web ? <Text style={{ fontSize: 8.25, opacity: 0.8 }}>{d.dodavatel.web}</Text> : null}
+          </View>
+        </View>
+
+        <View style={[s.telo, { gap: 18 }]}>
+          <View style={s.sloupec2}>
+            <View style={s.pul}>
+              <Text style={v.stitek}>DODAVATEL</Text>
+              <Text style={s.jmeno}>{d.dodavatel.name}</Text>
+              <Adresa x={d.dodavatel} />
+              <Text style={{ marginTop: 3 }}>
+                {[d.dodavatel.ico && `IČO ${d.dodavatel.ico}`, d.dodavatel.dic && `DIČ ${d.dodavatel.dic}`].filter(Boolean).join(" · ")}
+              </Text>
+            </View>
+            <View style={s.pul}>
+              <Text style={v.stitek}>ODBĚRATEL</Text>
+              {d.odberatel ? (
+                <>
+                  <Text style={s.jmeno}>{d.odberatel.name}</Text>
+                  <Adresa x={d.odberatel} />
+                  <Text style={{ marginTop: 3 }}>
+                    {[d.odberatel.ico && `IČO ${d.odberatel.ico}`, d.odberatel.dic && `DIČ ${d.odberatel.dic}`].filter(Boolean).join(" · ")}
+                  </Text>
+                </>
+              ) : null}
+            </View>
+          </View>
+
+          <View style={v.pruh}>
+            <View style={s.pul}>
+              <Text style={v.stitek}>DATUM UPOMÍNKY</Text>
+              <Text>{datumCz(datum)}</Text>
+            </View>
+            <View style={s.pul}>
+              <Text style={v.stitek}>FAKTURA Č.</Text>
+              <Text>{d.cislo}</Text>
+            </View>
+            <View style={s.pul}>
+              <Text style={v.stitek}>PŮVODNÍ SPLATNOST</Text>
+              <Text>{datumCz(d.splatnost)}</Text>
+            </View>
+            <View style={s.pul}>
+              <Text style={v.stitek}>PO SPLATNOSTI</Text>
+              <Text style={{ fontWeight: 700, color: B.red }}>
+                {poSplatnosti} {poSplatnosti === 1 ? "den" : poSplatnosti >= 2 && poSplatnosti <= 4 ? "dny" : "dní"}
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ gap: 8, fontSize: 9.75, lineHeight: 1.6 }}>
+            <Text>Vážení,</Text>
+            <Text>{text}</Text>
+            {u.level >= 2 ? <Text>Upozorňujeme, že za dobu prodlení jsme oprávněni účtovat úrok z prodlení podle platných právních předpisů.</Text> : null}
+          </View>
+
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 18 }} wrap={false}>
+            <View style={{ fontSize: 8.6, gap: 1 }}>
+              {d.dodavatel.bank_account ? (
+                <View style={s.radek}>
+                  <Text style={[s.muted, { width: 82 }]}>Číslo účtu</Text>
+                  <Text style={{ fontWeight: 600, color: B.navy }}>{d.dodavatel.bank_account}</Text>
+                </View>
+              ) : null}
+              {iban ? (
+                <View style={s.radek}>
+                  <Text style={[s.muted, { width: 82 }]}>IBAN</Text>
+                  <Text>{iban}</Text>
+                </View>
+              ) : null}
+              <View style={s.radek}>
+                <Text style={[s.muted, { width: 82 }]}>Variabilní symbol</Text>
+                <Text style={{ fontWeight: 600, color: B.navy }}>{d.vs}</Text>
+              </View>
+              <View style={s.radek}>
+                <Text style={[s.muted, { width: 82 }]}>Uhraďte do</Text>
+                <Text style={{ fontWeight: 700, color: B.navy }}>{datumCz(u.new_due_date)}</Text>
+              </View>
+            </View>
+            <View style={v.celkem}>
+              <Text style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: 0.6, opacity: 0.75 }}>DLUŽNÁ ČÁSTKA</Text>
+              <Text style={{ fontFamily: "Jakarta", fontWeight: 800, fontSize: 19.5, lineHeight: 1.2 }}>{castka(u.amount)}</Text>
+            </View>
+          </View>
+
+          <View style={{ gap: 2, fontSize: 9.75 }}>
+            <Text>S pozdravem</Text>
+            <Text style={s.bold}>{d.dodavatel.name}</Text>
+            {d.dodavatel.email || d.dodavatel.phone ? (
+              <Text style={{ fontSize: 8.25, color: B.slate600 }}>{[d.dodavatel.email, d.dodavatel.phone].filter(Boolean).join(" · ")}</Text>
+            ) : null}
+          </View>
+
+          <View style={{ marginTop: "auto", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 18 }} wrap={false}>
+            {qr ? (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
+                <Qr text={qr} velikost={78} />
+                <View style={{ fontSize: 7.9, color: B.slate600 }}>
+                  <Text style={{ fontWeight: 700, color: B.navy }}>QR platba</Text>
+                  <Text>Naskenujte v aplikaci své banky.</Text>
+                </View>
+              </View>
+            ) : (
+              <View />
+            )}
+            {logo === "dole" && <Logo src={d.logo!} vyska={36} />}
+          </View>
+        </View>
+
+        <Text style={s.paticka} fixed>
+          {[d.dodavatel.registry_note, "Vystaveno v systému čistásložka.cz."].filter(Boolean).map((t) => String(t).trim().replace(/[.\s]*$/, ".")).join(" ")}
+        </Text>
+      </Page>
+    </Document>
+  );
+}
+
+/** Vytvoří PDF upomínky k faktuře. */
+export async function pdfUpominky(d: DataFaktury, u: DataUpominky): Promise<Buffer> {
+  registrovatPisma();
+  return renderToBuffer(<UpominkaDokument d={await pripravitLogo(d)} u={u} />);
 }
