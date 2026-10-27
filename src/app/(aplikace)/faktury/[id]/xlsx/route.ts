@@ -37,6 +37,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
       poznamka: f.note,
       uvod: f.intro_text,
       stav: f.status,
+      odpocet: f.advance_amount > 0 ? { cislo: n.zalohaCislo ?? "", castka: f.advance_amount } : null,
     });
     return souborKeStazeni(new Uint8Array(xlsx), `${nazevSouboru(f.kind, f.number)}.xlsx`, XLSX);
   } catch (e) {

@@ -52,6 +52,7 @@ export type DataXlsx = {
   poznamka?: string | null;
   uvod?: string | null;
   stav: StavFaktury;
+  odpocet?: { cislo: string; castka: number } | null;
 };
 
 /** Jedna faktura jako list v Excelu. */
@@ -130,7 +131,22 @@ export async function fakturaXlsx(d: DataXlsx): Promise<Buffer> {
     ws.addRow([]);
   }
 
-  const celkem = d.platce ? ws.addRow(["Celkem k úhradě", "", "", "", "", d.zaklad, d.dph, d.celkem]) : ws.addRow(["Celkem k úhradě", "", "", "", "", d.celkem]);
+  const sloupecCelkem = d.platce ? 8 : 6;
+  const radekCastky = (popis: string, castkaRadku: number) => {
+    const r = ws.addRow([popis]);
+    r.getCell(sloupecCelkem).value = castkaRadku;
+    r.getCell(sloupecCelkem).numFmt = KC;
+    return r;
+  };
+  if (d.odpocet) {
+    radekCastky("Celkem za fakturu", d.celkem);
+    radekCastky(`Uhrazeno zálohou ${d.odpocet.cislo}`, -d.odpocet.castka);
+  }
+  const celkem = d.odpocet
+    ? radekCastky("Zbývá uhradit", naHalere(d.celkem - d.odpocet.castka))
+    : d.platce
+      ? ws.addRow(["Celkem k úhradě", "", "", "", "", d.zaklad, d.dph, d.celkem])
+      : ws.addRow(["Celkem k úhradě", "", "", "", "", d.celkem]);
   celkem.font = { bold: true, size: 12, color: { argb: NAVY } };
   [6, 7, 8].forEach((i) => (celkem.getCell(i).numFmt = KC));
   if (d.poznamka) {
