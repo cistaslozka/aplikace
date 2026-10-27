@@ -18,6 +18,7 @@ import {
   ZPUSOBY_UHRADY,
   type PoziceLoga,
   type Polozka,
+  type Rekapitulace,
   type SazbaDph,
   type Strana,
   type Vzhled,
@@ -76,7 +77,7 @@ export function FakturaEditor({
   /** Předvyplnění nové faktury (např. ze zálohy), bez čísla a id */
   predloha?: VychoziFaktura;
   /** Konečná faktura: vyúčtovává tuto zaplacenou zálohu */
-  vyuctovani?: { id: string; cislo: string; castka: number };
+  vyuctovani?: { id: string; cislo: string; castka: number; rekapitulace: Rekapitulace[] };
 }) {
   const zdroj = vychozi ?? predloha;
   const vychoziSazba: SazbaDph = platce ? 21 : 0;
@@ -494,7 +495,7 @@ export function FakturaEditor({
                     polozky,
                     ...{ rekapitulace: soucty.rekapitulace, zaklad: soucty.zaklad, dph: soucty.dph, celkem: soucty.celkem },
                     poznamka,
-                    odpocet: vyuctovani ? { cislo: vyuctovani.cislo, castka: vyuctovani.castka, rekapitulace: [] } : null,
+                    odpocet: vyuctovani ? { cislo: vyuctovani.cislo, castka: vyuctovani.castka, rekapitulace: platce ? vyuctovani.rekapitulace : [] } : null,
                     uvod,
                     logo,
                     logoPozice,

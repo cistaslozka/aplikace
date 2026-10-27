@@ -61,7 +61,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 2 | Nastavení firmy: IČO → ARES, adresa, účet, plátce / neplátce DPH | hotovo |
 | 3 | Adresář klientů (z ARES), našeptávač podle jména, limit dotazů do ARES | hotovo |
 | 4a | Faktury: vystavení, číselná řada, položky a DPH, živý náhled ve 3 vzhledech, QR platba, stavy, tisk / PDF z prohlížeče | hotovo |
-| 4b | Faktury: stažení PDF, upomínky, export ISDOC a XLSX, zálohová faktura, daňový doklad k přijaté platbě (hotovo); vyúčtování zálohy; odeslání e-mailem (až bude doména) | rozpracováno |
+| 4b | Faktury: stažení PDF, upomínky, export ISDOC a XLSX, zálohová faktura, daňový doklad k přijaté platbě, vyúčtování zálohy (hotovo); odeslání e-mailem (až bude doména) | skoro hotovo |
 | 5 | Přehled s dlaždicemi: finanční přehled a **hlídání limitu DPH**, archiv, grafy podle měsíců a roku, rychlé akce, končící smlouvy a HR; vlastní rozložení | |
 | 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
 | 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol, cestovní příkaz a vyúčtování; **podpis na obrazovce**; hlídání končících smluv | |
@@ -74,15 +74,8 @@ První verze pro skutečné uživatele = kroky 0–5.
 
 ### Kde jsme skončili (aktualizuje se po každém kroku)
 
-- **Teď rozpracováno:** krok 4b – **vyúčtování zálohy** (konečná faktura, ve které se odečte zaplacená
-  záloha). Větev `krok-4b-vyuctovani`.
-  - Plán: tlačítko „Vystavit konečnou fakturu“ u uhrazené zálohy → editor předvyplněný ze zálohy →
-    na faktuře řádek „Odpočet zálohy ZF…“ a „Zbývá uhradit“. U plátce se odečítá základ a DPH podle
-    daňového dokladu (DD…), u neplátce jen částka. V ISDOC `TaxedDeposits` / `NonTaxedDeposits`.
-  - **Hotovo:** databáze (migrace `20261027154652_vyuctovani_zalohy.sql`, nahraná a otestovaná):
-    sloupce `advance_amount`, `advance_recap`, funkce `ulozit_konecnou_fakturu(faktura, položky, záloha)`.
-  - **Zbývá:** aplikace (tlačítko u zálohy, editor s `?zaloha=`, odpočet na A4/PDF/ISDOC/Excel, seznam).
-- **Potom:** odeslání e-mailem (až bude doména a služba Resend), pak krok 5 (Přehled s dlaždicemi).
+- **Hotovo naposledy:** krok 4b – vyúčtování zálohy (konečná faktura s odpočtem zálohy, PR „Krok 4b (část 6)“).
+- **Další na řadě:** krok 5 – Přehled s dlaždicemi (skutečná čísla, graf, limit DPH, vlastní rozložení). Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
 
 ### Formáty ke stažení
@@ -155,6 +148,11 @@ uživatelů (týmový přístup v Pro).
   stornovat; zálohu s platným daňovým dokladem nejde upravit, vrátit na neuhrazenou ani stornovat (hlídají
   triggery `private.hlidat_zalohu` a `private.hlidat_upravy_dokladu`). Každý druh má vlastní číselnou řadu. `related_invoice_id` = vazba na zálohu.
   Druh dokladu po vystavení změnit nejde. Do příjmů na přehledu se počítají jen faktury.
+- Vyúčtování zálohy: konečná faktura (`kind = faktura`, `related_invoice_id` = záloha) má `advance_amount`
+  (odečtená záloha vč. DPH) a `advance_recap` (rozpis podle sazeb z daňového dokladu; u neplátce sazba 0).
+  Vytváří ji jen `ulozit_konecnou_fakturu(faktura, položky, záloha)`. K úhradě = `total − advance_amount`
+  (QR, upomínky, seznam). V ISDOC `TaxedDeposits` + „AlreadyClaimed…“ u plátce, `NonTaxedDeposits` +
+  `PaidDepositsAmount` u neplátce.
 - `invoice_reminders` – upomínky (1.–3.) k neuhrazené faktuře po splatnosti. Vytváří je jen funkce
   `vytvorit_upominku(faktura, dnes)`, nová lhůta k úhradě je 7 dní. PDF: `/faktury/<id>/upominka/<1–3>`.
 - `dashboard_layouts` – rozložení dlaždic na přehledu pro každého uživatele

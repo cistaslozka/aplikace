@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { adresaLoga, dnesIso, pridatDny } from "@/lib/faktura";
+import { adresaLoga, dnesIso, pridatDny, type Rekapitulace } from "@/lib/faktura";
 import { aktivniFirma } from "@/lib/firma";
 import { dalsiCisloDokladu, dodavatelZFirmy, nactiFakturu, nactiSouvisejici } from "@/lib/faktury";
 import { FakturaEditor, type VychoziFaktura } from "../FakturaEditor";
@@ -19,7 +19,7 @@ export default async function NovaFakturaPage({ searchParams }: Props) {
 
   // Konečná faktura ze zaplacené zálohy: předvyplnit odběratele a položky
   let predloha: VychoziFaktura | undefined;
-  let vyuctovani: { id: string; cislo: string; castka: number } | undefined;
+  let vyuctovani: { id: string; cislo: string; castka: number; rekapitulace: Rekapitulace[] } | undefined;
   if (zalohaId && /^[0-9a-f-]{36}$/i.test(zalohaId)) {
     const n = await nactiFakturu(firma.id, zalohaId);
     const z = n?.faktura;
@@ -29,7 +29,7 @@ export default async function NovaFakturaPage({ searchParams }: Props) {
     if (z.vat_payer && !navazane.some((x) => x.kind === "ddpp" && x.status !== "stornovana")) {
       redirect(`/faktury/${zalohaId}?chyba=${encodeURIComponent("Nejdřív vystavte daňový doklad k přijaté platbě.")}`);
     }
-    vyuctovani = { id: z.id, cislo: z.number, castka: z.total };
+    vyuctovani = { id: z.id, cislo: z.number, castka: z.total, rekapitulace: z.vat_recap };
     predloha = {
       kind: "faktura",
       cislo,
