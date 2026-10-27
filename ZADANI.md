@@ -61,7 +61,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 2 | Nastavení firmy: IČO → ARES, adresa, účet, plátce / neplátce DPH | hotovo |
 | 3 | Adresář klientů (z ARES), našeptávač podle jména, limit dotazů do ARES | hotovo |
 | 4a | Faktury: vystavení, číselná řada, položky a DPH, živý náhled ve 3 vzhledech, QR platba, stavy, tisk / PDF z prohlížeče | hotovo |
-| 4b | Faktury: stažení PDF (hotovo), upomínky (hotovo), export ISDOC a XLSX (hotovo), zálohové faktury, odeslání e-mailem (až bude doména) | rozpracováno |
+| 4b | Faktury: stažení PDF, upomínky, export ISDOC a XLSX, zálohová faktura (hotovo); daňový doklad k přijaté platbě a vyúčtování zálohy; odeslání e-mailem (až bude doména) | rozpracováno |
 | 5 | Přehled s dlaždicemi: finanční přehled a **hlídání limitu DPH**, archiv, grafy podle měsíců a roku, rychlé akce, končící smlouvy a HR; vlastní rozložení | |
 | 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
 | 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol, cestovní příkaz a vyúčtování; **podpis na obrazovce**; hlídání končících smluv | |
@@ -135,6 +135,10 @@ uživatelů (týmový přístup v Pro).
 - Exporty faktury: `/faktury/<id>/isdoc` (ISDOC 6.0.2, `src/lib/isdoc.ts`, ověřeno proti oficiálnímu
   schématu `isdoc-invoice-6.0.2.xsd`), `/faktury/<id>/xlsx` a přehled za rok `/faktury/export?rok=2026`
   (`src/lib/xlsx.ts`). Stornované faktury jsou v přehledu s nulovými částkami.
+- Druhy dokladů v `invoices.kind`: `faktura` (20260001), `zalohova` – zálohová faktura, nedaňový doklad
+  (ZF20260001, VS 920260001, bez DUZP, v ISDOC DocumentType 4), `ddpp` – daňový doklad k přijaté platbě
+  (DD20260001, připravuje se). Každý druh má vlastní číselnou řadu. `related_invoice_id` = vazba na zálohu.
+  Druh dokladu po vystavení změnit nejde. Do příjmů na přehledu se počítají jen faktury.
 - `invoice_reminders` – upomínky (1.–3.) k neuhrazené faktuře po splatnosti. Vytváří je jen funkce
   `vytvorit_upominku(faktura, dnes)`, nová lhůta k úhradě je 7 dní. PDF: `/faktury/<id>/upominka/<1–3>`.
 - `dashboard_layouts` – rozložení dlaždic na přehledu pro každého uživatele

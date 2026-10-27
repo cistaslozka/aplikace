@@ -1,3 +1,4 @@
+import { nazevSouboru } from "@/lib/faktura";
 import { chybaPdf } from "@/lib/chybaPdf";
 import { pdfFaktury } from "@/components/faktura/FakturaPdf";
 import { aktivniFirma } from "@/lib/firma";
@@ -19,7 +20,7 @@ async function vytvorit(params: Promise<{ id: string }>): Promise<Response> {
     return new Response(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="faktura-${n.faktura.number}.pdf"`,
+        "Content-Disposition": `attachment; filename="${nazevSouboru(n.faktura.kind, n.faktura.number)}.pdf"`,
         "Cache-Control": "private, no-store",
       },
     });

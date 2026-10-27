@@ -1,6 +1,6 @@
 import "server-only";
 import ExcelJS from "exceljs";
-import { STAVY, ZPUSOBY_UHRADY, zakladPolozky, naHalere, type Polozka, type Rekapitulace, type StavFaktury, type Strana, type ZpusobUhrady } from "./faktura";
+import { NAZVY_DOKLADU, STAVY, type DruhDokladu, ZPUSOBY_UHRADY, zakladPolozky, naHalere, type Polozka, type Rekapitulace, type StavFaktury, type Strana, type ZpusobUhrady } from "./faktura";
 import { formatujIban } from "./validace";
 
 // Barvy z globals.css (ARGB)
@@ -34,6 +34,7 @@ function hlavickaTabulky(radek: ExcelJS.Row) {
 const adresa = (s: Strana) => [s.street, [s.zip, s.city].filter(Boolean).join(" "), s.country && s.country !== "CZ" ? s.country : null].filter(Boolean).join(", ");
 
 export type DataXlsx = {
+  druh?: DruhDokladu;
   cislo: string;
   vs: string;
   dodavatel: Strana;
@@ -56,12 +57,13 @@ export type DataXlsx = {
 /** Jedna faktura jako list v Excelu. */
 export async function fakturaXlsx(d: DataXlsx): Promise<Buffer> {
   const wb = sesit();
-  const ws = wb.addWorksheet(`Faktura ${d.cislo}`, { pageSetup: { paperSize: 9, orientation: "portrait", fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
+  const nazev = NAZVY_DOKLADU[d.druh ?? "faktura"];
+  const ws = wb.addWorksheet(`${d.druh === "zalohova" ? "Záloha" : "Faktura"} ${d.cislo}`, { pageSetup: { paperSize: 9, orientation: "portrait", fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
   ws.columns = [{ width: 42 }, { width: 11 }, { width: 9 }, { width: 16 }, { width: 8 }, { width: 16 }, { width: 14 }, { width: 16 }];
 
-  const nadpis = ws.addRow([`Faktura ${d.cislo}`]);
+  const nadpis = ws.addRow([`${nazev} ${d.cislo}`]);
   nadpis.font = { bold: true, size: 18, color: { argb: NAVY } };
-  ws.addRow([d.platce ? "Daňový doklad" : "Nejsem plátce DPH."]).font = { color: { argb: MUTED } };
+  ws.addRow([d.druh === "zalohova" ? "Není daňový doklad." : d.platce ? "Daňový doklad" : "Nejsem plátce DPH."]).font = { color: { argb: MUTED } };
   if (d.stav !== "vystavena") ws.addRow([STAVY[d.stav]]).font = { bold: true, color: { argb: NAVY } };
   ws.addRow([]);
 
@@ -82,7 +84,7 @@ export async function fakturaXlsx(d: DataXlsx): Promise<Buffer> {
 
   const udaje: [string, string | Date | null][] = [
     ["Datum vystavení", datum(d.vystaveno)],
-    ...(d.platce ? ([["Datum zdanitelného plnění", datum(d.duzp ?? d.vystaveno)]] as [string, Date | null][]) : []),
+    ...(d.platce && d.druh !== "zalohova" ? ([["Datum zdanitelného plnění", datum(d.duzp ?? d.vystaveno)]] as [string, Date | null][]) : []),
     ["Datum splatnosti", datum(d.splatnost)],
     ["Způsob úhrady", ZPUSOBY_UHRADY[d.uhrada]],
     ["Variabilní symbol", d.vs],
@@ -142,6 +144,7 @@ export async function fakturaXlsx(d: DataXlsx): Promise<Buffer> {
 }
 
 export type RadekPrehledu = {
+  druh: DruhDokladu;
   cislo: string;
   vs: string;
   vystaveno: string;
@@ -161,7 +164,8 @@ export async function prehledFakturXlsx(radky: RadekPrehledu[], nazev: string): 
   const wb = sesit();
   const ws = wb.addWorksheet("Faktury", { views: [{ state: "frozen", ySplit: 1 }] });
   ws.columns = [
-    { header: "Číslo", key: "cislo", width: 12 },
+    { header: "Doklad", key: "druh", width: 16 },
+    { header: "Číslo", key: "cislo", width: 13 },
     { header: "Vystaveno", key: "vystaveno", width: 12, style: { numFmt: DATUM } },
     { header: "DUZP", key: "duzp", width: 12, style: { numFmt: DATUM } },
     { header: "Splatnost", key: "splatnost", width: 12, style: { numFmt: DATUM } },
@@ -181,6 +185,7 @@ export async function prehledFakturXlsx(radky: RadekPrehledu[], nazev: string): 
     // Stornované faktury jsou v přehledu, ale s nulovými částkami, aby nezkreslovaly součty
     const storno = f.stav === "stornovana";
     ws.addRow({
+      druh: NAZVY_DOKLADU[f.druh],
       cislo: f.cislo,
       vystaveno: datum(f.vystaveno),
       duzp: datum(f.duzp),
@@ -198,10 +203,10 @@ export async function prehledFakturXlsx(radky: RadekPrehledu[], nazev: string): 
     });
   }
   const posledni = ws.rowCount;
-  ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: posledni, column: 14 } };
+  ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: posledni, column: 15 } };
   if (radky.length) {
-    const soucet = ws.addRow({ cislo: "Celkem" });
-    for (const [klic, sloupec] of [["zaklad", "H"], ["dph", "I"], ["celkem", "J"]] as const) {
+    const soucet = ws.addRow({ druh: "Celkem" });
+    for (const [klic, sloupec] of [["zaklad", "I"], ["dph", "J"], ["celkem", "K"]] as const) {
       const c = soucet.getCell(klic);
       c.value = { formula: `SUBTOTAL(9,${sloupec}2:${sloupec}${posledni})`, result: radky.reduce((s, f) => s + (f.stav === "stornovana" ? 0 : f[klic]), 0) };
       c.numFmt = KC;

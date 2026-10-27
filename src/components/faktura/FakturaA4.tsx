@@ -5,6 +5,8 @@ import {
   qrPlatba,
   zakladPolozky,
   ZPUSOBY_UHRADY,
+  NAZVY_DOKLADU,
+  type DruhDokladu,
   type PoziceLoga,
   type Polozka,
   type Rekapitulace,
@@ -16,6 +18,8 @@ import { formatujIban } from "@/lib/validace";
 import { QrKod } from "./QrKod";
 
 export type DataFaktury = {
+  /** Druh dokladu, výchozí je faktura */
+  druh?: DruhDokladu;
   cislo: string; // "20260001" nebo text pro koncept
   vs: string;
   dodavatel: Strana;
@@ -98,6 +102,8 @@ function Adresa({ s }: { s: Strana }) {
  */
 export function FakturaA4({ d }: { d: DataFaktury }) {
   const v = V[d.vzhled];
+  const druh = d.druh ?? "faktura";
+  const danovy = d.platce && druh !== "zalohova";
   const logo = d.logo && d.logoPozice ? d.logoPozice : null;
   const iban = d.dodavatel.iban ? formatujIban(d.dodavatel.iban) : null;
   const prevod = d.uhrada === "prevod";
@@ -115,7 +121,7 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
   return (
     <article
       className="faktura-a4 relative flex h-[1123px] w-[794px] flex-col overflow-hidden bg-white font-sans text-[12px] leading-[1.5] text-slate-800"
-      aria-label={`Faktura ${d.cislo}`}
+      aria-label={`${NAZVY_DOKLADU[druh]} ${d.cislo}`}
     >
       {d.stav === "stornovana" && (
         <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center" aria-hidden="true">
@@ -129,10 +135,10 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
         <div className="flex items-center gap-4">
           {logo === "vlevo" && <Logo src={d.logo!} />}
           <div>
-            <div className={v.nadpis}>Faktura</div>
+            <div className={v.nadpis}>{NAZVY_DOKLADU[druh]}</div>
             <div className={"num " + v.podnadpis}>
               č. {d.cislo}
-              {d.platce ? " · daňový doklad" : ""}
+              {druh === "zalohova" ? " · není daňový doklad" : danovy ? " · daňový doklad" : ""}
             </div>
           </div>
         </div>
@@ -182,7 +188,7 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
             <div className={v.stitek}>Vystaveno</div>
             {datumCz(d.vystaveno)}
           </div>
-          {d.platce ? (
+          {danovy ? (
             <div>
               <div className={v.stitek}>Datum zdan. plnění</div>
               {datumCz(d.duzp ?? d.vystaveno)}
@@ -217,7 +223,7 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
                 <span>{iban}</span>
               </>
             )}
-            {d.platce && (
+            {danovy && (
               <>
                 <span className="text-muted">Variabilní symbol</span>
                 <span className="font-semibold text-navy">{d.vs}</span>

@@ -1,4 +1,4 @@
-import { naHalere, zakladPolozky, type Polozka, type Rekapitulace, type Strana, type ZpusobUhrady } from "./faktura";
+import { naHalere, type DruhDokladu, zakladPolozky, type Polozka, type Rekapitulace, type Strana, type ZpusobUhrady } from "./faktura";
 import { rozeberUcet } from "./validace";
 
 /*
@@ -8,6 +8,7 @@ import { rozeberUcet } from "./validace";
 */
 
 export type DataIsdoc = {
+  druh?: DruhDokladu;
   id: string; // UUID faktury v naší databázi
   cislo: string;
   vs: string;
@@ -140,12 +141,13 @@ export function fakturaIsdoc(d: DataIsdoc): string {
   return (
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<Invoice xmlns="http://isdoc.cz/namespace/2013" version="6.0.2">' +
-    el("DocumentType", 1) +
+    // 1 = faktura (daňový doklad), 4 = zálohová faktura (nedaňový zálohový list)
+    el("DocumentType", d.druh === "zalohova" ? 4 : 1) +
     el("ID", d.cislo) +
     el("UUID", d.id.toUpperCase()) +
     el("IssuingSystem", "čistásložka.cz") +
     el("IssueDate", d.vystaveno) +
-    (d.platce ? el("TaxPointDate", d.duzp ?? d.vystaveno) : "") +
+    (d.platce && d.druh !== "zalohova" ? el("TaxPointDate", d.duzp ?? d.vystaveno) : "") +
     el("VATApplicable", d.platce) +
     el("ElectronicPossibilityAgreementReference", "") +
     (poznamka ? el("Note", poznamka) : "") +

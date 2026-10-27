@@ -2,7 +2,7 @@ import "server-only";
 import path from "node:path";
 import { Document, Font, Image, Page, Path, StyleSheet, Svg, Text, View, renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import QRCode from "qrcode";
-import { castka, datumCz, mnozstvi, qrPlatba, zakladPolozky, ZPUSOBY_UHRADY, type Strana } from "@/lib/faktura";
+import { castka, datumCz, mnozstvi, NAZVY_DOKLADU, qrPlatba, zakladPolozky, ZPUSOBY_UHRADY, type Strana } from "@/lib/faktura";
 import { formatujIban } from "@/lib/validace";
 import type { DataFaktury } from "./FakturaA4";
 
@@ -135,6 +135,8 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
       ? qrPlatba({ iban: d.dodavatel.iban, castka: d.celkem, vs: d.vs, splatnost: d.splatnost, zprava: `Faktura ${d.cislo}` })
       : null;
   const logo = d.logo && d.logoPozice ? d.logoPozice : null;
+  const druh = d.druh ?? "faktura";
+  const danovy = d.platce && druh !== "zalohova";
   const tabSloupce = d.platce ? ["44%", "13%", "17%", "9%", "17%"] : ["50%", "15%", "17.5%", "17.5%"];
   const paticka = [d.dodavatel.registry_note, d.platce ? null : "Nejsem plátce DPH.", "Vystaveno v systému čistásložka.cz."]
     .filter(Boolean)
@@ -142,7 +144,7 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
     .join(" ");
 
   return (
-    <Document title={`Faktura ${d.cislo}`} author={d.dodavatel.name} creator="čistásložka.cz" producer="čistásložka.cz" language="cs">
+    <Document title={`${NAZVY_DOKLADU[druh]} ${d.cislo}`} author={d.dodavatel.name} creator="čistásložka.cz" producer="čistásložka.cz" language="cs">
       <Page size="A4" style={s.page}>
         {d.stav === "stornovana" && (
           <View fixed style={{ position: "absolute", top: 360, left: 0, right: 0, alignItems: "center" }}>
@@ -156,10 +158,10 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             {logo === "vlevo" && <Logo src={d.logo!} />}
             <View>
-              <Text style={v.nadpis}>{d.vzhled === "corporate" ? "FAKTURA" : "Faktura"}</Text>
+              <Text style={v.nadpis}>{d.vzhled === "corporate" ? NAZVY_DOKLADU[druh].toUpperCase() : NAZVY_DOKLADU[druh]}</Text>
               <Text style={v.podnadpis}>
                 č. {d.cislo}
-                {d.platce ? " · daňový doklad" : ""}
+                {druh === "zalohova" ? " · není daňový doklad" : danovy ? " · daňový doklad" : ""}
               </Text>
             </View>
           </View>
@@ -204,8 +206,8 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
               <Text>{datumCz(d.vystaveno)}</Text>
             </View>
             <View style={s.pul}>
-              <Text style={v.stitek}>{d.platce ? "DATUM ZDAN. PLNĚNÍ" : "VAR. SYMBOL"}</Text>
-              <Text>{d.platce ? datumCz(d.duzp ?? d.vystaveno) : d.vs}</Text>
+              <Text style={v.stitek}>{danovy ? "DATUM ZDAN. PLNĚNÍ" : "VAR. SYMBOL"}</Text>
+              <Text>{danovy ? datumCz(d.duzp ?? d.vystaveno) : d.vs}</Text>
             </View>
             <View style={s.pul}>
               <Text style={v.stitek}>SPLATNOST</Text>
@@ -231,7 +233,7 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
                   <Text>{iban}</Text>
                 </View>
               ) : null}
-              {d.platce ? (
+              {danovy ? (
                 <View style={s.radek}>
                   <Text style={[s.muted, { width: 82 }]}>Variabilní symbol</Text>
                   <Text style={{ fontWeight: 600, color: B.navy }}>{d.vs}</Text>
@@ -369,12 +371,12 @@ export async function pdfFaktury(d: DataFaktury): Promise<Buffer> {
 export type DataUpominky = { level: number; amount: number; new_due_date: string; created_at: string };
 
 const TEXTY_UPOMINKY = {
-  1: (c: string, vyst: string, spl: string) =>
-    `dovolujeme si Vás upozornit, že jsme dosud neobdrželi úhradu faktury č. ${c} vystavené ${vyst} se splatností ${spl}. Pokud jste platbu již odeslali, považujte prosím tuto upomínku za bezpředmětnou.`,
-  2: (c: string, vyst: string, spl: string) =>
-    `znovu Vás upozorňujeme, že faktura č. ${c} vystavená ${vyst} se splatností ${spl} je stále neuhrazená. Prosíme o její úhradu bez dalšího odkladu.`,
-  3: (c: string, vyst: string, spl: string) =>
-    `opakovaně jsme Vás upozorňovali na neuhrazenou fakturu č. ${c} vystavenou ${vyst} se splatností ${spl}. Toto je poslední upomínka. Pokud částku neuhradíte v níže uvedeném termínu, budeme nuceni pohledávku vymáhat dalšími prostředky.`,
+  1: (c: string, vyst: string, spl: string, z: boolean) =>
+    `dovolujeme si Vás upozornit, že jsme dosud neobdrželi úhradu ${z ? "zálohové " : ""}faktury č. ${c} vystavené ${vyst} se splatností ${spl}. Pokud jste platbu již odeslali, považujte prosím tuto upomínku za bezpředmětnou.`,
+  2: (c: string, vyst: string, spl: string, z: boolean) =>
+    `znovu Vás upozorňujeme, že ${z ? "zálohová " : ""}faktura č. ${c} vystavená ${vyst} se splatností ${spl} je stále neuhrazená. Prosíme o její úhradu bez dalšího odkladu.`,
+  3: (c: string, vyst: string, spl: string, z: boolean) =>
+    `opakovaně jsme Vás upozorňovali na neuhrazenou ${z ? "zálohovou " : ""}fakturu č. ${c} vystavenou ${vyst} se splatností ${spl}. Toto je poslední upomínka. Pokud částku neuhradíte v níže uvedeném termínu, budeme nuceni pohledávku vymáhat dalšími prostředky.`,
 } as const;
 
 function UpominkaDokument({ d, u }: { d: DataFaktury; u: DataUpominky }) {
@@ -386,11 +388,11 @@ function UpominkaDokument({ d, u }: { d: DataFaktury; u: DataUpominky }) {
     ? qrPlatba({ iban: d.dodavatel.iban, castka: u.amount, vs: d.vs, splatnost: u.new_due_date, zprava: `Faktura ${d.cislo}` })
     : null;
   const logo = d.logo && d.logoPozice ? d.logoPozice : null;
-  const text = TEXTY_UPOMINKY[u.level as 1 | 2 | 3](d.cislo, datumCz(d.vystaveno), datumCz(d.splatnost));
+  const text = TEXTY_UPOMINKY[u.level as 1 | 2 | 3](d.cislo, datumCz(d.vystaveno), datumCz(d.splatnost), d.druh === "zalohova");
   const nazev = `${u.level}. upomínka`;
 
   return (
-    <Document title={`${nazev} k faktuře ${d.cislo}`} author={d.dodavatel.name} creator="čistásložka.cz" producer="čistásložka.cz" language="cs">
+    <Document title={`${nazev} k ${d.druh === "zalohova" ? "zálohové faktuře" : "faktuře"} ${d.cislo}`} author={d.dodavatel.name} creator="čistásložka.cz" producer="čistásložka.cz" language="cs">
       <Page size="A4" style={s.page}>
         <View style={v.hlavicka}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -398,7 +400,7 @@ function UpominkaDokument({ d, u }: { d: DataFaktury; u: DataUpominky }) {
             <View>
               <Text style={v.nadpis}>{d.vzhled === "corporate" ? "UPOMÍNKA" : "Upomínka"}</Text>
               <Text style={v.podnadpis}>
-                {nazev} k faktuře č. {d.cislo}
+                {nazev} k {d.druh === "zalohova" ? "zálohové faktuře" : "faktuře"} č. {d.cislo}
               </Text>
             </View>
           </View>
@@ -439,7 +441,7 @@ function UpominkaDokument({ d, u }: { d: DataFaktury; u: DataUpominky }) {
               <Text>{datumCz(datum)}</Text>
             </View>
             <View style={s.pul}>
-              <Text style={v.stitek}>FAKTURA Č.</Text>
+              <Text style={v.stitek}>{d.druh === "zalohova" ? "ZÁLOHOVÁ FAKTURA Č." : "FAKTURA Č."}</Text>
               <Text>{d.cislo}</Text>
             </View>
             <View style={s.pul}>

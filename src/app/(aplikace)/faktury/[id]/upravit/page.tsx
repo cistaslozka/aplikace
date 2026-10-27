@@ -28,6 +28,7 @@ export default async function UpravitFakturuPage({ params }: { params: Promise<{
         id: f.id,
         cislo: f.number,
         vs: f.variable_symbol,
+        kind: f.kind === "zalohova" ? "zalohova" : "faktura",
         client_id: f.client_id,
         customer: f.customer,
         issue_date: f.issue_date,

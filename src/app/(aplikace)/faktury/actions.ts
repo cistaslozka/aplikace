@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export type NovaFaktura = {
   id?: string;
+  kind?: "faktura" | "zalohova";
   client_id: string | null;
   customer: {
     name: string;
@@ -62,6 +63,7 @@ export async function ulozitFakturuAkce(f: NovaFaktura): Promise<VysledekUlozeni
   const { data: id, error } = await supabase.rpc("ulozit_fakturu", {
     p_faktura: {
       id: f.id ?? null,
+      kind: f.kind === "zalohova" ? "zalohova" : "faktura",
       organization_id: firma.id,
       client_id: f.client_id,
       customer: {

@@ -8,12 +8,13 @@ import { seznamFaktur, type FakturaRadek } from "@/lib/faktury";
 
 export const metadata: Metadata = { title: "Faktury" };
 
-type Filtr = "vse" | "ceka" | "po" | "uhrazeno" | "storno";
+type Filtr = "vse" | "ceka" | "po" | "uhrazeno" | "zalohy" | "storno";
 const FILTRY: [Filtr, string][] = [
   ["vse", "Vše"],
   ["ceka", "Čeká na úhradu"],
   ["po", "Po splatnosti"],
   ["uhrazeno", "Uhrazeno"],
+  ["zalohy", "Zálohy"],
   ["storno", "Storno"],
 ];
 
@@ -25,6 +26,8 @@ function sedi(f: FakturaRadek, filtr: Filtr, dnes: string) {
       return f.status === "vystavena" && f.due_date < dnes;
     case "uhrazeno":
       return f.status === "uhrazena";
+    case "zalohy":
+      return f.kind === "zalohova";
     case "storno":
       return f.status === "stornovana";
     default:
@@ -49,12 +52,13 @@ export default async function FakturyPage({ searchParams }: Props) {
   const neuhrazene = vsechny.filter((f) => f.status === "vystavena");
   const poSplatnosti = neuhrazene.filter((f) => f.due_date < dnes);
   const soucet = (xs: FakturaRadek[]) => xs.reduce((s, f) => s + f.total, 0);
-  const uhrazenoLetos = vsechny.filter((f) => f.status === "uhrazena" && (f.paid_at ?? "").startsWith(rok));
+  // Do příjmů počítáme jen faktury: zaplacená záloha se později odečte na konečné faktuře
+  const uhrazenoLetos = vsechny.filter((f) => f.kind === "faktura" && f.status === "uhrazena" && (f.paid_at ?? "").startsWith(rok));
 
   const dlazdice = [
     { nazev: "Čeká na úhradu", hodnota: castka(soucet(neuhrazene)), pod: faktur(neuhrazene.length), cervena: false },
     { nazev: "Po splatnosti", hodnota: castka(soucet(poSplatnosti)), pod: faktur(poSplatnosti.length), cervena: poSplatnosti.length > 0 },
-    { nazev: `Uhrazeno v roce ${rok}`, hodnota: castka(soucet(uhrazenoLetos)), pod: faktur(uhrazenoLetos.length), cervena: false },
+    { nazev: `Uhrazené faktury ${rok}`, hodnota: castka(soucet(uhrazenoLetos)), pod: faktur(uhrazenoLetos.length), cervena: false },
   ];
 
   return (
@@ -130,6 +134,7 @@ export default async function FakturyPage({ searchParams }: Props) {
                     <div className="min-w-0">
                       <div className="truncate font-semibold text-navy">{f.customer.name}</div>
                       <div className="num text-[13px] text-muted">
+                        {f.kind === "zalohova" && "Záloha · "}
                         {f.number} · splatnost {datumCz(f.due_date)}
                       </div>
                     </div>
@@ -161,7 +166,12 @@ export default async function FakturyPage({ searchParams }: Props) {
                         {f.number}
                       </Link>
                     </td>
-                    <td className="max-w-64 truncate px-3 py-3.5">{f.customer.name}</td>
+                    <td className="max-w-64 truncate px-3 py-3.5">
+                      {f.kind === "zalohova" && (
+                        <span className="mr-2 rounded-full bg-amber-tint px-2 py-0.5 text-[11.5px] font-semibold text-amber">Záloha</span>
+                      )}
+                      {f.customer.name}
+                    </td>
                     <td className="num px-3 py-3.5 text-muted">{datumCz(f.issue_date)}</td>
                     <td className="num px-3 py-3.5 text-muted">{datumCz(f.due_date)}</td>
                     <td className="num px-3 py-3.5 text-right font-bold text-navy">{castka(f.total)}</td>
