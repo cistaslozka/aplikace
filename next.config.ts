@@ -2,7 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Písma pro PDF faktury musí být součástí nasazení na Vercelu
-  outputFileTracingIncludes: { "/faktury/[id]/pdf": ["./src/fonts/**"] },
+  outputFileTracingIncludes: {
+    "/faktury/[id]/pdf": ["./src/fonts/**"],
+    "/faktury/[id]/upominka/[cislo]": ["./src/fonts/**"],
+  },
   serverExternalPackages: ["@react-pdf/renderer"],
   async rewrites() {
     return {

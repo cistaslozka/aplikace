@@ -131,3 +131,16 @@ export function dataUlozeneFaktury(f: FakturaRadek, polozky: Polozka[]): DataFak
     uhrazeno: f.paid_at,
   };
 }
+
+export type Upominka = { level: number; amount: number; new_due_date: string; created_at: string };
+
+export async function nactiUpominky(invoiceId: string): Promise<Upominka[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("invoice_reminders")
+    .select("level, amount, new_due_date, created_at")
+    .eq("invoice_id", invoiceId)
+    .order("level");
+  if (error) console.error("Načtení upomínek selhalo:", error.message);
+  return (data ?? []).map((u) => ({ ...u, amount: Number(u.amount) }));
+}
