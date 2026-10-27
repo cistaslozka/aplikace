@@ -70,7 +70,7 @@ export function prevedAres(d: AresOdpoved): FirmaZAres | null {
   const s = d.sidlo ?? {};
   return {
     ico: d.ico.padStart(8, "0"),
-    name: d.obchodniJmeno,
+    name: d.obchodniJmeno.replace(/\s+/g, " ").trim(),
     dic: d.dic ?? null,
     vat_payer: d.seznamRegistraci?.stavZdrojeDph === "AKTIVNI",
     legal_form: forma,

@@ -48,3 +48,45 @@
 @utility num {
   font-variant-numeric: tabular-nums;
 }
+
+/*
+  Tisk faktury (Ctrl+P → Uložit jako PDF): vytiskne se jen list A4,
+  bez menu a tlačítek, ve skutečné velikosti.
+*/
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .tisk-oblast,
+  .tisk-oblast * {
+    visibility: visible;
+  }
+  .tisk-oblast {
+    position: absolute;
+    inset: 0 auto auto 0;
+  }
+  .tisk-oblast .meritko-plocha {
+    width: 210mm !important;
+    height: 297mm !important;
+  }
+  .tisk-oblast .meritko-obsah {
+    transform: none !important;
+  }
+  .tisk-oblast .faktura-a4 {
+    width: 210mm;
+    height: 297mm;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .netisknout {
+    display: none !important;
+  }
+}
