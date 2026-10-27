@@ -29,11 +29,14 @@ export type FakturaRadek = {
   vat_total: number;
   total: number;
   vat_recap: Rekapitulace[];
+  /** Odečtená záloha na konečné faktuře (vč. DPH) a její rozpis podle sazeb */
+  advance_amount: number;
+  advance_recap: Rekapitulace[];
   created_at: string;
 };
 
 const SLOUPCE =
-  "id, kind, related_invoice_id, number, variable_symbol, client_id, supplier, customer, issue_date, taxable_date, due_date, payment_method, vat_payer, template, note, intro_text, logo_position, logo_path, status, paid_at, subtotal, vat_total, total, vat_recap, created_at";
+  "id, kind, related_invoice_id, number, variable_symbol, client_id, supplier, customer, issue_date, taxable_date, due_date, payment_method, vat_payer, template, note, intro_text, logo_position, logo_path, status, paid_at, subtotal, vat_total, total, vat_recap, advance_amount, advance_recap, created_at";
 
 // Supabase vrací numeric jako text, převedeme na čísla.
 function cisla(f: Record<string, unknown>): FakturaRadek {
@@ -44,6 +47,8 @@ function cisla(f: Record<string, unknown>): FakturaRadek {
     vat_total: Number(r.vat_total),
     total: Number(r.total),
     vat_recap: (r.vat_recap ?? []).map((x) => ({ rate: Number(x.rate), base: Number(x.base), vat: Number(x.vat) })),
+    advance_amount: Number(r.advance_amount ?? 0),
+    advance_recap: (r.advance_recap ?? []).map((x) => ({ rate: Number(x.rate), base: Number(x.base), vat: Number(x.vat) })),
   };
 }
 
@@ -77,6 +82,11 @@ export async function nactiFakturu(organizationId: string, id: string) {
     .order("position");
   return {
     faktura: cisla(data),
+    // číslo zálohy, kterou konečná faktura vyúčtovává (pro řádek „Odpočet zálohy“)
+    zalohaCislo:
+      data.kind === "faktura" && data.related_invoice_id
+        ? ((await supabase.from("invoices").select("number").eq("id", data.related_invoice_id).maybeSingle()).data?.number ?? null)
+        : null,
     polozky: (polozky ?? []).map(
       (p): Polozka => ({
         description: p.description,
@@ -109,7 +119,7 @@ export async function dalsiCisloDokladu(organizationId: string, rok: number, dru
 }
 
 /** Údaje pro vykreslení uložené faktury (náhled, tisk i PDF). */
-export function dataUlozeneFaktury(f: FakturaRadek, polozky: Polozka[]): DataFaktury {
+export function dataUlozeneFaktury(f: FakturaRadek, polozky: Polozka[], zalohaCislo: string | null = null): DataFaktury {
   return {
     druh: f.kind,
     cislo: f.number,
@@ -133,6 +143,7 @@ export function dataUlozeneFaktury(f: FakturaRadek, polozky: Polozka[]): DataFak
     vzhled: f.template,
     stav: f.status,
     uhrazeno: f.paid_at,
+    odpocet: f.advance_amount > 0 ? { cislo: zalohaCislo ?? "", castka: f.advance_amount, rekapitulace: f.advance_recap } : null,
   };
 }
 

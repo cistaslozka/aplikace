@@ -239,7 +239,7 @@ export default async function FakturaPage({ params, searchParams }: Props) {
       <div className="tisk-oblast mx-auto w-full max-w-[860px] rounded-2xl bg-slate-200/70 p-3 sm:p-6 print:max-w-none print:rounded-none print:bg-transparent print:p-0">
         <div className="shadow-[0_18px_40px_-18px_rgba(15,37,55,0.35)] print:shadow-none">
           <Meritko>
-            <FakturaA4 d={dataUlozeneFaktury(f, n.polozky)} />
+            <FakturaA4 d={dataUlozeneFaktury(f, n.polozky, n.zalohaCislo)} />
           </Meritko>
         </div>
       </div>

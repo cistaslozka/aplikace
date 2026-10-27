@@ -17,7 +17,7 @@ async function vytvorit(params: Promise<{ id: string; cislo: string }>): Promise
   if (!u) return chybaPdf("Upomínka nenalezena", 404);
 
   try {
-    const pdf = await pdfUpominky(dataUlozeneFaktury(n.faktura, n.polozky), u);
+    const pdf = await pdfUpominky(dataUlozeneFaktury(n.faktura, n.polozky, n.zalohaCislo), u);
     return new Response(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",

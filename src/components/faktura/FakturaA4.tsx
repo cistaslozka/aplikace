@@ -1,4 +1,5 @@
 import {
+  naHalere,
   castka,
   datumCz,
   mnozstvi,
@@ -44,6 +45,8 @@ export type DataFaktury = {
   logoPozice?: PoziceLoga | null;
   /** Vlastní text nad položkami */
   uvod?: string | null;
+  /** Odpočet zaplacené zálohy na konečné faktuře */
+  odpocet?: { cislo: string; castka: number; rekapitulace: Rekapitulace[] } | null;
 };
 
 // Styly tří vzhledů. Obsah faktury je ve všech stejný, mění se jen vzhled.
@@ -104,15 +107,19 @@ function Adresa({ s }: { s: Strana }) {
 export function FakturaA4({ d }: { d: DataFaktury }) {
   const v = V[d.vzhled];
   const druh = d.druh ?? "faktura";
+  // Konečná faktura: k úhradě zbývá celkem minus zaplacená záloha
+  const zaloha = d.odpocet?.castka ?? 0;
+  const kUhrade = naHalere(d.celkem - zaloha);
+  const dphZbyva = naHalere(d.dph - (d.odpocet?.rekapitulace ?? []).reduce((s, r) => s + r.vat, 0));
   const danovy = d.platce && druh !== "zalohova";
   const logo = d.logo && d.logoPozice ? d.logoPozice : null;
   const iban = d.dodavatel.iban ? formatujIban(d.dodavatel.iban) : null;
   const prevod = d.uhrada === "prevod";
   const qr =
-    prevod && d.dodavatel.iban && d.celkem > 0 && d.stav !== "stornovana" && d.stav !== "uhrazena"
+    prevod && d.dodavatel.iban && kUhrade > 0 && d.stav !== "stornovana" && d.stav !== "uhrazena"
       ? qrPlatba({
           iban: d.dodavatel.iban,
-          castka: d.celkem,
+          castka: kUhrade,
           vs: d.vs,
           splatnost: d.splatnost,
           zprava: `Faktura ${d.cislo}`,
@@ -286,11 +293,19 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
             <span />
           )}
           <div className={v.celkem}>
+            {d.odpocet && (
+              <div className="num mb-1 text-[10.5px] opacity-80">
+                <div>Celkem {castka(d.celkem)}</div>
+                <div>
+                  Uhrazeno zálohou{d.odpocet.cislo ? ` ${d.odpocet.cislo}` : ""} −{castka(zaloha)}
+                </div>
+              </div>
+            )}
             <div className="text-[10px] font-bold tracking-[0.08em] uppercase opacity-75">
-              {d.stav === "uhrazena" ? "Uhrazeno" : "Celkem k úhradě"}
+              {d.stav === "uhrazena" ? "Uhrazeno" : d.odpocet ? "Zbývá uhradit" : "Celkem k úhradě"}
             </div>
-            <div className="num font-display text-[26px] leading-tight font-extrabold">{castka(d.celkem)}</div>
-            {d.platce && <div className="num text-[10.5px] opacity-75">z toho DPH {castka(d.dph)}</div>}
+            <div className="num font-display text-[26px] leading-tight font-extrabold">{castka(kUhrade)}</div>
+            {d.platce && <div className="num text-[10.5px] opacity-75">z toho DPH {castka(d.odpocet ? dphZbyva : d.dph)}</div>}
           </div>
         </div>
 
@@ -299,7 +314,7 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
         <div className="mt-auto flex items-end justify-between gap-6">
           {qr ? (
             <div className="flex items-center gap-3">
-              <QrKod text={qr} velikost={104} popis={`QR platba ${castka(d.celkem)}`} />
+              <QrKod text={qr} velikost={104} popis={`QR platba ${castka(kUhrade)}`} />
               <div className="text-[10.5px] text-slate-600">
                 <div className="font-bold text-navy">QR platba</div>
                 Naskenujte v aplikaci své banky.

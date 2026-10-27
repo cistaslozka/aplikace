@@ -2,7 +2,7 @@ import "server-only";
 import path from "node:path";
 import { Document, Font, Image, Page, Path, StyleSheet, Svg, Text, View, renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import QRCode from "qrcode";
-import { castka, datumCz, mnozstvi, nadpisDokladu, NAZVY_DOKLADU, qrPlatba, zakladPolozky, ZPUSOBY_UHRADY, type Strana } from "@/lib/faktura";
+import { castka, datumCz, mnozstvi, naHalere, nadpisDokladu, NAZVY_DOKLADU, qrPlatba, zakladPolozky, ZPUSOBY_UHRADY, type Strana } from "@/lib/faktura";
 import { formatujIban } from "@/lib/validace";
 import type { DataFaktury } from "./FakturaA4";
 
@@ -130,9 +130,12 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
   const v = V[d.vzhled];
   const iban = d.dodavatel.iban ? formatujIban(d.dodavatel.iban) : null;
   const prevod = d.uhrada === "prevod";
+  const zaloha = d.odpocet?.castka ?? 0;
+  const kUhrade = naHalere(d.celkem - zaloha);
+  const dphZbyva = naHalere(d.dph - (d.odpocet?.rekapitulace ?? []).reduce((s, r) => s + r.vat, 0));
   const qr =
-    prevod && d.dodavatel.iban && d.celkem > 0 && d.stav !== "stornovana" && d.stav !== "uhrazena"
-      ? qrPlatba({ iban: d.dodavatel.iban, castka: d.celkem, vs: d.vs, splatnost: d.splatnost, zprava: `Faktura ${d.cislo}` })
+    prevod && d.dodavatel.iban && kUhrade > 0 && d.stav !== "stornovana" && d.stav !== "uhrazena"
+      ? qrPlatba({ iban: d.dodavatel.iban, castka: kUhrade, vs: d.vs, splatnost: d.splatnost, zprava: `Faktura ${d.cislo}` })
       : null;
   const logo = d.logo && d.logoPozice ? d.logoPozice : null;
   const druh = d.druh ?? "faktura";
@@ -294,11 +297,19 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
               <View />
             )}
             <View style={v.celkem}>
+              {d.odpocet ? (
+                <View style={{ fontSize: 7.9, opacity: 0.8, marginBottom: 3, alignItems: "flex-end" }}>
+                  <Text>Celkem {castka(d.celkem)}</Text>
+                  <Text>
+                    Uhrazeno zálohou{d.odpocet.cislo ? ` ${d.odpocet.cislo}` : ""} −{castka(zaloha)}
+                  </Text>
+                </View>
+              ) : null}
               <Text style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: 0.6, opacity: 0.75 }}>
-                {d.stav === "uhrazena" ? "UHRAZENO" : "CELKEM K ÚHRADĚ"}
+                {d.stav === "uhrazena" ? "UHRAZENO" : d.odpocet ? "ZBÝVÁ UHRADIT" : "CELKEM K ÚHRADĚ"}
               </Text>
-              <Text style={{ fontFamily: "Jakarta", fontWeight: 800, fontSize: 19.5, lineHeight: 1.2 }}>{castka(d.celkem)}</Text>
-              {d.platce ? <Text style={{ fontSize: 7.9, opacity: 0.75 }}>z toho DPH {castka(d.dph)}</Text> : null}
+              <Text style={{ fontFamily: "Jakarta", fontWeight: 800, fontSize: 19.5, lineHeight: 1.2 }}>{castka(kUhrade)}</Text>
+              {d.platce ? <Text style={{ fontSize: 7.9, opacity: 0.75 }}>z toho DPH {castka(d.odpocet ? dphZbyva : d.dph)}</Text> : null}
             </View>
           </View>
 
