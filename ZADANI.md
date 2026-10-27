@@ -61,13 +61,39 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 2 | Nastavení firmy: IČO → ARES, adresa, účet, plátce / neplátce DPH | hotovo |
 | 3 | Adresář klientů (z ARES), našeptávač podle jména, limit dotazů do ARES | hotovo |
 | 4a | Faktury: vystavení, číselná řada, položky a DPH, živý náhled ve 3 vzhledech, QR platba, stavy, tisk / PDF z prohlížeče | hotovo |
-| 4b | Faktury: stažení PDF (hotovo), upomínky (hotovo), zálohové faktury, odeslání e-mailem (až bude doména) | rozpracováno |
-| 5 | Přehled s dlaždicemi (skutečná čísla, vlastní rozložení) | |
+| 4b | Faktury: stažení PDF (hotovo), upomínky (hotovo), **export ISDOC a XLSX**, zálohové faktury, odeslání e-mailem (až bude doména) | rozpracováno |
+| 5 | Přehled s dlaždicemi: finanční přehled a **hlídání limitu DPH**, archiv, grafy podle měsíců a roku, rychlé akce, končící smlouvy a HR; vlastní rozložení | |
 | 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
-| 7 | Smlouvy (dílo, služby, licence, NDA) | |
-| 8 | HR dokumenty (Pro) – **až po kontrole právníkem** | |
+| 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol, cestovní příkaz a vyúčtování; **podpis na obrazovce**; hlídání končících smluv | |
+| 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | |
+| 9 | Pro: B2B rámcová, kupní a nájemní smlouva, plná moc, svěření majetku, záznam o školení BOZP, souhlas GDPR; týmový přístup (účetní, asistentka) | |
+| 10 | HR dokumenty (Pro): HPP, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, vytýkací dopis – **až po kontrole právníkem** | |
+| 11 | **Datová schránka a úřady** (Pro): příprava přihlášky zaměstnance k ČSSZ (REGZEC, JMHZ) a odeslání přes datovou schránku – **návrh viz níže, čeká na rozhodnutí** | |
 
 První verze pro skutečné uživatele = kroky 0–5.
+
+### Formáty ke stažení
+
+Každý doklad jde stáhnout jako **PDF**. Faktury a účetní doklady navíc jako **ISDOC**
+(český formát elektronické faktury, načtou ho účetní programy jako Pohoda, Money nebo ABRA)
+a **XLSX** (Excel: jedna faktura i přehled faktur za období pro účetní).
+
+### Datová schránka (krok 11, k rozhodnutí)
+
+- Od roku 2026 hlásí zaměstnavatelé zaměstnance ČSSZ elektronicky: registrace zaměstnance
+  (REGZEC) a každý měsíc jednotné měsíční hlášení (JMHZ). Jde to přes datovou schránku ČSSZ,
+  ePortál ČSSZ nebo datové rozhraní. Zdroj: cssz.gov.cz a pruvodcepodnikanim.cz.
+- **Varianta A (doporučená jako první):** aplikace připraví hotový soubor podání a uživatel ho
+  odešle ze své datové schránky sám. Nemusíme u sebe držet přístupy do cizích datových schránek.
+- **Varianta B (později):** přímé odeslání z aplikace přes rozhraní datových schránek (ISDS).
+  Uživatel by nám musel svěřit přihlášení nebo certifikát ke své schránce → vyšší nároky na
+  zabezpečení a právní kontrolu.
+- Obsah podání musí zkontrolovat mzdová účetní nebo právník, než to pustíme uživatelům.
+
+### Mimo rozsah (zatím)
+
+Plné podvojné účetnictví, mzdy a výpočet odvodů, daňová přiznání. Aplikace připraví doklady
+a podklady, účetní je zpracuje ve svém programu. Kdyby se mělo rozšířit, nejdřív se domluvíme.
 
 ## Datový model (návrh, upřesní se v jednotlivých krocích)
 
