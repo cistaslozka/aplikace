@@ -62,7 +62,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 3 | Adresář klientů (z ARES), našeptávač podle jména, limit dotazů do ARES | hotovo |
 | 4a | Faktury: vystavení, číselná řada, položky a DPH, živý náhled ve 3 vzhledech, QR platba, stavy, tisk / PDF z prohlížeče | hotovo |
 | 4b | Faktury: stažení PDF, upomínky, export ISDOC a XLSX, zálohová faktura, daňový doklad k přijaté platbě, vyúčtování zálohy (hotovo); odeslání e-mailem (až bude doména) | skoro hotovo |
-| 5 | Přehled s dlaždicemi: **5a hotovo** (skutečná čísla: neuhrazené, po splatnosti, limit DPH / DPH na výstupu, graf příjmů 6 měsíců, rychlé akce, poslední doklady); **5b** vlastní rozložení dlaždic (zapnout, vypnout, seřadit) | rozpracováno |
+| 5 | Přehled s dlaždicemi: skutečná čísla (5a) a vlastní rozložení – zapnout, vypnout, seřadit (5b) | hotovo |
 | 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
 | 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol, cestovní příkaz a vyúčtování; **podpis na obrazovce**; hlídání končících smluv | |
 | 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | |
@@ -74,9 +74,10 @@ První verze pro skutečné uživatele = kroky 0–5.
 
 ### Kde jsme skončili (aktualizuje se po každém kroku)
 
-- **Hotovo naposledy:** krok 5a – Přehled se skutečnými čísly (`src/lib/prehled.ts`, `src/app/(aplikace)/prehled/page.tsx`).
-- **Další na řadě:** krok 5b – vlastní rozložení přehledu: tabulka `dashboard_layouts` (uživatel + firma, pořadí
-  a zapnuté dlaždice), tlačítko „Upravit přehled“ jako v návrhu (`public/navrh-aplikace.html`). Pak krok 6 (placení).
+- **Hotovo naposledy:** krok 5 – Přehled (5a čísla, 5b vlastní rozložení v tabulce `dashboard_layouts`,
+  seznam dlaždic v `src/lib/rozlozeni.ts`; nová dlaždice se přidá tam a uživatelům se objeví na konci).
+- **Další na řadě:** krok 6 – placení předplatného (platební brána: potřeba vybrat Stripe / GoPay / Comgate a založit
+  účet, to musí udělat Michael a Omar). Do té doby lze dělat krok 7 – smlouvy (smlouva o dílo jako první).
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
 
@@ -157,7 +158,7 @@ uživatelů (týmový přístup v Pro).
   `PaidDepositsAmount` u neplátce.
 - `invoice_reminders` – upomínky (1.–3.) k neuhrazené faktuře po splatnosti. Vytváří je jen funkce
   `vytvorit_upominku(faktura, dnes)`, nová lhůta k úhradě je 7 dní. PDF: `/faktury/<id>/upominka/<1–3>`.
-- `dashboard_layouts` – rozložení dlaždic na přehledu pro každého uživatele
+- `dashboard_layouts` – rozložení dlaždic na přehledu pro každého uživatele **Hotovo v kroku 5b** (`tiles` = pořadí a zapnuté dlaždice, RLS: každý jen své).
 - `waitlist` – zájemci o spuštění z webu awao.cz (už existuje; číst ho smí jen správce)
 
 Každá tabulka má zapnuté **RLS** a pravidla „vidíš jen data firem, kde jsi členem".
