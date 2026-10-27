@@ -59,7 +59,7 @@ export default async function FakturyPage({ searchParams }: Props) {
   const dlazdice = [
     { nazev: "Čeká na úhradu", hodnota: castka(soucet(neuhrazene)), pod: faktur(neuhrazene.length), cervena: false },
     { nazev: "Po splatnosti", hodnota: castka(soucet(poSplatnosti)), pod: faktur(poSplatnosti.length), cervena: poSplatnosti.length > 0 },
-    { nazev: `Uhrazené faktury ${rok}`, hodnota: castka(soucet(uhrazenoLetos)), pod: faktur(uhrazenoLetos.length), cervena: false },
+    { nazev: `Uhrazené faktury ${rok}`, hodnota: castka(uhrazenoLetos.reduce((s, f) => s + f.total, 0)), pod: faktur(uhrazenoLetos.length), cervena: false },
   ];
 
   return (

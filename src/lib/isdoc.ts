@@ -27,6 +27,8 @@ export type DataIsdoc = {
   poznamka?: string | null;
   uvod?: string | null;
   uhrazeno?: boolean;
+  /** Konečná faktura: odečtená záloha (u plátce podle daňového dokladu, rozpis podle sazeb) */
+  odpocet?: { cislo: string; castka: number; rekapitulace: Rekapitulace[] } | null;
 };
 
 // Kód způsobu platby podle číselníku ISDOC
@@ -104,6 +106,13 @@ export function fakturaIsdoc(d: DataIsdoc): string {
 
   // Rekapitulace DPH: u neplátce jeden řádek se sazbou 0 %
   const rekap: Rekapitulace[] = d.platce && d.rekapitulace.length ? d.rekapitulace : [{ rate: 0, base: d.zaklad, vat: 0 }];
+  // Odpočet zálohy: u plátce „již uplatněno“ podle sazeb (daňový doklad k platbě), u neplátce nedaňová záloha
+  const zdanena = d.platce && d.odpocet ? d.odpocet.rekapitulace : [];
+  const uplatneno = (sazba: number) => zdanena.find((x) => x.rate === sazba) ?? { rate: sazba, base: 0, vat: 0 };
+  const zalohaNedanova = !d.platce && d.odpocet ? d.odpocet.castka : 0;
+  const uplZaklad = zdanena.reduce((s, x) => s + x.base, 0);
+  const uplCelkem = zdanena.reduce((s, x) => s + x.base + x.vat, 0);
+  const kUhrade = d.celkem - uplCelkem - zalohaNedanova;
   const souhrn = rekap
     .map(
       (r) =>
@@ -111,12 +120,12 @@ export function fakturaIsdoc(d: DataIsdoc): string {
         el("TaxableAmount", kc(r.base)) +
         el("TaxAmount", kc(r.vat)) +
         el("TaxInclusiveAmount", kc(r.base + r.vat)) +
-        el("AlreadyClaimedTaxableAmount", kc(0)) +
-        el("AlreadyClaimedTaxAmount", kc(0)) +
-        el("AlreadyClaimedTaxInclusiveAmount", kc(0)) +
-        el("DifferenceTaxableAmount", kc(r.base)) +
-        el("DifferenceTaxAmount", kc(r.vat)) +
-        el("DifferenceTaxInclusiveAmount", kc(r.base + r.vat)) +
+        el("AlreadyClaimedTaxableAmount", kc(uplatneno(r.rate).base)) +
+        el("AlreadyClaimedTaxAmount", kc(uplatneno(r.rate).vat)) +
+        el("AlreadyClaimedTaxInclusiveAmount", kc(uplatneno(r.rate).base + uplatneno(r.rate).vat)) +
+        el("DifferenceTaxableAmount", kc(r.base - uplatneno(r.rate).base)) +
+        el("DifferenceTaxAmount", kc(r.vat - uplatneno(r.rate).vat)) +
+        el("DifferenceTaxInclusiveAmount", kc(r.base + r.vat - uplatneno(r.rate).base - uplatneno(r.rate).vat)) +
         `<TaxCategory>${el("Percent", r.rate)}${el("VATApplicable", d.platce)}</TaxCategory>` +
         "</TaxSubTotal>",
     )
@@ -157,18 +166,32 @@ export function fakturaIsdoc(d: DataIsdoc): string {
     `<AccountingSupplierParty>${strana(d.dodavatel)}</AccountingSupplierParty>` +
     `<AccountingCustomerParty>${strana(d.odberatel)}</AccountingCustomerParty>` +
     `<InvoiceLines>${radky}</InvoiceLines>` +
+    (zalohaNedanova > 0 && d.odpocet
+      ? `<NonTaxedDeposits><NonTaxedDeposit>${el("ID", d.odpocet.cislo)}${el("VariableSymbol", "")}${el("DepositAmount", kc(zalohaNedanova))}</NonTaxedDeposit></NonTaxedDeposits>`
+      : "") +
+    (zdanena.length && d.odpocet
+      ? "<TaxedDeposits>" +
+        zdanena
+          .map(
+            (x) =>
+              `<TaxedDeposit>${el("ID", d.odpocet!.cislo)}${el("VariableSymbol", "")}${el("TaxableDepositAmount", kc(x.base))}${el("TaxInclusiveDepositAmount", kc(x.base + x.vat))}` +
+              `<ClassifiedTaxCategory>${el("Percent", x.rate)}${el("VATCalculationMethod", 0)}${el("VATApplicable", true)}</ClassifiedTaxCategory></TaxedDeposit>`,
+          )
+          .join("") +
+        "</TaxedDeposits>"
+      : "") +
     `<TaxTotal>${souhrn}${el("TaxAmount", kc(d.platce ? d.dph : 0))}</TaxTotal>` +
     "<LegalMonetaryTotal>" +
     el("TaxExclusiveAmount", kc(d.zaklad)) +
     el("TaxInclusiveAmount", kc(d.celkem)) +
-    el("AlreadyClaimedTaxExclusiveAmount", kc(0)) +
-    el("AlreadyClaimedTaxInclusiveAmount", kc(0)) +
-    el("DifferenceTaxExclusiveAmount", kc(d.zaklad)) +
-    el("DifferenceTaxInclusiveAmount", kc(d.celkem)) +
-    el("PaidDepositsAmount", kc(0)) +
-    el("PayableAmount", kc(d.celkem)) +
+    el("AlreadyClaimedTaxExclusiveAmount", kc(uplZaklad)) +
+    el("AlreadyClaimedTaxInclusiveAmount", kc(uplCelkem)) +
+    el("DifferenceTaxExclusiveAmount", kc(d.zaklad - uplZaklad)) +
+    el("DifferenceTaxInclusiveAmount", kc(d.celkem - uplCelkem)) +
+    el("PaidDepositsAmount", kc(zalohaNedanova)) +
+    el("PayableAmount", kc(kUhrade)) +
     "</LegalMonetaryTotal>" +
-    `<PaymentMeans><Payment>${el("PaidAmount", kc(d.celkem))}${el("PaymentMeansCode", KOD_PLATBY[d.uhrada])}${detailPlatby}</Payment></PaymentMeans>` +
+    `<PaymentMeans><Payment>${el("PaidAmount", kc(kUhrade))}${el("PaymentMeansCode", KOD_PLATBY[d.uhrada])}${detailPlatby}</Payment></PaymentMeans>` +
     "</Invoice>\n"
   );
 }
