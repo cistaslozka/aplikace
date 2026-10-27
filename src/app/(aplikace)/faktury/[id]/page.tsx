@@ -5,9 +5,9 @@ import { FakturaA4 } from "@/components/faktura/FakturaA4";
 import { Meritko } from "@/components/faktura/Meritko";
 import { StavPill } from "@/components/faktura/StavPill";
 import { Hlaska } from "@/components/Formular";
-import { adresaLoga, castka, datumCz } from "@/lib/faktura";
+import { castka, datumCz } from "@/lib/faktura";
 import { aktivniFirma } from "@/lib/firma";
-import { nactiFakturu } from "@/lib/faktury";
+import { dataUlozeneFaktury, nactiFakturu } from "@/lib/faktury";
 import { zmenitStavAkce } from "../actions";
 import { TlacitkoTisk } from "./Tisk";
 
@@ -38,7 +38,12 @@ export default async function FakturaPage({ params, searchParams }: Props) {
             <h1 className="num text-2xl font-extrabold tracking-tight">Faktura {f.number}</h1>
             <StavPill status={f.status} splatnost={f.due_date} />
           </div>
-          <TlacitkoTisk />
+          <div className="flex flex-wrap gap-2">
+            <a href={`/faktury/${f.id}/pdf`} className={tlacitko}>
+              Stáhnout PDF
+            </a>
+            <TlacitkoTisk />
+          </div>
         </div>
 
         {p.vystaveno === "1" && <Hlaska typ="info">Faktura je vystavená. Vytiskněte ji nebo uložte jako PDF a pošlete odběrateli.</Hlaska>}
@@ -93,31 +98,7 @@ export default async function FakturaPage({ params, searchParams }: Props) {
       <div className="tisk-oblast mx-auto w-full max-w-[860px] rounded-2xl bg-slate-200/70 p-3 sm:p-6 print:max-w-none print:rounded-none print:bg-transparent print:p-0">
         <div className="shadow-[0_18px_40px_-18px_rgba(15,37,55,0.35)] print:shadow-none">
           <Meritko>
-            <FakturaA4
-              d={{
-                cislo: f.number,
-                vs: f.variable_symbol,
-                dodavatel: f.supplier,
-                odberatel: f.customer,
-                vystaveno: f.issue_date,
-                duzp: f.taxable_date,
-                splatnost: f.due_date,
-                uhrada: f.payment_method,
-                platce: f.vat_payer,
-                polozky: n.polozky,
-                rekapitulace: f.vat_recap,
-                zaklad: f.subtotal,
-                dph: f.vat_total,
-                celkem: f.total,
-                poznamka: f.note,
-                uvod: f.intro_text,
-                logo: adresaLoga(f.logo_path),
-                logoPozice: f.logo_position,
-                vzhled: f.template,
-                stav: f.status,
-                uhrazeno: f.paid_at,
-              }}
-            />
+            <FakturaA4 d={dataUlozeneFaktury(f, n.polozky)} />
           </Meritko>
         </div>
       </div>
