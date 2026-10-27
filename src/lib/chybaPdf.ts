@@ -13,3 +13,15 @@ ${detail ? `<p style="font-size:13px;color:#64748b">Technický detail (pošlete 
 <p><a href="javascript:history.back()" style="color:#047857;font-weight:600">← Zpět</a></p></div></body></html>`;
   return new Response(html, { status, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
 }
+
+/** Odpověď se souborem ke stažení. */
+export function souborKeStazeni(data: Uint8Array | string, nazev: string, typ: string): Response {
+  const telo: BodyInit = typeof data === "string" ? data : new Blob([new Uint8Array(data)]);
+  return new Response(telo, {
+    headers: {
+      "Content-Type": typ,
+      "Content-Disposition": `attachment; filename="${nazev}"`,
+      "Cache-Control": "private, no-store",
+    },
+  });
+}

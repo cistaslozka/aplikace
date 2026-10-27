@@ -64,9 +64,20 @@ export default async function FakturyPage({ searchParams }: Props) {
           <h1 className="text-3xl font-extrabold tracking-tight">Faktury</h1>
           <p className="mt-1 text-[15px] text-muted">Vystavené faktury, jejich stav a úhrady.</p>
         </div>
-        <Link href="/faktury/nova" className="inline-flex min-h-12 items-center rounded-xl bg-green px-5 text-[15px] font-bold text-navy hover:brightness-95">
-          + Nová faktura
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          {vsechny.length > 0 && (
+            <a
+              href={`/faktury/export?rok=${rok}`}
+              title="Přehled všech faktur za rok pro účetní"
+              className="inline-flex min-h-12 items-center rounded-xl border-[1.5px] border-line bg-surface px-4 text-sm font-semibold text-navy hover:border-muted"
+            >
+              Přehled {rok} do Excelu
+            </a>
+          )}
+          <Link href="/faktury/nova" className="inline-flex min-h-12 items-center rounded-xl bg-green px-5 text-[15px] font-bold text-navy hover:brightness-95">
+            + Nová faktura
+          </Link>
+        </div>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-3">

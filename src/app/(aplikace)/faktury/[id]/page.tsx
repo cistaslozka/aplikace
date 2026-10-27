@@ -41,10 +41,19 @@ export default async function FakturaPage({ params, searchParams }: Props) {
             <h1 className="num text-2xl font-extrabold tracking-tight">Faktura {f.number}</h1>
             <StavPill status={f.status} splatnost={f.due_date} />
           </div>
-          <div className="flex flex-wrap gap-2">
-            <a href={`/faktury/${f.id}/pdf`} className={tlacitko}>
-              Stáhnout PDF
-            </a>
+          <div className="flex flex-wrap items-center gap-2">
+            <div role="group" aria-label="Stáhnout fakturu" className="flex overflow-hidden rounded-xl border-[1.5px] border-line bg-surface text-sm font-semibold text-navy">
+              <span className="flex items-center px-3 text-muted">Stáhnout</span>
+              <a href={`/faktury/${f.id}/pdf`} className="flex min-h-11 items-center border-l border-line px-3.5 hover:bg-green-tint">
+                PDF
+              </a>
+              <a href={`/faktury/${f.id}/isdoc`} title="Pro účetní programy (Pohoda, Money, ABRA…)" className="flex min-h-11 items-center border-l border-line px-3.5 hover:bg-green-tint">
+                ISDOC
+              </a>
+              <a href={`/faktury/${f.id}/xlsx`} className="flex min-h-11 items-center border-l border-line px-3.5 hover:bg-green-tint">
+                Excel
+              </a>
+            </div>
             <TlacitkoTisk />
           </div>
         </div>
