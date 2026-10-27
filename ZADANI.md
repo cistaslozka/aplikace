@@ -59,8 +59,8 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 0 | Kostra aplikace, pravidla, napojení Supabase, Vercel | hotovo |
 | 1 | Registrace a přihlášení (e-mail + heslo), ochrana stránek | hotovo |
 | 2 | Nastavení firmy: IČO → ARES, adresa, účet, plátce / neplátce DPH | hotovo |
-| 3 | Adresář klientů (z ARES) | další na řadě |
-| 4 | Faktury: vystavení, číselná řada, položky, QR platba, PDF, stavy, upomínky | |
+| 3 | Adresář klientů (z ARES), našeptávač podle jména, limit dotazů do ARES | hotovo |
+| 4 | Faktury: vystavení, číselná řada, položky, QR platba, PDF, stavy, upomínky | další na řadě |
 | 5 | Přehled s dlaždicemi (skutečná čísla, vlastní rozložení) | |
 | 6 | Placení tarifů | |
 | 7 | Smlouvy (dílo, služby, licence, NDA) | |
@@ -80,7 +80,13 @@ uživatelů (týmový přístup v Pro).
   `plan` a `trial_ends_at` uživatel sám měnit nesmí, mění je jen server (placení v kroku 6).
 - `memberships` – kdo má přístup k jaké firmě a s jakou rolí (owner / member). **Hotovo v kroku 2.**
   Pravidla používají `private.je_clen(org)`; schéma `private` není vidět přes API.
-- `clients` – adresář odběratelů (patří firmě)
+- `clients` – adresář odběratelů (patří firmě). **Hotovo v kroku 3.** Jedno IČO jen jednou na firmu.
+  Hledání `hledat_klienty(org, dotaz)` podle jména (bez ohledu na háčky) nebo začátku IČO.
+  Komponenta `src/components/VyberKlienta.tsx` je našeptávač pro faktury i smlouvy: klient z adresáře,
+  nebo nové IČO → ARES → rovnou uložit. `last_used_at` nastavit při použití na dokladu (krok 4).
+- Limit ARES: každé načtení jde přes `nactiZAresSLimitem` (src/lib/ares.ts) → funkce
+  `ares_smim_se_zeptat()`: nejvýš 20 dotazů/min na uživatele a 250/min za celou aplikaci
+  (ARES blokuje nad 500/min). Výsledky ARES se navíc pamatují 24 h.
 - `number_series` – číselné řady dokladů (např. faktury 2026xxxx)
 - `invoices` + `invoice_items` – faktury a jejich položky
 - `dashboard_layouts` – rozložení dlaždic na přehledu pro každého uživatele

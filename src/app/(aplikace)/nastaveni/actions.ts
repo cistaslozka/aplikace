@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { nactiZAres, type VysledekAres } from "@/lib/ares";
+import { nactiZAresSLimitem, type VysledekAres } from "@/lib/ares";
 import { aktivniFirma } from "@/lib/firma";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -19,7 +19,7 @@ import {
 export async function nactiAresAkce(icoVstup: string): Promise<VysledekAres> {
   const ico = normalizujIco(icoVstup);
   if (!jePlatneIco(ico)) return { ok: false, chyba: "IČO má 8 číslic a toto nevychází. Zkontrolujte překlep." };
-  return nactiZAres(ico);
+  return nactiZAresSLimitem(ico);
 }
 
 export type StavFirmy = { chyby?: Record<string, string>; chyba?: string; ulozeno?: boolean };
