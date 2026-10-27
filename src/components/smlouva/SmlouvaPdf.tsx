@@ -1,0 +1,114 @@
+import "server-only";
+import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import { B, registrovatPisma } from "@/components/faktura/FakturaPdf";
+import { datumCz } from "@/lib/faktura";
+import { DRUHY_SMLUV, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
+
+// PDF smlouvy (víc stran). Rozvržení odpovídá SmlouvaA4.tsx – když měníš jedno, uprav i druhé.
+
+const RIMSKA = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+
+const s = StyleSheet.create({
+  page: { fontFamily: "Inter", fontSize: 9.4, lineHeight: 1.6, color: B.slate800, paddingHorizontal: 42, paddingTop: 42, paddingBottom: 54 },
+  stitek: { fontSize: 8, fontWeight: 700, letterSpacing: 0.6, marginBottom: 6 },
+  clanekNadpis: { textAlign: "center", fontSize: 9.8, fontWeight: 700, marginTop: 16, marginBottom: 5 },
+  paticka: { position: "absolute", left: 42, right: 42, bottom: 22, flexDirection: "row", justifyContent: "space-between", fontSize: 7.1, color: B.muted, borderTopWidth: 0.75, borderTopColor: B.line, paddingTop: 6 },
+});
+
+const HLAVA = {
+  minimal: { box: { borderBottomWidth: 0.75, borderBottomColor: B.line, paddingBottom: 14 }, nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 22.5, color: B.navy }, pod: { color: B.muted }, akcent: B.navy },
+  corporate: { box: { backgroundColor: B.navy, marginHorizontal: -42, marginTop: -42, paddingHorizontal: 42, paddingTop: 33, paddingBottom: 22 }, nadpis: { fontWeight: 700, fontSize: 16.5, letterSpacing: 2, color: B.white }, pod: { color: B.slate300 }, akcent: B.navy },
+  creative: { box: { backgroundColor: B.greenTint, borderBottomWidth: 4.5, borderBottomColor: B.green, marginHorizontal: -42, marginTop: -42, paddingHorizontal: 42, paddingTop: 36, paddingBottom: 21 }, nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 25.5, color: B.greenInk }, pod: { color: B.navy }, akcent: B.greenInk },
+} as const;
+
+function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
+  const h = HLAVA[d.vzhled];
+  const r = role(d);
+  const z = (k: string) => (typeof d.pole[k] === "string" ? (d.pole[k] as string).trim() : "");
+  const strany = d.myDodavame
+    ? [
+        { s: d.my, r: r.my, z: z("zastupce_my") },
+        { s: d.oni, r: r.oni, z: z("zastupce_oni") },
+      ]
+    : [
+        { s: d.oni, r: r.oni, z: z("zastupce_oni") },
+        { s: d.my, r: r.my, z: z("zastupce_my") },
+      ];
+
+  return (
+    <Document title={`${d.nazev} ${d.cislo}`} author={d.my.name} creator="čistásložka.cz" producer="čistásložka.cz" language="cs">
+      <Page size="A4" style={s.page}>
+        <View style={h.box}>
+          <Text style={h.nadpis}>{d.vzhled === "corporate" ? d.nazev.toUpperCase() : d.nazev}</Text>
+          <Text style={[{ marginTop: 4, fontSize: 9 }, h.pod]}>
+            č. {d.cislo}
+            {d.druh === "dilo" ? " · uzavřená podle § 2586 a násl. zákona č. 89/2012 Sb., občanský zákoník" : ""}
+          </Text>
+        </View>
+
+        <View style={{ marginTop: 18 }}>
+          <Text style={[s.stitek, { color: h.akcent }]}>SMLUVNÍ STRANY</Text>
+          {strany.map((x, i) => (
+            <View key={i} style={{ flexDirection: "row", marginBottom: 8 }} wrap={false}>
+              <Text style={{ width: 84, fontWeight: 600, color: B.navy }}>{x.r}</Text>
+              <View style={{ flex: 1 }}>
+                {(x.s ? popisStrany(x.s) : ["…"]).map((radek, j) => (
+                  <Text key={j} style={j === 0 ? { fontWeight: 700, color: B.navy, fontSize: 9.8 } : {}}>
+                    {radek}
+                  </Text>
+                ))}
+                {x.z ? <Text>zastoupen(a): {x.z}</Text> : null}
+                <Text style={{ color: B.muted }}>(dále jen „{x.r.toLowerCase()}“)</Text>
+              </View>
+            </View>
+          ))}
+          <Text>uzavírají níže uvedeného dne, měsíce a roku tuto smlouvu:</Text>
+        </View>
+
+        {clanky.map((c, i) => (
+          <View key={i}>
+            <View wrap={false} minPresenceAhead={40}>
+              <Text style={[s.clanekNadpis, { color: h.akcent }]}>
+                Článek {RIMSKA[i] ?? i + 1}.{"\n"}
+                {c.nadpis}
+              </Text>
+            </View>
+            {c.odstavce.map((o, j) => (
+              <View key={j} style={{ flexDirection: "row", marginBottom: 3 }}>
+                <Text style={{ width: 18, color: B.muted }}>{j + 1}.</Text>
+                <Text style={{ flex: 1 }}>{o}</Text>
+              </View>
+            ))}
+          </View>
+        ))}
+
+        <View style={{ flexDirection: "row", gap: 30, marginTop: 30 }} wrap={false}>
+          {strany.map((x, i) => (
+            <View key={i} style={{ flex: 1 }}>
+              <Text>
+                V {d.misto || "…………………"} dne {d.datum ? datumCz(d.datum) : "…………………"}
+              </Text>
+              <View style={{ marginTop: 42, borderTopWidth: 0.75, borderTopColor: B.slate300, paddingTop: 4 }}>
+                <Text style={{ fontWeight: 600, color: B.navy }}>{x.r}</Text>
+                <Text style={{ color: B.muted }}>{x.s?.name ?? ""}</Text>
+                {x.z ? <Text style={{ color: B.muted }}>{x.z}</Text> : null}
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <View style={s.paticka} fixed>
+          <Text>
+            {DRUHY_SMLUV[d.druh].nazev} č. {d.cislo} · Vytvořeno v systému čistásložka.cz
+          </Text>
+          <Text render={({ pageNumber, totalPages }) => `Strana ${pageNumber} z ${totalPages}`} />
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+export async function pdfSmlouvy(d: DataSmlouvy, clanky: Clanek[]): Promise<Buffer> {
+  registrovatPisma();
+  return renderToBuffer(<SmlouvaDokument d={d} clanky={clanky} />);
+}

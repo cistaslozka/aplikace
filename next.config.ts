@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/faktury/[id]/pdf": SOUBORY_PRO_PDF,
     "/faktury/[id]/upominka/[cislo]": SOUBORY_PRO_PDF,
+    "/smlouvy/[id]/pdf": SOUBORY_PRO_PDF,
   },
   serverExternalPackages: ["@react-pdf/renderer"],
   async rewrites() {
