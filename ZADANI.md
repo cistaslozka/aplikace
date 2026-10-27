@@ -76,8 +76,9 @@ První verze pro skutečné uživatele = kroky 0–5.
 
 - **Hotovo naposledy:** krok 7b – vzory smlouva o službách, licenční smlouva, NDA, předávací protokol
   (`src/lib/smlouvy/*.ts`, zapsané ve `vzory.ts` i s podtitulem podle zákona a úvodní větou).
-- **Další na řadě:** krok 7c – podpis prstem / myší na obrazovce (obrázek podpisu ke smlouvě) a dlaždice
-  Končící smlouvy na přehledu podle `contracts.valid_until`. Pak krok 8 (dobropis, pokladní doklady).
+- **Teď rozpracováno:** krok 7c (větev `krok-7c-podpis`): sloupec `contracts.signatures` (podpisy jako obrázek
+  PNG + jméno + čas), funkce `podepsat_smlouvu`, po podpisu obou stran stav „uzavřená“; podepsanou smlouvu nejde
+  upravit. Dlaždice Končící smlouvy (uzavřené, `valid_until` do 30 dnů). Pak krok 8.
 - **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
