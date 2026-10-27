@@ -3,6 +3,7 @@ import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-p
 import { B, registrovatPisma } from "@/components/faktura/FakturaPdf";
 import { datumCz } from "@/lib/faktura";
 import { DRUHY_SMLUV, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
+import { VZORY } from "@/lib/smlouvy/vzory";
 
 // PDF smlouvy (víc stran). Rozvržení odpovídá SmlouvaA4.tsx – když měníš jedno, uprav i druhé.
 
@@ -42,7 +43,7 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
           <Text style={h.nadpis}>{d.vzhled === "corporate" ? d.nazev.toUpperCase() : d.nazev}</Text>
           <Text style={[{ marginTop: 4, fontSize: 9 }, h.pod]}>
             č. {d.cislo}
-            {d.druh === "dilo" ? " · uzavřená podle § 2586 a násl. zákona č. 89/2012 Sb., občanský zákoník" : ""}
+            {VZORY[d.druh]?.podtitul ? ` · ${VZORY[d.druh]!.podtitul}` : ""}
           </Text>
         </View>
 
@@ -62,7 +63,7 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
               </View>
             </View>
           ))}
-          <Text>uzavírají níže uvedeného dne, měsíce a roku tuto smlouvu:</Text>
+          <Text>{VZORY[d.druh]?.uvod ?? "uzavírají tuto smlouvu:"}</Text>
         </View>
 
         {clanky.map((c, i) => (
