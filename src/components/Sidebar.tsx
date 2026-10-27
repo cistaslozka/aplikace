@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 import { odhlasitAkce } from "@/app/(auth)/actions";
-import { IconClients, IconContract, IconDashboard, IconInvoice, IconPeople, IconPlus, IconSettings } from "./icons";
+import { IconCard, IconClients, IconContract, IconDashboard, IconInvoice, IconPeople, IconPlus, IconSettings } from "./icons";
 
 const NAV = [
   { href: "/prehled", label: "Přehled", Icon: IconDashboard },
@@ -52,6 +52,9 @@ function Odhlasit({ email, firma }: { email: string; firma: string | null }) {
           <Link href="/nastaveni" className="text-[13px] font-semibold text-green-soft hover:text-white md:hidden">
             Nastavení
           </Link>
+          <Link href="/predplatne" className="text-[13px] font-semibold text-green-soft hover:text-white md:hidden">
+            Předplatné
+          </Link>
           <button type="submit" className="text-[13px] font-semibold text-green-soft hover:text-white">
             Odhlásit se
           </button>
@@ -90,6 +93,7 @@ export function Sidebar({ email, firma }: { email: string; firma: string | null 
       <div className="flex flex-col gap-2 md:mt-auto">
         <nav aria-label="Účet" className="hidden md:block">
           <NavLink href="/nastaveni" label="Nastavení firmy" Icon={IconSettings} />
+          <NavLink href="/predplatne" label="Předplatné" Icon={IconCard} />
         </nav>
         <Odhlasit email={email} firma={firma} />
       </div>

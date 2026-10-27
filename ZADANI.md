@@ -63,7 +63,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 4a | Faktury: vystavení, číselná řada, položky a DPH, živý náhled ve 3 vzhledech, QR platba, stavy, tisk / PDF z prohlížeče | hotovo |
 | 4b | Faktury: stažení PDF, odeslání e-mailem, upomínky, zálohové faktury | další na řadě |
 | 5 | Přehled s dlaždicemi (skutečná čísla, vlastní rozložení) | |
-| 6 | Placení tarifů | |
+| 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
 | 7 | Smlouvy (dílo, služby, licence, NDA) | |
 | 8 | HR dokumenty (Pro) – **až po kontrole právníkem** | |
 
@@ -79,6 +79,8 @@ uživatelů (týmový přístup v Pro).
   `trial_ends_at` (7 dní od založení). **Hotovo v kroku 2.**
   Zakládá se jen funkcí `zalozit_firmu(…)` (vytvoří firmu i členství vlastníka najednou).
   `plan` a `trial_ends_at` uživatel sám měnit nesmí, mění je jen server (placení v kroku 6).
+  Výjimka: během zkušební doby může vlastník firmy přepínat Basic / Pro zdarma funkcí
+  `zmenit_tarif(org, plan)` (stránka `/predplatne`). Po zkušební době se tarif mění až po zaplacení.
 - `memberships` – kdo má přístup k jaké firmě a s jakou rolí (owner / member). **Hotovo v kroku 2.**
   Pravidla používají `private.je_clen(org)`; schéma `private` není vidět přes API.
 - `clients` – adresář odběratelů (patří firmě). **Hotovo v kroku 3.** Jedno IČO jen jednou na firmu.

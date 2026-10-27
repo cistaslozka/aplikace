@@ -62,11 +62,9 @@ export default async function PrehledPage({ searchParams }: Props) {
             <span className="first-letter:uppercase inline-block">{dnes}</span> · {firma.name}
           </p>
         </div>
-        {firma.plan === "basic" && (
-          <span className="rounded-full bg-amber-tint px-3 py-1.5 text-[13px] font-semibold text-amber">
-            {zbyva > 0 ? `Zkušební doba: zbývá ${zbyva} ${dny(zbyva)}` : "Zkušební doba skončila"}
-          </span>
-        )}
+        <Link href="/predplatne" className="rounded-full bg-amber-tint px-3 py-1.5 text-[13px] font-semibold text-amber hover:underline">
+          {zbyva > 0 ? `Zkušební doba: zbývá ${zbyva} ${dny(zbyva)}` : "Zkušební doba skončila"}
+        </Link>
       </section>
 
       <section aria-label="Dlaždice přehledu" className="grid grid-cols-1 gap-5 lg:grid-cols-3">
