@@ -79,6 +79,9 @@ První verze pro skutečné uživatele = kroky 0–5.
   - Plán: tlačítko „Vystavit konečnou fakturu“ u uhrazené zálohy → editor předvyplněný ze zálohy →
     na faktuře řádek „Odpočet zálohy ZF…“ a „Zbývá uhradit“. U plátce se odečítá základ a DPH podle
     daňového dokladu (DD…), u neplátce jen částka. V ISDOC `TaxedDeposits` / `NonTaxedDeposits`.
+  - **Hotovo:** databáze (migrace `20261027154652_vyuctovani_zalohy.sql`, nahraná a otestovaná):
+    sloupce `advance_amount`, `advance_recap`, funkce `ulozit_konecnou_fakturu(faktura, položky, záloha)`.
+  - **Zbývá:** aplikace (tlačítko u zálohy, editor s `?zaloha=`, odpočet na A4/PDF/ISDOC/Excel, seznam).
 - **Potom:** odeslání e-mailem (až bude doména a služba Resend), pak krok 5 (Přehled s dlaždicemi).
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
 
