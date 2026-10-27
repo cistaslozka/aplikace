@@ -1,10 +1,14 @@
 import type { NextConfig } from "next";
 
+// Soubory, které knihovna PDF načítá až za běhu, takže je Vercel sám nepřibalí:
+// naše písma a výchozí písma a barevný profil knihovny pdfkit.
+const SOUBORY_PRO_PDF = ["./src/fonts/**", "./node_modules/pdfkit/js/standard-fonts/**", "./node_modules/pdfkit/js/data/**"];
+
 const nextConfig: NextConfig = {
   // Písma pro PDF faktury musí být součástí nasazení na Vercelu
   outputFileTracingIncludes: {
-    "/faktury/[id]/pdf": ["./src/fonts/**"],
-    "/faktury/[id]/upominka/[cislo]": ["./src/fonts/**"],
+    "/faktury/[id]/pdf": SOUBORY_PRO_PDF,
+    "/faktury/[id]/upominka/[cislo]": SOUBORY_PRO_PDF,
   },
   serverExternalPackages: ["@react-pdf/renderer"],
   async rewrites() {
