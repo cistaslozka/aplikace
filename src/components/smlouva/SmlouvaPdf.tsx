@@ -12,13 +12,13 @@ const s = StyleSheet.create({
   page: { fontFamily: "Inter", fontSize: 9.4, lineHeight: 1.6, color: B.slate800, paddingHorizontal: 42, paddingTop: 42, paddingBottom: 54 },
   stitek: { fontSize: 8, fontWeight: 700, letterSpacing: 0.6, marginBottom: 6 },
   clanekNadpis: { textAlign: "center", fontSize: 9.8, fontWeight: 700, marginTop: 16, marginBottom: 5 },
-  paticka: { position: "absolute", left: 42, right: 42, bottom: 22, flexDirection: "row", justifyContent: "space-between", fontSize: 7.1, color: B.muted, borderTopWidth: 0.75, borderTopColor: B.line, paddingTop: 6 },
+  paticka: { position: "absolute", left: 42, right: 42, bottom: 22, fontSize: 7.1, color: B.muted, borderTopWidth: 0.75, borderTopColor: B.line, paddingTop: 6 },
 });
 
 const HLAVA = {
-  minimal: { box: { borderBottomWidth: 0.75, borderBottomColor: B.line, paddingBottom: 14 }, nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 22.5, color: B.navy }, pod: { color: B.muted }, akcent: B.navy },
-  corporate: { box: { backgroundColor: B.navy, marginHorizontal: -42, marginTop: -42, paddingHorizontal: 42, paddingTop: 33, paddingBottom: 22 }, nadpis: { fontWeight: 700, fontSize: 16.5, letterSpacing: 2, color: B.white }, pod: { color: B.slate300 }, akcent: B.navy },
-  creative: { box: { backgroundColor: B.greenTint, borderBottomWidth: 4.5, borderBottomColor: B.green, marginHorizontal: -42, marginTop: -42, paddingHorizontal: 42, paddingTop: 36, paddingBottom: 21 }, nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 25.5, color: B.greenInk }, pod: { color: B.navy }, akcent: B.greenInk },
+  minimal: { box: { borderBottomWidth: 0.75, borderBottomColor: B.line, paddingBottom: 14 }, nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 22.5, lineHeight: 1.2, color: B.navy }, pod: { color: B.muted }, akcent: B.navy },
+  corporate: { box: { backgroundColor: B.navy, marginHorizontal: -42, marginTop: -42, paddingHorizontal: 42, paddingTop: 33, paddingBottom: 22 }, nadpis: { fontWeight: 700, fontSize: 16.5, lineHeight: 1.2, letterSpacing: 2, color: B.white }, pod: { color: B.slate300 }, akcent: B.navy },
+  creative: { box: { backgroundColor: B.greenTint, borderBottomWidth: 4.5, borderBottomColor: B.green, marginHorizontal: -42, marginTop: -42, paddingHorizontal: 42, paddingTop: 36, paddingBottom: 21 }, nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 25.5, lineHeight: 1.2, color: B.greenInk }, pod: { color: B.navy }, akcent: B.greenInk },
 } as const;
 
 function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
@@ -67,16 +67,19 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
 
         {clanky.map((c, i) => (
           <View key={i}>
-            <View wrap={false} minPresenceAhead={40}>
-              <Text style={[s.clanekNadpis, { color: h.akcent }]}>
-                Článek {RIMSKA[i] ?? i + 1}.{"\n"}
-                {c.nadpis}
-              </Text>
-            </View>
             {c.odstavce.map((o, j) => (
-              <View key={j} style={{ flexDirection: "row", marginBottom: 3 }}>
-                <Text style={{ width: 18, color: B.muted }}>{j + 1}.</Text>
-                <Text style={{ flex: 1 }}>{o}</Text>
+              // nadpis článku drží s prvním odstavcem, aby nezůstal sám na konci strany
+              <View key={j} wrap={false}>
+                {j === 0 && (
+                  <Text style={[s.clanekNadpis, { color: h.akcent }]}>
+                    Článek {RIMSKA[i] ?? i + 1}.{"\n"}
+                    {c.nadpis}
+                  </Text>
+                )}
+                <View style={{ flexDirection: "row", marginBottom: 3 }}>
+                  <Text style={{ width: 18, color: B.muted }}>{j + 1}.</Text>
+                  <Text style={{ flex: 1 }}>{o}</Text>
+                </View>
               </View>
             ))}
           </View>
@@ -97,12 +100,9 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
           ))}
         </View>
 
-        <View style={s.paticka} fixed>
-          <Text>
-            {DRUHY_SMLUV[d.druh].nazev} č. {d.cislo} · Vytvořeno v systému čistásložka.cz
-          </Text>
-          <Text render={({ pageNumber, totalPages }) => `Strana ${pageNumber} z ${totalPages}`} />
-        </View>
+        <Text style={s.paticka} fixed>
+          {DRUHY_SMLUV[d.druh].nazev} č. {d.cislo} · Vytvořeno v systému čistásložka.cz
+        </Text>
       </Page>
     </Document>
   );

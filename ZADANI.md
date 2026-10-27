@@ -64,7 +64,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 4b | Faktury: stažení PDF, upomínky, export ISDOC a XLSX, zálohová faktura, daňový doklad k přijaté platbě, vyúčtování zálohy (hotovo); odeslání e-mailem (až bude doména) | skoro hotovo |
 | 5 | Přehled s dlaždicemi: skutečná čísla (5a) a vlastní rozložení – zapnout, vypnout, seřadit (5b) | hotovo |
 | 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
-| 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol, cestovní příkaz a vyúčtování; **podpis na obrazovce**; hlídání končících smluv | |
+| 7 | Smlouvy a provozní doklady: **7a smlouva o dílo hotová**; 7b služby, licence, NDA, předávací protokol, cestovní příkaz; 7c podpis na obrazovce, hlídání končících smluv | rozpracováno |
 | 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | |
 | 9 | Pro: B2B rámcová, kupní a nájemní smlouva, plná moc, svěření majetku, záznam o školení BOZP, souhlas GDPR; týmový přístup (účetní, asistentka) | |
 | 10 | HR dokumenty (Pro): HPP, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, vytýkací dopis – **až po kontrole právníkem** | |
@@ -76,11 +76,11 @@ První verze pro skutečné uživatele = kroky 0–5.
 
 - **Hotovo naposledy:** krok 5 – Přehled (5a čísla, 5b vlastní rozložení v tabulce `dashboard_layouts`,
   seznam dlaždic v `src/lib/rozlozeni.ts`; nová dlaždice se přidá tam a uživatelům se objeví na konci).
-- **Teď rozpracováno:** krok 7a – **smlouva o dílo** (větev `krok-7a-smlouva-o-dilo`).
-  - Plán: tabulka `contracts` (druh, číslo S20260001, strany jako kopie, `fields` = vyplněné údaje vzoru,
-    `valid_until` pro hlídání konce), funkce `ulozit_smlouvu`, editor s živým náhledem ve 3 vzhledech,
-    seznam `/smlouvy`, detail, PDF (víc stran). Texty vzoru v `src/lib/smlouvy/`.
-  - Potom 7b (služby, licence, NDA, předávací protokol, cestovní příkaz), 7c (podpis, končící smlouvy).
+- **Hotovo naposledy:** krok 7a – smlouva o dílo (tabulka `contracts`, funkce `ulozit_smlouvu`, číslo S20260001,
+  editor s náhledem, seznam `/smlouvy`, detail, PDF). Vzory jsou v `src/lib/smlouvy/` – každý vzor má
+  `formular` (pole), `clanky` (text), `chyby` (povinné údaje) a zapisuje se do `src/lib/smlouvy/vzory.ts`.
+- **Další na řadě:** krok 7b – další vzory stejným způsobem (služby, licence, NDA, předávací protokol,
+  cestovní příkaz), pak 7c (podpis na obrazovce, dlaždice Končící smlouvy podle `contracts.valid_until`).
 - **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
@@ -162,6 +162,8 @@ uživatelů (týmový přístup v Pro).
   `PaidDepositsAmount` u neplátce.
 - `invoice_reminders` – upomínky (1.–3.) k neuhrazené faktuře po splatnosti. Vytváří je jen funkce
   `vytvorit_upominku(faktura, dnes)`, nová lhůta k úhradě je 7 dní. PDF: `/faktury/<id>/upominka/<1–3>`.
+- `contracts` – smlouvy (druh, číslo S…, strany jako kopie, `fields` = vyplněný vzor, `valid_until`, stav
+  koncept / uzavřená / ukončená). Uzavřenou smlouvu nejde upravit (změny dodatkem). **Hotovo v kroku 7a.**
 - `dashboard_layouts` – rozložení dlaždic na přehledu pro každého uživatele **Hotovo v kroku 5b** (`tiles` = pořadí a zapnuté dlaždice, RLS: každý jen své).
 - `waitlist` – zájemci o spuštění z webu awao.cz (už existuje; číst ho smí jen správce)
 
