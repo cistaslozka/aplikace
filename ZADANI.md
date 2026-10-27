@@ -72,6 +72,16 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 
 První verze pro skutečné uživatele = kroky 0–5.
 
+### Kde jsme skončili (aktualizuje se po každém kroku)
+
+- **Teď rozpracováno:** krok 4b – **vyúčtování zálohy** (konečná faktura, ve které se odečte zaplacená
+  záloha). Větev `krok-4b-vyuctovani`.
+  - Plán: tlačítko „Vystavit konečnou fakturu“ u uhrazené zálohy → editor předvyplněný ze zálohy →
+    na faktuře řádek „Odpočet zálohy ZF…“ a „Zbývá uhradit“. U plátce se odečítá základ a DPH podle
+    daňového dokladu (DD…), u neplátce jen částka. V ISDOC `TaxedDeposits` / `NonTaxedDeposits`.
+- **Potom:** odeslání e-mailem (až bude doména a služba Resend), pak krok 5 (Přehled s dlaždicemi).
+- Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
+
 ### Formáty ke stažení
 
 Každý doklad jde stáhnout jako **PDF**. Faktury a účetní doklady navíc jako **ISDOC**
