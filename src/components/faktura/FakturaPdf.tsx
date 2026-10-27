@@ -11,7 +11,7 @@ import type { DataFaktury } from "./FakturaA4";
   rozměry jsou převedené z px na body (× 0,75), barvy jsou tokeny z globals.css.
 */
 
-const B = {
+export const B = {
   navy: "#0f2537",
   green: "#10b981",
   greenInk: "#047857",
@@ -29,7 +29,8 @@ const B = {
 };
 
 let pismaRegistrovana = false;
-function registrovatPisma() {
+/** Písma pro PDF (sdílí faktury i smlouvy). */
+export function registrovatPisma() {
   if (pismaRegistrovana) return;
   const p = (f: string) => path.join(process.cwd(), "src/fonts", f);
   Font.register({
