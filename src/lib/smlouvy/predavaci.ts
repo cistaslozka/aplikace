@@ -1,4 +1,4 @@
-import { datum, text, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
+import { datum, text, veta, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
 
 /*
   Předávací protokol – potvrzení o předání a převzetí díla, služby nebo věci (např. ke smlouvě o dílo,
@@ -34,17 +34,17 @@ export function clankyPredavaci(d: DataSmlouvy): Clanek[] {
     {
       nadpis: "Předmět předání",
       odstavce: [
-        text(p, "souvisi") ? `Předání se uskutečňuje na základě: ${text(p, "souvisi")}.` : "",
-        `Předávající předává a přebírající přebírá: ${text(p, "predmet") || "…"}.`,
+        text(p, "souvisi") ? `Předání se uskutečňuje na základě: ${veta(text(p, "souvisi"))}` : "",
+        `Předávající předává a přebírající přebírá: ${veta(text(p, "predmet") || "…")}`,
         `Datum předání: ${datum(p, "datum_predani") || "…"}.`,
-        text(p, "prilohy") ? `Spolu s předmětem předání byly předány: ${text(p, "prilohy")}.` : "",
+        text(p, "prilohy") ? `Spolu s předmětem předání byly předány: ${veta(text(p, "prilohy"))}` : "",
       ],
     },
     {
       nadpis: "Stav při předání",
       odstavce: sVadami
         ? [
-            `Přebírající přebírá předmět předání s výhradami. Zjištěné vady: ${text(p, "vady")}`,
+            `Přebírající přebírá předmět předání s výhradami. Zjištěné vady: ${veta(text(p, "vady"))}`,
             datum(p, "odstraneni") ? `Předávající zjištěné vady odstraní nejpozději do ${datum(p, "odstraneni")}.` : "Termín odstranění vad si strany dohodnou.",
           ]
         : ["Přebírající přebírá předmět předání bez výhrad. Při předání nebyly zjištěny žádné vady."],

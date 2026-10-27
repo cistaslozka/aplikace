@@ -1,5 +1,5 @@
 import { datumCz } from "@/lib/faktura";
-import { DRUHY_SMLUV, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
+import { DRUHY_SMLUV, malym, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
 import { VZORY } from "@/lib/smlouvy/vzory";
 
 /*
@@ -27,7 +27,7 @@ function Strana({ s, role: r }: { s: DataSmlouvy["my"] | null; role: string }) {
       ) : (
         <div className="rounded-lg border border-dashed border-slate-300 px-3 py-3 text-muted">Vyberte druhou smluvní stranu</div>
       )}
-      <div className="mt-1 text-muted">(dále jen „{r.toLowerCase()}“)</div>
+      <div className="mt-1 text-muted">(dále jen „{malym(r)}“)</div>
     </div>
   );
 }
@@ -58,7 +58,7 @@ export function SmlouvaA4({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
       </header>
 
       <section className="mt-6 flex flex-col gap-4">
-        <div className={"text-[11px] font-bold tracking-[0.08em] uppercase " + v.clanek}>Smluvní strany</div>
+        <div className={"text-[11px] font-bold tracking-[0.08em] uppercase " + v.clanek}>{d.druh === "predavaci" ? "Strany" : "Smluvní strany"}</div>
         {strany.map((x, i) => (
           <div key={i} className="grid grid-cols-[110px_1fr] gap-3">
             <div className="font-semibold text-navy">{x.r}</div>

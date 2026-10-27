@@ -1,4 +1,4 @@
-import { cislo, datum, kc, text, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
+import { cislo, datum, kc, text, veta, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
 
 /*
   Smlouva o poskytování služeb – nepojmenovaná smlouva podle § 1746 odst. 2 občanského zákoníku.
@@ -54,7 +54,7 @@ export function clankySluzby(d: DataSmlouvy): Clanek[] {
       nadpis: "Předmět smlouvy",
       odstavce: [
         `Poskytovatel se zavazuje poskytovat objednateli tyto služby: ${text(p, "predmet") || "…"} (dále jen „služby“).`,
-        text(p, "rozsah") ? `Rozsah a podrobnosti služeb: ${text(p, "rozsah")}` : "",
+        text(p, "rozsah") ? `Rozsah a podrobnosti služeb: ${veta(text(p, "rozsah"))}` : "",
         text(p, "misto_plneni") ? `Místem poskytování služeb je ${text(p, "misto_plneni")}.` : "",
         "Objednatel se zavazuje poskytovateli platit za služby odměnu podle této smlouvy a poskytovat mu součinnost potřebnou k jejich řádnému poskytování.",
       ],

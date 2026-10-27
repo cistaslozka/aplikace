@@ -1,4 +1,4 @@
-import { cislo, kc, text, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
+import { cislo, kc, text, veta, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
 
 /*
   Dohoda o mlčenlivosti (NDA) – nepojmenovaná smlouva podle § 1746 odst. 2 občanského zákoníku,
@@ -54,7 +54,7 @@ export function clankyNda(d: DataSmlouvy): Clanek[] {
       nadpis: "Důvěrné informace",
       odstavce: [
         "Důvěrnými informacemi se rozumí veškeré informace obchodní, technické, finanční či jiné povahy, které smluvní strana druhé straně zpřístupní v souvislosti se spoluprací, bez ohledu na formu, a to včetně obchodního tajemství ve smyslu § 504 občanského zákoníku.",
-        text(p, "informace") ? `Za důvěrné se považují zejména: ${text(p, "informace")}` : "",
+        text(p, "informace") ? `Za důvěrné se považují zejména: ${veta(text(p, "informace"))}` : "",
         "Důvěrnými informacemi nejsou informace, které jsou nebo se stanou veřejně známými jinak než porušením této dohody, které přijímající strana prokazatelně znala před jejich zpřístupněním, nebo které je povinna sdělit na základě zákona či rozhodnutí orgánu veřejné moci.",
       ],
     },

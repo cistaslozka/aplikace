@@ -1,4 +1,4 @@
-import { cislo, datum, kc, text, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
+import { cislo, datum, kc, text, veta, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
 
 /*
   Licenční smlouva podle § 2358 a násl. občanského zákoníku a zákona č. 121/2000 Sb., autorský zákon.
@@ -46,7 +46,7 @@ export function clankyLicence(d: DataSmlouvy): Clanek[] {
       nadpis: "Předmět smlouvy",
       odstavce: [
         `Předmětem smlouvy je poskytnutí oprávnění k výkonu práva dílo užít (dále jen „licence“) k tomuto dílu: ${text(p, "dilo") || "…"} (dále jen „dílo“).`,
-        text(p, "autor") ? `Autorem díla je ${text(p, "autor")}.` : "",
+        text(p, "autor") ? `Autorem díla je ${veta(text(p, "autor"))}` : "",
         "Poskytovatel poskytuje nabyvateli licenci v rozsahu podle této smlouvy a nabyvatel licenci přijímá.",
       ],
     },

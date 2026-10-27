@@ -1,4 +1,4 @@
-import { cislo, datum, kc, text, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
+import { cislo, datum, kc, text, veta, vycistit, type Clanek, type DataSmlouvy, type SekceFormulare } from "./index";
 
 /*
   Smlouva o dílo podle § 2586 a násl. zákona č. 89/2012 Sb., občanský zákoník.
@@ -76,7 +76,7 @@ export function clankyDilo(d: DataSmlouvy): Clanek[] {
       nadpis: "Předmět smlouvy",
       odstavce: [
         `Zhotovitel se zavazuje provést na svůj náklad a nebezpečí pro objednatele dílo: ${text(p, "predmet") || "…"} (dále jen „dílo“).`,
-        text(p, "specifikace") ? `Bližší specifikace díla: ${text(p, "specifikace")}` : "",
+        text(p, "specifikace") ? `Bližší specifikace díla: ${veta(text(p, "specifikace"))}` : "",
         "Objednatel se zavazuje dílo převzít a zaplatit zhotoviteli cenu podle článku o ceně díla.",
       ],
     },

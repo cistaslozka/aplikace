@@ -64,24 +64,20 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 4b | Faktury: stažení PDF, upomínky, export ISDOC a XLSX, zálohová faktura, daňový doklad k přijaté platbě, vyúčtování zálohy (hotovo); odeslání e-mailem (až bude doména) | skoro hotovo |
 | 5 | Přehled s dlaždicemi: skutečná čísla (5a) a vlastní rozložení – zapnout, vypnout, seřadit (5b) | hotovo |
 | 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
-| 7 | Smlouvy a provozní doklady: **7a smlouva o dílo hotová**; 7b služby, licence, NDA, předávací protokol, cestovní příkaz; 7c podpis na obrazovce, hlídání končících smluv | rozpracováno |
+| 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol (**7a, 7b hotovo**); 7c podpis na obrazovce, hlídání končících smluv. Cestovní příkaz přesunut do kroku 10 | rozpracováno |
 | 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | |
 | 9 | Pro: B2B rámcová, kupní a nájemní smlouva, plná moc, svěření majetku, záznam o školení BOZP, souhlas GDPR; týmový přístup (účetní, asistentka) | |
-| 10 | HR dokumenty (Pro): HPP, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, vytýkací dopis – **až po kontrole právníkem** | |
+| 10 | HR dokumenty (Pro): HPP, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, vytýkací dopis, cestovní příkaz a vyúčtování (sazby stravného) – **až po kontrole právníkem** | |
 | 11 | **Datová schránka a úřady** (Pro): příprava přihlášky zaměstnance k ČSSZ (REGZEC, JMHZ) a odeslání přes datovou schránku – **návrh viz níže, čeká na rozhodnutí** | |
 
 První verze pro skutečné uživatele = kroky 0–5.
 
 ### Kde jsme skončili (aktualizuje se po každém kroku)
 
-- **Hotovo naposledy:** krok 5 – Přehled (5a čísla, 5b vlastní rozložení v tabulce `dashboard_layouts`,
-  seznam dlaždic v `src/lib/rozlozeni.ts`; nová dlaždice se přidá tam a uživatelům se objeví na konci).
-- **Hotovo naposledy:** krok 7a – smlouva o dílo (tabulka `contracts`, funkce `ulozit_smlouvu`, číslo S20260001,
-  editor s náhledem, seznam `/smlouvy`, detail, PDF). Vzory jsou v `src/lib/smlouvy/` – každý vzor má
-  `formular` (pole), `clanky` (text), `chyby` (povinné údaje) a zapisuje se do `src/lib/smlouvy/vzory.ts`.
-- **Teď rozpracováno:** krok 7b – vzory smlouva o službách, licenční smlouva, NDA, předávací protokol
-  (větev `krok-7b-dalsi-vzory`). Cestovní příkaz se přesouvá ke kroku 10 (HR) – potřebuje sazby stravného.
-  Potom 7c (podpis na obrazovce, dlaždice Končící smlouvy podle `contracts.valid_until`).
+- **Hotovo naposledy:** krok 7b – vzory smlouva o službách, licenční smlouva, NDA, předávací protokol
+  (`src/lib/smlouvy/*.ts`, zapsané ve `vzory.ts` i s podtitulem podle zákona a úvodní větou).
+- **Další na řadě:** krok 7c – podpis prstem / myší na obrazovce (obrázek podpisu ke smlouvě) a dlaždice
+  Končící smlouvy na přehledu podle `contracts.valid_until`. Pak krok 8 (dobropis, pokladní doklady).
 - **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
