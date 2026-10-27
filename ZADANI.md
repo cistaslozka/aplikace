@@ -60,7 +60,8 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 1 | Registrace a přihlášení (e-mail + heslo), ochrana stránek | hotovo |
 | 2 | Nastavení firmy: IČO → ARES, adresa, účet, plátce / neplátce DPH | hotovo |
 | 3 | Adresář klientů (z ARES), našeptávač podle jména, limit dotazů do ARES | hotovo |
-| 4 | Faktury: vystavení, číselná řada, položky, QR platba, PDF, stavy, upomínky | další na řadě |
+| 4a | Faktury: vystavení, číselná řada, položky a DPH, živý náhled ve 3 vzhledech, QR platba, stavy, tisk / PDF z prohlížeče | hotovo |
+| 4b | Faktury: stažení PDF, odeslání e-mailem, upomínky, zálohové faktury | další na řadě |
 | 5 | Přehled s dlaždicemi (skutečná čísla, vlastní rozložení) | |
 | 6 | Placení tarifů | |
 | 7 | Smlouvy (dílo, služby, licence, NDA) | |
@@ -87,8 +88,15 @@ uživatelů (týmový přístup v Pro).
 - Limit ARES: každé načtení jde přes `nactiZAresSLimitem` (src/lib/ares.ts) → funkce
   `ares_smim_se_zeptat()`: nejvýš 20 dotazů/min na uživatele a 250/min za celou aplikaci
   (ARES blokuje nad 500/min). Výsledky ARES se navíc pamatují 24 h.
-- `number_series` – číselné řady dokladů (např. faktury 2026xxxx)
-- `invoices` + `invoice_items` – faktury a jejich položky
+- `number_series` – číselné řady dokladů: faktury `RRRR` + 4 číslice (20260001), variabilní symbol = číslo.
+  **Hotovo v kroku 4a.**
+- `invoices` + `invoice_items` – faktury a jejich položky. **Hotovo v kroku 4a.**
+  Ukládá se jen funkcí `ulozit_fakturu(faktura, polozky)`: přidělí číslo, uloží kopii údajů
+  dodavatele i odběratele (pozdější změna firmy nebo klienta starou fakturu nezmění) a částky
+  spočítá sama databáze (zaokrouhlení na haléře, DPH za každou sazbu zvlášť: 21 %, 12 %, 0 %).
+  Uživatel smí přímo měnit jen stav (vystavená / uhrazená / stornovaná) a datum úhrady.
+  Faktury se nemažou, jen stornují (číslo se znovu nepoužije). Stornovanou nejde upravit.
+  Výpočty pro náhled: `src/lib/faktura.ts` (stejné zaokrouhlení jako databáze).
 - `dashboard_layouts` – rozložení dlaždic na přehledu pro každého uživatele
 - `waitlist` – zájemci o spuštění z webu awao.cz (už existuje; číst ho smí jen správce)
 
