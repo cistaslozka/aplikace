@@ -51,7 +51,8 @@ export default async function FakturyPage({ searchParams }: Props) {
   const faktury = vsechny.filter((f) => sedi(f, filtr, dnes));
   const neuhrazene = vsechny.filter((f) => f.status === "vystavena");
   const poSplatnosti = neuhrazene.filter((f) => f.due_date < dnes);
-  const soucet = (xs: FakturaRadek[]) => xs.reduce((s, f) => s + f.total, 0);
+  // U konečné faktury počítáme jen to, co zbývá doplatit (záloha už je zaplacená)
+  const soucet = (xs: FakturaRadek[]) => xs.reduce((s, f) => s + f.total - f.advance_amount, 0);
   // Do příjmů počítáme jen faktury: zaplacená záloha se později odečte na konečné faktuře
   const uhrazenoLetos = vsechny.filter((f) => f.kind === "faktura" && f.status === "uhrazena" && (f.paid_at ?? "").startsWith(rok));
 
@@ -140,7 +141,7 @@ export default async function FakturyPage({ searchParams }: Props) {
                       </div>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-1">
-                      <span className="num font-bold text-navy">{castka(f.total)}</span>
+                      <span className="num font-bold text-navy">{castka(f.total - f.advance_amount)}</span>
                       <StavPill status={f.status} splatnost={f.due_date} dnes={dnes} />
                     </div>
                   </Link>
@@ -178,7 +179,7 @@ export default async function FakturyPage({ searchParams }: Props) {
                     </td>
                     <td className="num px-3 py-3.5 text-muted">{datumCz(f.issue_date)}</td>
                     <td className="num px-3 py-3.5 text-muted">{datumCz(f.due_date)}</td>
-                    <td className="num px-3 py-3.5 text-right font-bold text-navy">{castka(f.total)}</td>
+                    <td className="num px-3 py-3.5 text-right font-bold text-navy">{castka(f.total - f.advance_amount)}</td>
                     <td className="px-5 py-3.5">
                       <StavPill status={f.status} splatnost={f.due_date} dnes={dnes} />
                     </td>

@@ -29,9 +29,12 @@ export default async function FakturaPage({ params, searchParams }: Props) {
   const [upominky, souvisejici] = await Promise.all([nactiUpominky(f.id), nactiSouvisejici(f)]);
   const dnes = dnesIso();
   const danovyDoklad = souvisejici.navazane.find((x) => x.kind === "ddpp" && x.status !== "stornovana") ?? null;
+  const konecna = souvisejici.navazane.find((x) => x.kind === "faktura" && x.status !== "stornovana") ?? null;
+  // Konečnou fakturu lze vystavit k zaplacené záloze; plátce nejdřív potřebuje daňový doklad
+  const lzeVyuctovat = f.kind === "zalohova" && f.status === "uhrazena" && !konecna && (!f.vat_payer || !!danovyDoklad);
   // Zálohu s daňovým dokladem a daňový doklad samotný už upravit nejde
-  const lzeUpravit = f.status !== "stornovana" && f.kind !== "ddpp" && !danovyDoklad;
-  const lzeVratit = f.status === "uhrazena" && f.kind !== "ddpp" && !danovyDoklad;
+  const lzeUpravit = f.status !== "stornovana" && f.kind !== "ddpp" && !danovyDoklad && !konecna;
+  const lzeVratit = f.status === "uhrazena" && f.kind !== "ddpp" && !danovyDoklad && !konecna;
   const lhutaDdpp = f.paid_at ? pridatDny(f.paid_at.slice(0, 10), 15) : null;
   const poSplatnosti = f.status === "vystavena" ? -dnuMezi(dnes, f.due_date) : 0;
   const muzeUpominku = poSplatnosti > 0 && upominky.length < 3;
@@ -85,7 +88,7 @@ export default async function FakturaPage({ params, searchParams }: Props) {
             <span className="font-bold text-navy">{f.customer.name}</span>
             <span className="text-muted">
               {" "}
-              · <span className="num">{castka(f.total)}</span> · splatnost {datumCz(f.due_date)}
+              · <span className="num">{castka(f.total - f.advance_amount)}</span> · splatnost {datumCz(f.due_date)}
               {f.paid_at && <> · uhrazeno {datumCz(f.paid_at)}</>}
             </span>
           </div>
@@ -178,6 +181,40 @@ export default async function FakturaPage({ params, searchParams }: Props) {
               </>
             )}
           </section>
+        )}
+
+        {f.kind === "zalohova" && f.status === "uhrazena" && (konecna || lzeVyuctovat) && (
+          <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4" aria-label="Vyúčtování zálohy">
+            <div className="text-sm">
+              <h2 className="text-base font-bold">Vyúčtování zálohy</h2>
+              {konecna ? (
+                <p>
+                  Záloha je vyúčtovaná na{" "}
+                  <Link href={`/faktury/${konecna.id}`} className="num font-semibold text-green-ink hover:underline">
+                    faktuře {konecna.number}
+                  </Link>
+                  .
+                </p>
+              ) : (
+                <p className="text-muted">Až práci dokončíte, vystavte konečnou fakturu. Zaplacená záloha se na ní odečte.</p>
+              )}
+            </div>
+            {lzeVyuctovat && (
+              <Link href={`/faktury/nova?zaloha=${f.id}`} className="inline-flex min-h-11 items-center rounded-xl bg-green px-4 text-sm font-bold text-navy hover:brightness-95">
+                Vystavit konečnou fakturu
+              </Link>
+            )}
+          </section>
+        )}
+
+        {f.kind === "faktura" && souvisejici.zaloha && (
+          <p className="text-sm text-muted">
+            Konečná faktura k{" "}
+            <Link href={`/faktury/${souvisejici.zaloha.id}`} className="num font-semibold text-green-ink hover:underline">
+              zálohové faktuře {souvisejici.zaloha.number}
+            </Link>
+            . Zaplacená záloha je odečtená.
+          </p>
         )}
 
         {f.kind === "ddpp" && souvisejici.zaloha && (
