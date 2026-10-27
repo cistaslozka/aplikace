@@ -136,7 +136,7 @@ export type VysledekLoga = { ok: true } | { ok: false; chyba: string };
 export async function ulozitLogoAkce(cesta: string | null): Promise<VysledekLoga> {
   const firma = await aktivniFirma();
   if (!firma) return { ok: false, chyba: "Nejdřív uložte údaje o firmě." };
-  if (cesta !== null && !new RegExp(`^${firma.id}/logo-[0-9]+\\.(png|jpg|webp)$`).test(cesta)) {
+  if (cesta !== null && !new RegExp(`^${firma.id}/logo-[0-9]+\\.(png|jpg)$`).test(cesta)) {
     return { ok: false, chyba: "Logo se nepodařilo uložit." };
   }
   const supabase = await createClient();

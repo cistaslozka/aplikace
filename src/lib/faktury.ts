@@ -1,5 +1,7 @@
 import "server-only";
+import type { DataFaktury } from "@/components/faktura/FakturaA4";
 import { createClient } from "@/lib/supabase/server";
+import { adresaLoga } from "./faktura";
 import type { PoziceLoga, Polozka, Rekapitulace, SazbaDph, StavFaktury, Strana, Vzhled, ZpusobUhrady } from "./faktura";
 
 export type FakturaRadek = {
@@ -101,4 +103,31 @@ export async function dalsiCisloFaktury(organizationId: string, rok: number): Pr
   const { data, error } = await supabase.rpc("dalsi_cislo_faktury", { p_org: organizationId, p_rok: rok });
   if (error) console.error("Číslo faktury se nenačetlo:", error.message);
   return typeof data === "string" ? data : `${rok}0001`;
+}
+
+/** Údaje pro vykreslení uložené faktury (náhled, tisk i PDF). */
+export function dataUlozeneFaktury(f: FakturaRadek, polozky: Polozka[]): DataFaktury {
+  return {
+    cislo: f.number,
+    vs: f.variable_symbol,
+    dodavatel: f.supplier,
+    odberatel: f.customer,
+    vystaveno: f.issue_date,
+    duzp: f.taxable_date,
+    splatnost: f.due_date,
+    uhrada: f.payment_method,
+    platce: f.vat_payer,
+    polozky,
+    rekapitulace: f.vat_recap,
+    zaklad: f.subtotal,
+    dph: f.vat_total,
+    celkem: f.total,
+    poznamka: f.note,
+    uvod: f.intro_text,
+    logo: adresaLoga(f.logo_path),
+    logoPozice: f.logo_position,
+    vzhled: f.template,
+    stav: f.status,
+    uhrazeno: f.paid_at,
+  };
 }

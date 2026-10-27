@@ -6,7 +6,7 @@ import { adresaLoga } from "@/lib/faktura";
 import { createClient } from "@/lib/supabase/client";
 import { ulozitLogoAkce } from "./actions";
 
-const TYPY: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+const TYPY: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg" };
 const MAX = 1024 * 1024; // 1 MB
 
 export function LogoFirmy({ firmaId, cesta }: { firmaId: string; cesta: string | null }) {
@@ -22,7 +22,7 @@ export function LogoFirmy({ firmaId, cesta }: { firmaId: string; cesta: string |
     setHotovo(null);
     if (!soubor) return;
     const pripona = TYPY[soubor.type];
-    if (!pripona) return setChyba("Logo nahrajte jako obrázek PNG, JPG nebo WEBP.");
+    if (!pripona) return setChyba("Logo nahrajte jako obrázek PNG nebo JPG.");
     if (soubor.size > MAX) return setChyba("Obrázek je větší než 1 MB. Zmenšete ho prosím.");
 
     start(async () => {
@@ -76,7 +76,7 @@ export function LogoFirmy({ firmaId, cesta }: { firmaId: string; cesta: string |
             <input
               ref={vstup}
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept="image/png,image/jpeg"
               className="sr-only"
               onChange={(e) => nahrat(e.target.files?.[0])}
             />
@@ -86,7 +86,7 @@ export function LogoFirmy({ firmaId, cesta }: { firmaId: string; cesta: string |
               Odebrat logo
             </button>
           )}
-          <span className="text-[12.5px] text-muted">PNG, JPG nebo WEBP do 1 MB. Nejlépe vypadá logo na šířku.</span>
+          <span className="text-[12.5px] text-muted">PNG nebo JPG do 1 MB. Nejlépe vypadá logo na šířku.</span>
         </div>
       </div>
       {chyba && <Hlaska typ="chyba">{chyba}</Hlaska>}
