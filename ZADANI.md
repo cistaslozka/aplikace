@@ -76,8 +76,12 @@ První verze pro skutečné uživatele = kroky 0–5.
 
 - **Hotovo naposledy:** krok 5 – Přehled (5a čísla, 5b vlastní rozložení v tabulce `dashboard_layouts`,
   seznam dlaždic v `src/lib/rozlozeni.ts`; nová dlaždice se přidá tam a uživatelům se objeví na konci).
-- **Další na řadě:** krok 6 – placení předplatného (platební brána: potřeba vybrat Stripe / GoPay / Comgate a založit
-  účet, to musí udělat Michael a Omar). Do té doby lze dělat krok 7 – smlouvy (smlouva o dílo jako první).
+- **Teď rozpracováno:** krok 7a – **smlouva o dílo** (větev `krok-7a-smlouva-o-dilo`).
+  - Plán: tabulka `contracts` (druh, číslo S20260001, strany jako kopie, `fields` = vyplněné údaje vzoru,
+    `valid_until` pro hlídání konce), funkce `ulozit_smlouvu`, editor s živým náhledem ve 3 vzhledech,
+    seznam `/smlouvy`, detail, PDF (víc stran). Texty vzoru v `src/lib/smlouvy/`.
+  - Potom 7b (služby, licence, NDA, předávací protokol, cestovní příkaz), 7c (podpis, končící smlouvy).
+- **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
 
