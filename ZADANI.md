@@ -62,7 +62,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 3 | Adresář klientů (z ARES), našeptávač podle jména, limit dotazů do ARES | hotovo |
 | 4a | Faktury: vystavení, číselná řada, položky a DPH, živý náhled ve 3 vzhledech, QR platba, stavy, tisk / PDF z prohlížeče | hotovo |
 | 4b | Faktury: stažení PDF, upomínky, export ISDOC a XLSX, zálohová faktura, daňový doklad k přijaté platbě, vyúčtování zálohy (hotovo); odeslání e-mailem (až bude doména) | skoro hotovo |
-| 5 | Přehled s dlaždicemi: finanční přehled a **hlídání limitu DPH**, archiv, grafy podle měsíců a roku, rychlé akce, končící smlouvy a HR; vlastní rozložení | |
+| 5 | Přehled s dlaždicemi: **5a hotovo** (skutečná čísla: neuhrazené, po splatnosti, limit DPH / DPH na výstupu, graf příjmů 6 měsíců, rychlé akce, poslední doklady); **5b** vlastní rozložení dlaždic (zapnout, vypnout, seřadit) | rozpracováno |
 | 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
 | 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol, cestovní příkaz a vyúčtování; **podpis na obrazovce**; hlídání končících smluv | |
 | 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | |
@@ -74,8 +74,10 @@ První verze pro skutečné uživatele = kroky 0–5.
 
 ### Kde jsme skončili (aktualizuje se po každém kroku)
 
-- **Hotovo naposledy:** krok 4b – vyúčtování zálohy (konečná faktura s odpočtem zálohy, PR „Krok 4b (část 6)“).
-- **Další na řadě:** krok 5 – Přehled s dlaždicemi (skutečná čísla, graf, limit DPH, vlastní rozložení). Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
+- **Hotovo naposledy:** krok 5a – Přehled se skutečnými čísly (`src/lib/prehled.ts`, `src/app/(aplikace)/prehled/page.tsx`).
+- **Další na řadě:** krok 5b – vlastní rozložení přehledu: tabulka `dashboard_layouts` (uživatel + firma, pořadí
+  a zapnuté dlaždice), tlačítko „Upravit přehled“ jako v návrhu (`public/navrh-aplikace.html`). Pak krok 6 (placení).
+  Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
 
 ### Formáty ke stažení
