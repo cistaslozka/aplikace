@@ -15,7 +15,7 @@ export default async function UpravitFakturuPage({ params }: { params: Promise<{
   const n = await nactiFakturu(firma.id, id);
   if (!n) notFound();
   const f = n.faktura;
-  if (f.status === "stornovana") redirect(`/faktury/${id}`);
+  if (f.status === "stornovana" || f.kind === "ddpp") redirect(`/faktury/${id}`);
 
   return (
     <FakturaEditor

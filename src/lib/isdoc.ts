@@ -141,8 +141,8 @@ export function fakturaIsdoc(d: DataIsdoc): string {
   return (
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<Invoice xmlns="http://isdoc.cz/namespace/2013" version="6.0.2">' +
-    // 1 = faktura (daňový doklad), 4 = zálohová faktura (nedaňový zálohový list)
-    el("DocumentType", d.druh === "zalohova" ? 4 : 1) +
+    // 1 = faktura (daňový doklad), 4 = zálohová faktura (nedaňový zálohový list), 5 = daňový doklad k přijaté platbě
+    el("DocumentType", d.druh === "zalohova" ? 4 : d.druh === "ddpp" ? 5 : 1) +
     el("ID", d.cislo) +
     el("UUID", d.id.toUpperCase()) +
     el("IssuingSystem", "čistásložka.cz") +

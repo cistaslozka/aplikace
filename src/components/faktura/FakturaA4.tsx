@@ -6,6 +6,7 @@ import {
   zakladPolozky,
   ZPUSOBY_UHRADY,
   NAZVY_DOKLADU,
+  nadpisDokladu,
   type DruhDokladu,
   type PoziceLoga,
   type Polozka,
@@ -135,9 +136,9 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
         <div className="flex items-center gap-4">
           {logo === "vlevo" && <Logo src={d.logo!} />}
           <div>
-            <div className={v.nadpis}>{NAZVY_DOKLADU[druh]}</div>
+            <div className={v.nadpis}>{nadpisDokladu(druh).nadpis}</div>
             <div className={"num " + v.podnadpis}>
-              č. {d.cislo}
+              {nadpisDokladu(druh).dodatek}č. {d.cislo}
               {druh === "zalohova" ? " · není daňový doklad" : danovy ? " · daňový doklad" : ""}
             </div>
           </div>

@@ -2,7 +2,7 @@ import "server-only";
 import path from "node:path";
 import { Document, Font, Image, Page, Path, StyleSheet, Svg, Text, View, renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import QRCode from "qrcode";
-import { castka, datumCz, mnozstvi, NAZVY_DOKLADU, qrPlatba, zakladPolozky, ZPUSOBY_UHRADY, type Strana } from "@/lib/faktura";
+import { castka, datumCz, mnozstvi, nadpisDokladu, NAZVY_DOKLADU, qrPlatba, zakladPolozky, ZPUSOBY_UHRADY, type Strana } from "@/lib/faktura";
 import { formatujIban } from "@/lib/validace";
 import type { DataFaktury } from "./FakturaA4";
 
@@ -158,9 +158,9 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             {logo === "vlevo" && <Logo src={d.logo!} />}
             <View>
-              <Text style={v.nadpis}>{d.vzhled === "corporate" ? NAZVY_DOKLADU[druh].toUpperCase() : NAZVY_DOKLADU[druh]}</Text>
+              <Text style={v.nadpis}>{d.vzhled === "corporate" ? nadpisDokladu(druh).nadpis.toUpperCase() : nadpisDokladu(druh).nadpis}</Text>
               <Text style={v.podnadpis}>
-                č. {d.cislo}
+                {nadpisDokladu(druh).dodatek}č. {d.cislo}
                 {druh === "zalohova" ? " · není daňový doklad" : danovy ? " · daňový doklad" : ""}
               </Text>
             </View>

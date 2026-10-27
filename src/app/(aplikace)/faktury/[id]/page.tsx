@@ -5,15 +5,15 @@ import { FakturaA4 } from "@/components/faktura/FakturaA4";
 import { Meritko } from "@/components/faktura/Meritko";
 import { StavPill } from "@/components/faktura/StavPill";
 import { Hlaska } from "@/components/Formular";
-import { castka, datumCz, dnesIso, dnuMezi, dny, NAZVY_DOKLADU } from "@/lib/faktura";
+import { castka, datumCz, dnesIso, dnuMezi, dny, NAZVY_DOKLADU, pridatDny } from "@/lib/faktura";
 import { aktivniFirma } from "@/lib/firma";
-import { dataUlozeneFaktury, nactiFakturu, nactiUpominky } from "@/lib/faktury";
-import { vytvoritUpominkuAkce, zmenitStavAkce } from "../actions";
+import { dataUlozeneFaktury, nactiFakturu, nactiSouvisejici, nactiUpominky } from "@/lib/faktury";
+import { vystavitDdppAkce, vytvoritUpominkuAkce, zmenitStavAkce } from "../actions";
 import { TlacitkoTisk } from "./Tisk";
 
 export const metadata: Metadata = { title: "Faktura" };
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ vystaveno?: string; upraveno?: string; upominka?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ vystaveno?: string; upraveno?: string; upominka?: string; chyba?: string }> };
 
 const tlacitko = "inline-flex min-h-11 items-center rounded-xl border-[1.5px] border-line bg-surface px-4 text-sm font-semibold text-navy hover:border-muted";
 
@@ -26,8 +26,14 @@ export default async function FakturaPage({ params, searchParams }: Props) {
   if (!n) notFound();
   const f = n.faktura;
   const p = await searchParams;
-  const upominky = await nactiUpominky(f.id);
-  const poSplatnosti = f.status === "vystavena" ? -dnuMezi(dnesIso(), f.due_date) : 0;
+  const [upominky, souvisejici] = await Promise.all([nactiUpominky(f.id), nactiSouvisejici(f)]);
+  const dnes = dnesIso();
+  const danovyDoklad = souvisejici.navazane.find((x) => x.kind === "ddpp" && x.status !== "stornovana") ?? null;
+  // Zálohu s daňovým dokladem a daňový doklad samotný už upravit nejde
+  const lzeUpravit = f.status !== "stornovana" && f.kind !== "ddpp" && !danovyDoklad;
+  const lzeVratit = f.status === "uhrazena" && f.kind !== "ddpp" && !danovyDoklad;
+  const lhutaDdpp = f.paid_at ? pridatDny(f.paid_at.slice(0, 10), 15) : null;
+  const poSplatnosti = f.status === "vystavena" ? -dnuMezi(dnes, f.due_date) : 0;
   const muzeUpominku = poSplatnosti > 0 && upominky.length < 3;
 
   return (
@@ -62,6 +68,7 @@ export default async function FakturaPage({ params, searchParams }: Props) {
 
         {p.vystaveno === "1" && <Hlaska typ="info">{f.kind === "zalohova" ? "Zálohová faktura je vystavená." : "Faktura je vystavená."} Stáhněte ji jako PDF a pošlete odběrateli.</Hlaska>}
         {p.upraveno === "1" && <Hlaska typ="info">Změny jsou uložené.</Hlaska>}
+        {p.chyba && <Hlaska typ="chyba">{p.chyba.slice(0, 200)}</Hlaska>}
         {p.upominka === "chyba" && <Hlaska typ="chyba">Upomínku se nepodařilo vytvořit. Zkuste to prosím znovu.</Hlaska>}
         {p.upominka && /^[1-3]$/.test(p.upominka) && (
           <Hlaska typ="info">
@@ -82,19 +89,31 @@ export default async function FakturaPage({ params, searchParams }: Props) {
               {f.paid_at && <> · uhrazeno {datumCz(f.paid_at)}</>}
             </span>
           </div>
-          {f.status !== "stornovana" && (
+          {lzeUpravit && (
             <Link href={`/faktury/${f.id}/upravit`} className={tlacitko}>
               Upravit
             </Link>
           )}
           {f.status === "vystavena" && (
-            <form action={zmenitStavAkce}>
+            <form action={zmenitStavAkce} className="flex items-center gap-2">
               <input type="hidden" name="id" value={f.id} />
               <input type="hidden" name="stav" value="uhrazena" />
+              <label className="sr-only" htmlFor="datum-uhrady">
+                Datum úhrady
+              </label>
+              <input
+                id="datum-uhrady"
+                type="date"
+                name="datum"
+                defaultValue={dnes}
+                max={dnes}
+                title="Datum, kdy vám peníze přišly"
+                className="num min-h-11 rounded-xl border-[1.5px] border-line bg-surface px-3 text-sm text-navy"
+              />
               <button className="min-h-11 rounded-xl bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-2">Označit jako uhrazenou</button>
             </form>
           )}
-          {f.status === "uhrazena" && (
+          {lzeVratit && (
             <form action={zmenitStavAkce}>
               <input type="hidden" name="id" value={f.id} />
               <input type="hidden" name="stav" value="vystavena" />
@@ -117,6 +136,59 @@ export default async function FakturaPage({ params, searchParams }: Props) {
             </details>
           )}
         </div>
+
+        {f.kind === "zalohova" && f.vat_payer && f.status !== "stornovana" && (
+          <section className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4" aria-label="Daňový doklad k přijaté platbě">
+            <h2 className="text-base font-bold">Daňový doklad k přijaté platbě</h2>
+            {danovyDoklad ? (
+              <p className="text-sm">
+                Vystaven{" "}
+                <Link href={`/faktury/${danovyDoklad.id}`} className="num font-semibold text-green-ink hover:underline">
+                  daňový doklad {danovyDoklad.number}
+                </Link>{" "}
+                ({datumCz(danovyDoklad.issue_date)}).
+              </p>
+            ) : f.status === "vystavena" ? (
+              <p className="text-sm text-muted">
+                Až vám odběratel zálohu zaplatí, označte ji jako uhrazenou. Pak tu vystavíte daňový doklad. Jako plátce DPH ho musíte vystavit do 15 dnů
+                od přijetí platby.
+              </p>
+            ) : (
+              <>
+                <p className={"text-sm " + (lhutaDdpp && lhutaDdpp < dnes ? "text-red" : "text-ink")}>
+                  Záloha je zaplacená. Daňový doklad vystavte nejpozději <strong className="num">{lhutaDdpp ? datumCz(lhutaDdpp) : "do 15 dnů"}</strong>
+                  {lhutaDdpp && lhutaDdpp < dnes ? " – lhůta už uplynula, vystavte ho co nejdříve." : "."}
+                </p>
+                <form action={vystavitDdppAkce} className="flex flex-wrap items-end gap-2">
+                  <input type="hidden" name="id" value={f.id} />
+                  <label className="flex flex-col gap-1 text-[13px] font-semibold text-muted" htmlFor="datum-platby">
+                    Datum přijetí platby
+                    <input
+                      id="datum-platby"
+                      type="date"
+                      name="datum"
+                      required
+                      defaultValue={f.paid_at?.slice(0, 10) ?? dnes}
+                      max={dnes}
+                      className="num min-h-11 rounded-xl border-[1.5px] border-line bg-surface px-3 text-sm font-normal text-navy"
+                    />
+                  </label>
+                  <button className="min-h-11 rounded-xl bg-green px-4 text-sm font-bold text-navy hover:brightness-95">Vystavit daňový doklad</button>
+                </form>
+              </>
+            )}
+          </section>
+        )}
+
+        {f.kind === "ddpp" && souvisejici.zaloha && (
+          <p className="text-sm text-muted">
+            Patří k{" "}
+            <Link href={`/faktury/${souvisejici.zaloha.id}`} className="num font-semibold text-green-ink hover:underline">
+              zálohové faktuře {souvisejici.zaloha.number}
+            </Link>
+            . Daňový doklad nejde upravit. Když je v něm chyba, stornujte ho a vystavte nový.
+          </p>
+        )}
 
         {(poSplatnosti > 0 || upominky.length > 0) && (
           <section className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4" aria-label="Upomínky">

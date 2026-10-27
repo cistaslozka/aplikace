@@ -91,6 +91,7 @@ export async function ulozitFakturuAkce(f: NovaFaktura): Promise<VysledekUlozeni
   if (error || !id) {
     console.error("Uložení faktury selhalo:", error?.code, error?.message);
     if (error?.code === "23514") return { ok: false, chyba: "Některý údaj nesedí. Zkontrolujte data a položky." };
+    if (error?.code === "P0001") return { ok: false, chyba: error.message };
     return { ok: false, chyba: "Fakturu se nepodařilo uložit. Zkuste to prosím znovu." };
   }
 
@@ -105,9 +106,13 @@ export async function zmenitStavAkce(form: FormData) {
   const stav = String(form.get("stav") ?? "");
   if (!firma || !/^[0-9a-f-]{36}$/i.test(id)) return;
 
+  // Datum úhrady: zadané (ne v budoucnosti), jinak dnešek
+  const zadane = String(form.get("datum") ?? "");
+  const dnes = dnesIso();
+  const datumUhrady = datum(zadane) && zadane <= dnes ? zadane : dnes;
   const zmena =
     stav === "uhrazena"
-      ? { status: "uhrazena", paid_at: dnesIso() }
+      ? { status: "uhrazena", paid_at: datumUhrady }
       : stav === "vystavena"
         ? { status: "vystavena", paid_at: null }
         : stav === "stornovana"
@@ -117,11 +122,33 @@ export async function zmenitStavAkce(form: FormData) {
 
   const supabase = await createClient();
   const { error } = await supabase.from("invoices").update(zmena).eq("id", id).eq("organization_id", firma.id);
-  if (error) console.error("Změna stavu faktury selhala:", error.message);
   revalidatePath("/faktury");
   revalidatePath(`/faktury/${id}`);
   revalidatePath("/prehled");
+  if (error) {
+    console.error("Změna stavu faktury selhala:", error.message);
+    // Hláška z databáze je česky a srozumitelná (např. „Nejdřív stornujte daňový doklad“)
+    redirect(`/faktury/${id}?chyba=${encodeURIComponent(error.code === "P0001" ? error.message : "Stav se nepodařilo změnit.")}`);
+  }
   redirect(`/faktury/${id}`);
+}
+
+export async function vystavitDdppAkce(form: FormData) {
+  const firma = await aktivniFirma();
+  const id = String(form.get("id") ?? "");
+  const platba = String(form.get("datum") ?? "");
+  if (!firma || !/^[0-9a-f-]{36}$/i.test(id)) return;
+  if (!datum(platba)) redirect(`/faktury/${id}?chyba=${encodeURIComponent("Zadejte datum přijetí platby.")}`);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("vystavit_ddpp", { p_zaloha: id, p_datum_platby: platba, p_dnes: dnesIso() });
+  if (error || !data) {
+    console.error("Vystavení daňového dokladu selhalo:", error?.code, error?.message);
+    const zprava = error && ["P0001", "22023"].includes(error.code) ? error.message : "Daňový doklad se nepodařilo vystavit. Zkuste to prosím znovu.";
+    redirect(`/faktury/${id}?chyba=${encodeURIComponent(zprava)}`);
+  }
+  revalidatePath("/faktury");
+  revalidatePath(`/faktury/${id}`);
+  redirect(`/faktury/${data}?vystaveno=1`);
 }
 
 export async function vytvoritUpominkuAkce(form: FormData) {
