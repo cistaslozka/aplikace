@@ -58,7 +58,7 @@ export default async function FakturaPage({ params, searchParams }: Props) {
             <a href={`/faktury/${f.id}/upominka/${p.upominka}`} className="font-bold underline">
               Stáhnout PDF
             </a>{" "}
-            a pošlete ji odběrateli.
+            a pošlete ji odběrateli e-mailem nebo poštou. Aplikace ji zatím sama neposílá.
           </Hlaska>
         )}
 
@@ -147,7 +147,7 @@ export default async function FakturaPage({ params, searchParams }: Props) {
               </ul>
             )}
             {upominky.length >= 3 && poSplatnosti > 0 && (
-              <p className="text-[13px] text-muted">Odeslali jste všechny 3 upomínky. Další postup už je na vymáhání pohledávky.</p>
+              <p className="text-[13px] text-muted">Vytvořili jste všechny 3 upomínky. Pokud faktura zůstane neuhrazená, další krok je vymáhání pohledávky.</p>
             )}
           </section>
         )}

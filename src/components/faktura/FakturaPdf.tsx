@@ -1,6 +1,6 @@
 import "server-only";
 import path from "node:path";
-import { Document, Font, Image, Page, Path, StyleSheet, Svg, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Font, Image, Page, Path, StyleSheet, Svg, Text, View, renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import QRCode from "qrcode";
 import { castka, datumCz, mnozstvi, qrPlatba, zakladPolozky, ZPUSOBY_UHRADY, type Strana } from "@/lib/faktura";
 import { formatujIban } from "@/lib/validace";
@@ -348,10 +348,22 @@ async function pripravitLogo(d: DataFaktury): Promise<DataFaktury> {
   return { ...d, logo, logoPozice: logo ? d.logoPozice : null };
 }
 
+/** Když vykreslení s logem selže, zkusí to ještě jednou bez loga (lepší PDF bez loga než žádné). */
+async function vykreslit(dokument: (d: DataFaktury) => React.ReactElement<DocumentProps>, d: DataFaktury): Promise<Buffer> {
+  registrovatPisma();
+  const s = await pripravitLogo(d);
+  try {
+    return await renderToBuffer(dokument(s));
+  } catch (e) {
+    if (!s.logo) throw e;
+    console.error("PDF s logem se nepodařilo vytvořit, zkouším bez loga:", (e as Error).message);
+    return renderToBuffer(dokument({ ...s, logo: null, logoPozice: null }));
+  }
+}
+
 /** Vytvoří PDF faktury. */
 export async function pdfFaktury(d: DataFaktury): Promise<Buffer> {
-  registrovatPisma();
-  return renderToBuffer(<FakturaDokument d={await pripravitLogo(d)} />);
+  return vykreslit((x) => <FakturaDokument d={x} />, d);
 }
 
 export type DataUpominky = { level: number; amount: number; new_due_date: string; created_at: string };
@@ -511,6 +523,5 @@ function UpominkaDokument({ d, u }: { d: DataFaktury; u: DataUpominky }) {
 
 /** Vytvoří PDF upomínky k faktuře. */
 export async function pdfUpominky(d: DataFaktury, u: DataUpominky): Promise<Buffer> {
-  registrovatPisma();
-  return renderToBuffer(<UpominkaDokument d={await pripravitLogo(d)} u={u} />);
+  return vykreslit((x) => <UpominkaDokument d={x} u={u} />, d);
 }
