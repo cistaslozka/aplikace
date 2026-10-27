@@ -56,6 +56,8 @@ export function FakturaEditor({
   platce,
   dnes,
   dalsiCislo,
+  dalsiCisloZalohy = dalsiCislo,
+  vychoziDruh = "faktura",
   logo,
   vychozi,
 }: {
@@ -63,11 +65,20 @@ export function FakturaEditor({
   platce: boolean;
   dnes: string;
   dalsiCislo: string;
+  /** Další číslo zálohové faktury (ZF…) */
+  dalsiCisloZalohy?: string;
+  vychoziDruh?: "faktura" | "zalohova";
   /** Adresa nahraného loga firmy, nebo null */
   logo: string | null;
   vychozi?: VychoziFaktura;
 }) {
   const vychoziSazba: SazbaDph = platce ? 21 : 0;
+  const [druh, setDruh] = useState<"faktura" | "zalohova">(vychozi?.kind === "zalohova" ? "zalohova" : vychozi ? "faktura" : vychoziDruh);
+  const zaloha = druh === "zalohova";
+  // DUZP a daňový doklad jen u faktury plátce; zálohová faktura není daňový doklad
+  const danovy = platce && !zaloha;
+  const cisloDokladu = vychozi?.cislo ?? (zaloha ? dalsiCisloZalohy : dalsiCislo);
+  const vsDokladu = vychozi?.vs ?? (zaloha ? "9" + cisloDokladu.replace(/^ZF/, "") : cisloDokladu);
   const [odberatel, setOdberatel] = useState<{ id: string | null; s: Strana } | null>(
     vychozi?.customer ? { id: vychozi.client_id, s: vychozi.customer } : null,
   );
@@ -145,7 +156,8 @@ export function FakturaEditor({
       client_id: odberatel.id,
       customer: { name: odberatel.s.name, ico: odberatel.s.ico, dic: odberatel.s.dic, street: odberatel.s.street, city: odberatel.s.city, zip: odberatel.s.zip, country: odberatel.s.country, email: odberatel.s.email },
       issue_date: vystaveno,
-      taxable_date: platce ? duzp : null,
+      kind: druh,
+      taxable_date: danovy ? duzp : null,
       due_date: splatnost,
       payment_method: uhrada,
       template: vzhled,
@@ -178,7 +190,8 @@ export function FakturaEditor({
             ← Faktury
           </Link>
           <h1 className="text-2xl font-extrabold tracking-tight">
-            {vychozi ? "Úprava faktury" : "Nová faktura"} <span className="num font-semibold text-muted">č. {vychozi?.cislo ?? dalsiCislo}</span>
+            {vychozi ? (zaloha ? "Úprava zálohové faktury" : "Úprava faktury") : zaloha ? "Nová zálohová faktura" : "Nová faktura"}{" "}
+            <span className="num font-semibold text-muted">č. {cisloDokladu}</span>
           </h1>
         </div>
         <button
@@ -187,7 +200,7 @@ export function FakturaEditor({
           disabled={ukladam}
           className="min-h-12 rounded-xl bg-green px-6 text-[15px] font-bold text-navy transition hover:brightness-95 disabled:cursor-wait disabled:opacity-70"
         >
-          {ukladam ? "Ukládám…" : vychozi ? "Uložit změny" : "Vystavit fakturu"}
+          {ukladam ? "Ukládám…" : vychozi ? "Uložit změny" : zaloha ? "Vystavit zálohovou fakturu" : "Vystavit fakturu"}
         </button>
       </div>
 
@@ -195,6 +208,25 @@ export function FakturaEditor({
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
+          {!vychozi && (
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Druh dokladu">
+              {(
+                [
+                  ["faktura", "Faktura"],
+                  ["zalohova", "Zálohová faktura"],
+                ] as const
+              ).map(([k, t]) => (
+                <button key={k} type="button" aria-pressed={druh === k} onClick={() => setDruh(k)} className={tlacitkoVolby(druh === k)}>
+                  {t}
+                </button>
+              ))}
+              {zaloha && (
+                <span className="text-[13px] text-muted">
+                  Výzva k zaplacení zálohy. Není to daňový doklad{platce ? ", ten vystavíte po přijetí platby" : ""}.
+                </span>
+              )}
+            </div>
+          )}
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-green-soft bg-green-tint px-5 py-3.5 text-sm">
             <span>
               <strong className="text-navy">Fakturujete jako {dodavatel.name}</strong>
@@ -323,11 +355,11 @@ export function FakturaEditor({
           {/* Platba a termíny */}
           <section className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5">
             <h2 className="text-base font-bold">Platba a termíny</h2>
-            <div className={"grid gap-4 " + (platce ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+            <div className={"grid gap-4 " + (danovy ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
               <Pole id="vystaveno" label="Datum vystavení">
                 <input id="vystaveno" type="date" value={vystaveno} onChange={(e) => zmenVystaveno(e.target.value)} className={tridyVstupu() + " num"} />
               </Pole>
-              {platce && (
+              {danovy && (
                 <Pole id="duzp" label="Datum plnění (DUZP)" napoveda="Den, kdy jste dodali zboží nebo službu.">
                   <input id="duzp" type="date" value={duzp} onChange={(e) => e.target.value && setDuzp(e.target.value)} className={tridyVstupu() + " num"} />
                 </Pole>
@@ -420,12 +452,13 @@ export function FakturaEditor({
               <Meritko>
                 <FakturaA4
                   d={{
-                    cislo: vychozi?.cislo ?? dalsiCislo,
-                    vs: vychozi?.vs ?? dalsiCislo,
+                    druh,
+                    cislo: cisloDokladu,
+                    vs: vsDokladu,
                     dodavatel,
                     odberatel: odberatel?.s ?? null,
                     vystaveno,
-                    duzp: platce ? duzp : null,
+                    duzp: danovy ? duzp : null,
                     splatnost,
                     uhrada,
                     platce,

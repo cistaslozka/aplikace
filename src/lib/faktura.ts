@@ -57,6 +57,17 @@ export const ZPUSOBY_UHRADY: Record<ZpusobUhrady, string> = {
   dobirka: "Dobírkou",
 };
 
+export type DruhDokladu = "faktura" | "zalohova" | "ddpp";
+export const NAZVY_DOKLADU: Record<DruhDokladu, string> = {
+  faktura: "Faktura",
+  zalohova: "Zálohová faktura",
+  ddpp: "Daňový doklad k přijaté platbě",
+};
+/** Název souboru ke stažení: faktura-20260001, zalohova-faktura-ZF20260001 … */
+export function nazevSouboru(druh: DruhDokladu, cislo: string): string {
+  return `${druh === "zalohova" ? "zalohova-faktura" : druh === "ddpp" ? "danovy-doklad" : "faktura"}-${cislo}`;
+}
+
 export const STAVY = {
   vystavena: "Čeká na úhradu",
   uhrazena: "Uhrazeno",

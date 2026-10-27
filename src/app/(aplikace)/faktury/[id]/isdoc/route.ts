@@ -1,3 +1,4 @@
+import { nazevSouboru } from "@/lib/faktura";
 import { chybaPdf, souborKeStazeni } from "@/lib/chybaPdf";
 import { aktivniFirma } from "@/lib/firma";
 import { nactiFakturu } from "@/lib/faktury";
@@ -17,6 +18,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     const f = n.faktura;
     const xml = fakturaIsdoc({
       id: f.id,
+      druh: f.kind,
       cislo: f.number,
       vs: f.variable_symbol,
       dodavatel: f.supplier,
@@ -34,7 +36,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
       poznamka: f.note,
       uvod: f.intro_text,
     });
-    return souborKeStazeni(xml, `faktura-${f.number}.isdoc`, "application/xml; charset=utf-8");
+    return souborKeStazeni(xml, `${nazevSouboru(f.kind, f.number)}.isdoc`, "application/xml; charset=utf-8");
   } catch (e) {
     console.error("ISDOC faktury se nepodařilo vytvořit:", e);
     return chybaPdf("Soubor ISDOC se nepodařilo vytvořit. Zkuste to prosím znovu.", 500, e);

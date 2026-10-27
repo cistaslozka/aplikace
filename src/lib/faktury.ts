@@ -2,10 +2,12 @@ import "server-only";
 import type { DataFaktury } from "@/components/faktura/FakturaA4";
 import { createClient } from "@/lib/supabase/server";
 import { adresaLoga } from "./faktura";
-import type { PoziceLoga, Polozka, Rekapitulace, SazbaDph, StavFaktury, Strana, Vzhled, ZpusobUhrady } from "./faktura";
+import type { DruhDokladu, PoziceLoga, Polozka, Rekapitulace, SazbaDph, StavFaktury, Strana, Vzhled, ZpusobUhrady } from "./faktura";
 
 export type FakturaRadek = {
   id: string;
+  kind: DruhDokladu;
+  related_invoice_id: string | null;
   number: string;
   variable_symbol: string;
   client_id: string | null;
@@ -31,7 +33,7 @@ export type FakturaRadek = {
 };
 
 const SLOUPCE =
-  "id, number, variable_symbol, client_id, supplier, customer, issue_date, taxable_date, due_date, payment_method, vat_payer, template, note, intro_text, logo_position, logo_path, status, paid_at, subtotal, vat_total, total, vat_recap, created_at";
+  "id, kind, related_invoice_id, number, variable_symbol, client_id, supplier, customer, issue_date, taxable_date, due_date, payment_method, vat_payer, template, note, intro_text, logo_position, logo_path, status, paid_at, subtotal, vat_total, total, vat_recap, created_at";
 
 // Supabase vrací numeric jako text, převedeme na čísla.
 function cisla(f: Record<string, unknown>): FakturaRadek {
@@ -98,16 +100,18 @@ export function dodavatelZFirmy(f: {
   };
 }
 
-export async function dalsiCisloFaktury(organizationId: string, rok: number): Promise<string> {
+export async function dalsiCisloDokladu(organizationId: string, rok: number, druh: DruhDokladu): Promise<string> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("dalsi_cislo_faktury", { p_org: organizationId, p_rok: rok });
-  if (error) console.error("Číslo faktury se nenačetlo:", error.message);
-  return typeof data === "string" ? data : `${rok}0001`;
+  const { data, error } = await supabase.rpc("dalsi_cislo_dokladu", { p_org: organizationId, p_rok: rok, p_druh: druh });
+  if (error) console.error("Číslo dokladu se nenačetlo:", error.message);
+  const predpona = druh === "zalohova" ? "ZF" : druh === "ddpp" ? "DD" : "";
+  return typeof data === "string" ? data : `${predpona}${rok}0001`;
 }
 
 /** Údaje pro vykreslení uložené faktury (náhled, tisk i PDF). */
 export function dataUlozeneFaktury(f: FakturaRadek, polozky: Polozka[]): DataFaktury {
   return {
+    druh: f.kind,
     cislo: f.number,
     vs: f.variable_symbol,
     dodavatel: f.supplier,

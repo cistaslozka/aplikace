@@ -5,7 +5,7 @@ import { FakturaA4 } from "@/components/faktura/FakturaA4";
 import { Meritko } from "@/components/faktura/Meritko";
 import { StavPill } from "@/components/faktura/StavPill";
 import { Hlaska } from "@/components/Formular";
-import { castka, datumCz, dnesIso, dnuMezi, dny } from "@/lib/faktura";
+import { castka, datumCz, dnesIso, dnuMezi, dny, NAZVY_DOKLADU } from "@/lib/faktura";
 import { aktivniFirma } from "@/lib/firma";
 import { dataUlozeneFaktury, nactiFakturu, nactiUpominky } from "@/lib/faktury";
 import { vytvoritUpominkuAkce, zmenitStavAkce } from "../actions";
@@ -38,11 +38,13 @@ export default async function FakturaPage({ params, searchParams }: Props) {
             <Link href="/faktury" className="text-sm font-semibold text-muted hover:text-navy">
               ← Faktury
             </Link>
-            <h1 className="num text-2xl font-extrabold tracking-tight">Faktura {f.number}</h1>
+            <h1 className="num text-2xl font-extrabold tracking-tight">
+              {NAZVY_DOKLADU[f.kind]} {f.number}
+            </h1>
             <StavPill status={f.status} splatnost={f.due_date} />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <div role="group" aria-label="Stáhnout fakturu" className="flex overflow-hidden rounded-xl border-[1.5px] border-line bg-surface text-sm font-semibold text-navy">
+            <div role="group" aria-label="Stáhnout doklad" className="flex overflow-hidden rounded-xl border-[1.5px] border-line bg-surface text-sm font-semibold text-navy">
               <span className="flex items-center px-3 text-muted">Stáhnout</span>
               <a href={`/faktury/${f.id}/pdf`} className="flex min-h-11 items-center border-l border-line px-3.5 hover:bg-green-tint">
                 PDF
@@ -58,7 +60,7 @@ export default async function FakturaPage({ params, searchParams }: Props) {
           </div>
         </div>
 
-        {p.vystaveno === "1" && <Hlaska typ="info">Faktura je vystavená. Vytiskněte ji nebo uložte jako PDF a pošlete odběrateli.</Hlaska>}
+        {p.vystaveno === "1" && <Hlaska typ="info">{f.kind === "zalohova" ? "Zálohová faktura je vystavená." : "Faktura je vystavená."} Stáhněte ji jako PDF a pošlete odběrateli.</Hlaska>}
         {p.upraveno === "1" && <Hlaska typ="info">Změny jsou uložené.</Hlaska>}
         {p.upominka === "chyba" && <Hlaska typ="chyba">Upomínku se nepodařilo vytvořit. Zkuste to prosím znovu.</Hlaska>}
         {p.upominka && /^[1-3]$/.test(p.upominka) && (

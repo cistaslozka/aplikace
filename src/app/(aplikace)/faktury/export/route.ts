@@ -19,6 +19,7 @@ export async function GET(req: Request) {
       .sort((a, b) => a.number.localeCompare(b.number));
     const xlsx = await prehledFakturXlsx(
       faktury.map((f) => ({
+        druh: f.kind,
         cislo: f.number,
         vs: f.variable_symbol,
         vystaveno: f.issue_date,
@@ -32,7 +33,7 @@ export async function GET(req: Request) {
         uhrazeno: f.paid_at,
         uhrada: f.payment_method,
       })),
-      `${firma.name} – vydané faktury${rok ? ` ${rok}` : ""}`,
+      `${firma.name} – vydané doklady${rok ? ` ${rok}` : ""}`,
     );
     return souborKeStazeni(new Uint8Array(xlsx), `faktury-${rok ?? "vse"}.xlsx`, XLSX);
   } catch (e) {

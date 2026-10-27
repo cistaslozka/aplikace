@@ -1,3 +1,4 @@
+import { nazevSouboru } from "@/lib/faktura";
 import { chybaPdf, souborKeStazeni } from "@/lib/chybaPdf";
 import { aktivniFirma } from "@/lib/firma";
 import { nactiFakturu } from "@/lib/faktury";
@@ -18,6 +19,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     if (!n) return chybaPdf("Faktura nenalezena", 404);
     const f = n.faktura;
     const xlsx = await fakturaXlsx({
+      druh: f.kind,
       cislo: f.number,
       vs: f.variable_symbol,
       dodavatel: f.supplier,
@@ -36,7 +38,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
       uvod: f.intro_text,
       stav: f.status,
     });
-    return souborKeStazeni(new Uint8Array(xlsx), `faktura-${f.number}.xlsx`, XLSX);
+    return souborKeStazeni(new Uint8Array(xlsx), `${nazevSouboru(f.kind, f.number)}.xlsx`, XLSX);
   } catch (e) {
     console.error("XLSX faktury se nepodařilo vytvořit:", e);
     return chybaPdf("Soubor Excel se nepodařilo vytvořit. Zkuste to prosím znovu.", 500, e);
