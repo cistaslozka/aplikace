@@ -170,6 +170,13 @@ uživatelů (týmový přístup v Pro).
   upravit ani stornovat. „Uhrazeno“ u dobropisu = vypořádáno (peníze vráceny nebo započteny). Upomínka počítá
   s odečtením dobropisů. V ISDOC DocumentType 2 s `OriginalDocumentReferences`. Na přehledu snižuje obrat,
   DPH a (po vypořádání) příjmy.
+- `cash_documents` – pokladní doklady: `kind` `prijem` (PPD20260001) / `vydej` (VPD20260001), částka vždy
+  kladná, `purpose` = účel platby, `partner` = od koho / komu, `supplier` = snímek firmy. U plátce volitelná
+  sazba DPH a rozpis výpočtem shora (`vat_base`, `vat_amount`). Zapisuje jen `ulozit_pokladni_doklad(p, dnes)`
+  (datum ne v budoucnosti), storno jen `stornovat_pokladni_doklad(id)`. S `invoice_id` jde o hotovostní úhradu
+  neuhrazené faktury – faktura se označí jako uhrazená (způsob úhrady hotově), storno dokladu ji vrátí.
+  Stránky `/pokladna` (zůstatek, příjmy a výdaje za rok), `/pokladna/nova`, `/pokladna/<id>` a PDF A5 na šířku.
+  Upozornění na limit hotovosti 270 000 Kč.
 - `invoice_reminders` – upomínky (1.–3.) k neuhrazené faktuře po splatnosti. Vytváří je jen funkce
   `vytvorit_upominku(faktura, dnes)`, nová lhůta k úhradě je 7 dní. PDF: `/faktury/<id>/upominka/<1–3>`.
 - `contracts` – smlouvy (druh, číslo S…, strany jako kopie, `fields` = vyplněný vzor, `valid_until`, stav

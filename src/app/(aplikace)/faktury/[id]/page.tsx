@@ -152,6 +152,15 @@ export default async function FakturaPage({ params, searchParams }: Props) {
               </button>
             </form>
           )}
+          {f.status === "vystavena" && (f.kind === "faktura" || f.kind === "zalohova") && (
+            <Link
+              href={`/pokladna/nova?faktura=${f.id}`}
+              className={tlacitko}
+              title="Vystaví příjmový pokladní doklad a označí fakturu jako uhrazenou"
+            >
+              Zaplaceno hotově
+            </Link>
+          )}
           {lzeVratit && (
             <form action={zmenitStavAkce}>
               <input type="hidden" name="id" value={f.id} />
