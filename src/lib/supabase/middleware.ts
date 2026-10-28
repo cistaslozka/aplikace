@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Stránky, které vidí i nepřihlášený návštěvník.
-const VEREJNE = ["/", "/navrh"];
+const VEREJNE = ["/", "/navrh", "/obchodni-podminky", "/ochrana-osobnich-udaju", "/cookies", "/vylouceni-odpovednosti"];
 // Stránky pro přihlášení: přihlášeného uživatele z nich pošleme rovnou do aplikace.
 const PRIHLASOVACI = ["/prihlaseni", "/registrace", "/zapomenute-heslo"];
 
