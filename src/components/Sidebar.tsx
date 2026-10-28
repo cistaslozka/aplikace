@@ -96,6 +96,17 @@ export function Sidebar({ email, firma }: { email: string; firma: string | null 
           <NavLink href="/predplatne" label="Předplatné" Icon={IconCard} />
         </nav>
         <Odhlasit email={email} firma={firma} />
+        <div className="flex flex-wrap gap-x-3 gap-y-1 px-1 text-[12px] text-slate-400">
+          <Link href="/obchodni-podminky" className="hover:text-white">
+            Podmínky
+          </Link>
+          <Link href="/ochrana-osobnich-udaju" className="hover:text-white">
+            Osobní údaje
+          </Link>
+          <Link href="/cookies" className="hover:text-white">
+            Cookies
+          </Link>
+        </div>
       </div>
     </aside>
   );

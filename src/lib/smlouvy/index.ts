@@ -23,6 +23,9 @@ export type StavSmlouvy = keyof typeof STAVY_SMLUV;
 /** Článek smlouvy: nadpis a číslované odstavce. */
 export type Clanek = { nadpis: string; odstavce: string[] };
 
+export type Podpis = { obrazek: string; jmeno: string; kdy: string };
+export type Podpisy = { my?: Podpis; oni?: Podpis };
+
 export type DataSmlouvy = {
   druh: DruhSmlouvy;
   cislo: string;
@@ -36,6 +39,7 @@ export type DataSmlouvy = {
   datum: string | null;
   vzhled: Vzhled;
   stav?: StavSmlouvy;
+  podpisy?: Podpisy;
 };
 
 /** Role stran ve smlouvě: kdo je zhotovitel a kdo objednatel. */

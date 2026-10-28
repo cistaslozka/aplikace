@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { StavPill } from "@/components/faktura/StavPill";
-import { castka, datumCz, dnesIso, dny, NAZVY_DOKLADU } from "@/lib/faktura";
+import { castka, datumCz, dnesIso, dnuMezi, dny, NAZVY_DOKLADU, pridatDny } from "@/lib/faktura";
 import { aktivniFirma } from "@/lib/firma";
 import { seznamFaktur } from "@/lib/faktury";
 import { kUhrade, LIMIT_DPH, LIMIT_DPH_OKAMZITY, spocitejPrehled } from "@/lib/prehled";
@@ -43,10 +43,21 @@ export default async function PrehledPage({ searchParams }: Props) {
   }).format(new Date());
   const zbyva = dniDo(firma.trial_ends_at);
   const supabase = await createClient();
-  const [doklady, ulozene] = await Promise.all([
+  const [doklady, ulozene, koncici] = await Promise.all([
     seznamFaktur(firma.id),
     supabase.from("dashboard_layouts").select("tiles").eq("organization_id", firma.id).maybeSingle(),
+    // uzavřené smlouvy, kterým termín končí do 30 dnů (nebo nedávno skončil)
+    supabase
+      .from("contracts")
+      .select("id, title, number, customer, valid_until")
+      .eq("organization_id", firma.id)
+      .eq("status", "uzavrena")
+      .gte("valid_until", pridatDny(dnes, -14))
+      .lte("valid_until", pridatDny(dnes, 30))
+      .order("valid_until")
+      .limit(5),
   ]);
+  const koncSmlouvy = (koncici.data ?? []) as { id: string; title: string; number: string; customer: { name: string }; valid_until: string }[];
   const rozlozeni = slozRozlozeni(ulozene.data?.tiles);
   const s = spocitejPrehled(doklady, dnes);
   const maxMesic = Math.max(...s.prijmy.mesice.map((m) => m.castka), 1);
@@ -231,8 +242,34 @@ export default async function PrehledPage({ searchParams }: Props) {
     smlouvy: (
       <>
         <article className={karta}>
-          <h2 className="text-lg font-bold">Končící smlouvy</h2>
-          <p className="text-[13px] text-muted">Až budete mít smlouvy v aplikaci, tady uvidíte ty, kterým se blíží konec.</p>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-lg font-bold">Končící smlouvy</h2>
+            <Link href="/smlouvy" className="text-[13px] font-semibold text-green-ink hover:underline">
+              Smlouvy →
+            </Link>
+          </div>
+          {koncSmlouvy.length === 0 ? (
+            <p className="text-[13px] text-muted">Žádné smlouvě v příštích 30 dnech nekončí termín.</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-line">
+              {koncSmlouvy.map((k) => {
+                const zbyva = dnuMezi(dnes, k.valid_until);
+                return (
+                  <li key={k.id}>
+                    <Link href={`/smlouvy/${k.id}`} className="flex items-center justify-between gap-3 py-2.5 hover:bg-slate-50">
+                      <span className="min-w-0 text-sm">
+                        <span className="block truncate font-semibold text-navy">{k.title}</span>
+                        <span className="block truncate text-[12.5px] text-muted">{k.customer.name}</span>
+                      </span>
+                      <span className={"shrink-0 text-[12.5px] font-semibold " + (zbyva < 0 ? "text-red" : zbyva <= 7 ? "text-amber" : "text-muted")}>
+                        {zbyva < 0 ? `skončila před ${-zbyva} ${dny(-zbyva)}` : zbyva === 0 ? "končí dnes" : `končí za ${zbyva} ${dny(zbyva)}`}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </article>
       </>
     ),
