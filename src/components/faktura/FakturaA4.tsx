@@ -8,6 +8,7 @@ import {
   ZPUSOBY_UHRADY,
   NAZVY_DOKLADU,
   nadpisDokladu,
+  textyDokladu,
   type DruhDokladu,
   type PoziceLoga,
   type Polozka,
@@ -47,6 +48,8 @@ export type DataFaktury = {
   uvod?: string | null;
   /** Odpočet zaplacené zálohy na konečné faktuře */
   odpocet?: { cislo: string; castka: number; rekapitulace: Rekapitulace[] } | null;
+  /** Dobropis: opravovaná faktura a důvod opravy */
+  oprava?: { id?: string; cislo: string; vystaveno: string; duvod?: string | null } | null;
 };
 
 // Styly tří vzhledů. Obsah faktury je ve všech stejný, mění se jen vzhled.
@@ -111,7 +114,8 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
   const zaloha = d.odpocet?.castka ?? 0;
   const kUhrade = naHalere(d.celkem - zaloha);
   const dphZbyva = naHalere(d.dph - (d.odpocet?.rekapitulace ?? []).reduce((s, r) => s + r.vat, 0));
-  const danovy = d.platce && druh !== "zalohova";
+  const t = textyDokladu(druh, d.platce, d.stav, !!d.odpocet);
+  const danovy = t.danovy;
   const logo = d.logo && d.logoPozice ? d.logoPozice : null;
   const iban = d.dodavatel.iban ? formatujIban(d.dodavatel.iban) : null;
   const prevod = d.uhrada === "prevod";
@@ -146,7 +150,7 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
             <div className={v.nadpis}>{nadpisDokladu(druh).nadpis}</div>
             <div className={"num " + v.podnadpis}>
               {nadpisDokladu(druh).dodatek}č. {d.cislo}
-              {druh === "zalohova" ? " · není daňový doklad" : danovy ? " · daňový doklad" : ""}
+              {t.podtitul}
             </div>
           </div>
         </div>
@@ -198,7 +202,7 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
           </div>
           {danovy ? (
             <div>
-              <div className={v.stitek}>Datum zdan. plnění</div>
+              <div className={v.stitek}>{t.stitekDuzp}</div>
               {datumCz(d.duzp ?? d.vystaveno)}
             </div>
           ) : (
@@ -217,7 +221,17 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
           </div>
         </div>
 
-        {prevod && (d.dodavatel.bank_account || iban) && (
+        {d.oprava && (
+          <div className="rounded-lg border border-line bg-slate-50 px-4 py-2.5 text-[11.5px]">
+            <div>
+              {d.platce ? "Opravný daňový doklad" : "Opravný doklad"} k faktuře č.{" "}
+              <strong className="num text-navy">{d.oprava.cislo}</strong> ze dne <span className="num">{datumCz(d.oprava.vystaveno)}</span>.
+            </div>
+            {d.oprava.duvod && <div className="mt-0.5">Důvod opravy: {d.oprava.duvod}</div>}
+          </div>
+        )}
+
+        {t.ucet && prevod && (d.dodavatel.bank_account || iban) && (
           <div className="num grid grid-cols-[auto_1fr] gap-x-6 gap-y-0.5 text-[11.5px]">
             {d.dodavatel.bank_account && (
               <>
@@ -301,9 +315,7 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
                 </div>
               </div>
             )}
-            <div className="text-[10px] font-bold tracking-[0.08em] uppercase opacity-75">
-              {d.stav === "uhrazena" ? "Uhrazeno" : d.odpocet ? "Zbývá uhradit" : "Celkem k úhradě"}
-            </div>
+            <div className="text-[10px] font-bold tracking-[0.08em] uppercase opacity-75">{t.stitekCelkem}</div>
             <div className="num font-display text-[26px] leading-tight font-extrabold">{castka(kUhrade)}</div>
             {d.platce && <div className="num text-[10.5px] opacity-75">z toho DPH {castka(d.odpocet ? dphZbyva : d.dph)}</div>}
           </div>
@@ -326,7 +338,7 @@ export function FakturaA4({ d }: { d: DataFaktury }) {
           {logo === "dole" && <Logo src={d.logo!} vyska={48} />}
           {d.stav === "uhrazena" && d.uhrazeno && (
             <div className="rounded-lg border-2 border-green-ink px-3 py-1.5 text-center text-[11px] font-bold text-green-ink">
-              UHRAZENO {datumCz(d.uhrazeno)}
+              {t.razitko} {datumCz(d.uhrazeno)}
             </div>
           )}
         </div>

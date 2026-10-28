@@ -162,6 +162,14 @@ uživatelů (týmový přístup v Pro).
   Vytváří ji jen `ulozit_konecnou_fakturu(faktura, položky, záloha)`. K úhradě = `total − advance_amount`
   (QR, upomínky, seznam). V ISDOC `TaxedDeposits` + „AlreadyClaimed…“ u plátce, `NonTaxedDeposits` +
   `PaidDepositsAmount` u neplátce.
+- Dobropis (`kind = dobropis`, OD20260001, VS = VS faktury, `related_invoice_id` = opravovaná faktura):
+  opravný daňový doklad (§ 45 ZDPH), u neplátce opravný doklad. Částky jsou záporné, `correction_reason` =
+  důvod opravy. Vystavuje ho jen `vystavit_dobropis(faktura, údaje, položky, dnes)` (stránka
+  `/faktury/<id>/dobropis`): jen k platné faktuře, součet dobropisů nesmí přesáhnout částku faktury,
+  DUZP (u plátce) = datum vystavení. Dobropis nejde upravit, jen stornovat; fakturu s platným dobropisem nejde
+  upravit ani stornovat. „Uhrazeno“ u dobropisu = vypořádáno (peníze vráceny nebo započteny). Upomínka počítá
+  s odečtením dobropisů. V ISDOC DocumentType 2 s `OriginalDocumentReferences`. Na přehledu snižuje obrat,
+  DPH a (po vypořádání) příjmy.
 - `cash_documents` – pokladní doklady: `kind` `prijem` (PPD20260001) / `vydej` (VPD20260001), částka vždy
   kladná, `purpose` = účel platby, `partner` = od koho / komu, `supplier` = snímek firmy. U plátce volitelná
   sazba DPH a rozpis výpočtem shora (`vat_base`, `vat_amount`). Zapisuje jen `ulozit_pokladni_doklad(p, dnes)`

@@ -1,6 +1,18 @@
 import "server-only";
 import ExcelJS from "exceljs";
-import { NAZVY_DOKLADU, STAVY, type DruhDokladu, ZPUSOBY_UHRADY, zakladPolozky, naHalere, type Polozka, type Rekapitulace, type StavFaktury, type Strana, type ZpusobUhrady } from "./faktura";
+import {
+  NAZVY_DOKLADU,
+  STAVY,
+  type DruhDokladu,
+  ZPUSOBY_UHRADY,
+  zakladPolozky,
+  naHalere,
+  type Polozka,
+  type Rekapitulace,
+  type StavFaktury,
+  type Strana,
+  type ZpusobUhrady,
+} from "./faktura";
 import { formatujIban } from "./validace";
 
 // Barvy z globals.css (ARGB)
@@ -31,7 +43,8 @@ function hlavickaTabulky(radek: ExcelJS.Row) {
   radek.height = 22;
 }
 
-const adresa = (s: Strana) => [s.street, [s.zip, s.city].filter(Boolean).join(" "), s.country && s.country !== "CZ" ? s.country : null].filter(Boolean).join(", ");
+const adresa = (s: Strana) =>
+  [s.street, [s.zip, s.city].filter(Boolean).join(" "), s.country && s.country !== "CZ" ? s.country : null].filter(Boolean).join(", ");
 
 export type DataXlsx = {
   druh?: DruhDokladu;
@@ -53,19 +66,34 @@ export type DataXlsx = {
   uvod?: string | null;
   stav: StavFaktury;
   odpocet?: { cislo: string; castka: number } | null;
+  /** Dobropis: opravovaná faktura */
+  oprava?: { cislo: string; vystaveno: string; duvod?: string | null } | null;
 };
 
 /** Jedna faktura jako list v Excelu. */
 export async function fakturaXlsx(d: DataXlsx): Promise<Buffer> {
   const wb = sesit();
   const nazev = NAZVY_DOKLADU[d.druh ?? "faktura"];
-  const ws = wb.addWorksheet(`${d.druh === "zalohova" ? "Záloha" : "Faktura"} ${d.cislo}`, { pageSetup: { paperSize: 9, orientation: "portrait", fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
+  const dobropis = d.druh === "dobropis";
+  const ws = wb.addWorksheet(`${d.druh === "zalohova" ? "Záloha" : dobropis ? "Dobropis" : "Faktura"} ${d.cislo}`, {
+    pageSetup: { paperSize: 9, orientation: "portrait", fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+  });
   ws.columns = [{ width: 42 }, { width: 11 }, { width: 9 }, { width: 16 }, { width: 8 }, { width: 16 }, { width: 14 }, { width: 16 }];
 
   const nadpis = ws.addRow([`${nazev} ${d.cislo}`]);
   nadpis.font = { bold: true, size: 18, color: { argb: NAVY } };
-  ws.addRow([d.druh === "zalohova" ? "Není daňový doklad." : d.platce ? "Daňový doklad" : "Nejsem plátce DPH."]).font = { color: { argb: MUTED } };
-  if (d.stav !== "vystavena") ws.addRow([STAVY[d.stav]]).font = { bold: true, color: { argb: NAVY } };
+  ws.addRow([
+    d.druh === "zalohova"
+      ? "Není daňový doklad."
+      : dobropis
+        ? `${d.platce ? "Opravný daňový doklad" : "Opravný doklad"}${d.oprava ? ` k faktuře č. ${d.oprava.cislo} ze dne ${d.oprava.vystaveno.split("-").reverse().map(Number).join(". ")}` : ""}`
+        : d.platce
+          ? "Daňový doklad"
+          : "Nejsem plátce DPH.",
+  ]).font = { color: { argb: MUTED } };
+  if (dobropis && d.oprava?.duvod) ws.addRow([`Důvod opravy: ${d.oprava.duvod}`]);
+  if (d.stav !== "vystavena")
+    ws.addRow([dobropis && d.stav === "uhrazena" ? "Vypořádáno" : STAVY[d.stav]]).font = { bold: true, color: { argb: NAVY } };
   ws.addRow([]);
 
   const strany = ws.addRow(["Dodavatel", "", "", "Odběratel"]);
@@ -85,12 +113,16 @@ export async function fakturaXlsx(d: DataXlsx): Promise<Buffer> {
 
   const udaje: [string, string | Date | null][] = [
     ["Datum vystavení", datum(d.vystaveno)],
-    ...(d.platce && d.druh !== "zalohova" ? ([["Datum zdanitelného plnění", datum(d.duzp ?? d.vystaveno)]] as [string, Date | null][]) : []),
+    ...(d.platce && d.druh !== "zalohova"
+      ? ([[dobropis ? "Datum opravy" : "Datum zdanitelného plnění", datum(d.duzp ?? d.vystaveno)]] as [string, Date | null][])
+      : []),
     ["Datum splatnosti", datum(d.splatnost)],
     ["Způsob úhrady", ZPUSOBY_UHRADY[d.uhrada]],
     ["Variabilní symbol", d.vs],
-    ...(d.uhrada === "prevod" && d.dodavatel.bank_account ? ([["Číslo účtu", d.dodavatel.bank_account]] as [string, string][]) : []),
-    ...(d.uhrada === "prevod" && d.dodavatel.iban ? ([["IBAN", formatujIban(d.dodavatel.iban)]] as [string, string][]) : []),
+    ...(!dobropis && d.uhrada === "prevod" && d.dodavatel.bank_account
+      ? ([["Číslo účtu", d.dodavatel.bank_account]] as [string, string][])
+      : []),
+    ...(!dobropis && d.uhrada === "prevod" && d.dodavatel.iban ? ([["IBAN", formatujIban(d.dodavatel.iban)]] as [string, string][]) : []),
   ];
   for (const [k, v] of udaje) {
     const r = ws.addRow([k, v]);
@@ -145,8 +177,8 @@ export async function fakturaXlsx(d: DataXlsx): Promise<Buffer> {
   const celkem = d.odpocet
     ? radekCastky("Zbývá uhradit", naHalere(d.celkem - d.odpocet.castka))
     : d.platce
-      ? ws.addRow(["Celkem k úhradě", "", "", "", "", d.zaklad, d.dph, d.celkem])
-      : ws.addRow(["Celkem k úhradě", "", "", "", "", d.celkem]);
+      ? ws.addRow([dobropis ? "Celkem snížení" : "Celkem k úhradě", "", "", "", "", d.zaklad, d.dph, d.celkem])
+      : ws.addRow([dobropis ? "Celkem snížení" : "Celkem k úhradě", "", "", "", "", d.celkem]);
   celkem.font = { bold: true, size: 12, color: { argb: NAVY } };
   [6, 7, 8].forEach((i) => (celkem.getCell(i).numFmt = KC));
   if (d.poznamka) {
@@ -222,9 +254,16 @@ export async function prehledFakturXlsx(radky: RadekPrehledu[], nazev: string): 
   ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: posledni, column: 15 } };
   if (radky.length) {
     const soucet = ws.addRow({ druh: "Celkem" });
-    for (const [klic, sloupec] of [["zaklad", "I"], ["dph", "J"], ["celkem", "K"]] as const) {
+    for (const [klic, sloupec] of [
+      ["zaklad", "I"],
+      ["dph", "J"],
+      ["celkem", "K"],
+    ] as const) {
       const c = soucet.getCell(klic);
-      c.value = { formula: `SUBTOTAL(9,${sloupec}2:${sloupec}${posledni})`, result: radky.reduce((s, f) => s + (f.stav === "stornovana" ? 0 : f[klic]), 0) };
+      c.value = {
+        formula: `SUBTOTAL(9,${sloupec}2:${sloupec}${posledni})`,
+        result: radky.reduce((s, f) => s + (f.stav === "stornovana" ? 0 : f[klic]), 0),
+      };
       c.numFmt = KC;
     }
     soucet.font = { bold: true, color: { argb: NAVY } };

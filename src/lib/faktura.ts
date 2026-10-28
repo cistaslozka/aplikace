@@ -57,11 +57,12 @@ export const ZPUSOBY_UHRADY: Record<ZpusobUhrady, string> = {
   dobirka: "Dobírkou",
 };
 
-export type DruhDokladu = "faktura" | "zalohova" | "ddpp";
+export type DruhDokladu = "faktura" | "zalohova" | "ddpp" | "dobropis";
 export const NAZVY_DOKLADU: Record<DruhDokladu, string> = {
   faktura: "Faktura",
   zalohova: "Zálohová faktura",
   ddpp: "Daňový doklad k přijaté platbě",
+  dobropis: "Dobropis",
 };
 /** Nadpis na dokladu: u daňového dokladu k platbě je dlouhý název rozdělený do dvou řádků. */
 export function nadpisDokladu(druh: DruhDokladu): { nadpis: string; dodatek: string } {
@@ -69,9 +70,43 @@ export function nadpisDokladu(druh: DruhDokladu): { nadpis: string; dodatek: str
   return { nadpis: NAZVY_DOKLADU[druh], dodatek: "" };
 }
 
+/** Texty, které se na dokladu liší podle druhu (stejné pro náhled i PDF). */
+export function textyDokladu(druh: DruhDokladu, platce: boolean, stav: StavFaktury | undefined, sOdpoctem: boolean) {
+  const danovy = platce && druh !== "zalohova";
+  const dobropis = druh === "dobropis";
+  return {
+    danovy,
+    podtitul:
+      druh === "zalohova"
+        ? " · není daňový doklad"
+        : dobropis
+          ? platce
+            ? " · opravný daňový doklad"
+            : " · opravný doklad"
+          : danovy
+            ? " · daňový doklad"
+            : "",
+    stitekDuzp: dobropis ? "Datum opravy" : "Datum zdan. plnění",
+    stitekCelkem:
+      stav === "uhrazena"
+        ? dobropis
+          ? "Vypořádáno"
+          : "Uhrazeno"
+        : dobropis
+          ? "Celkem snížení"
+          : sOdpoctem
+            ? "Zbývá uhradit"
+            : "Celkem k úhradě",
+    razitko: dobropis ? "VYPOŘÁDÁNO" : "UHRAZENO",
+    // u dobropisu se nic neplatí na náš účet, údaje o účtu nedávají smysl
+    ucet: !dobropis,
+  };
+}
+
 /** Název souboru ke stažení: faktura-20260001, zalohova-faktura-ZF20260001 … */
 export function nazevSouboru(druh: DruhDokladu, cislo: string): string {
-  return `${druh === "zalohova" ? "zalohova-faktura" : druh === "ddpp" ? "danovy-doklad" : "faktura"}-${cislo}`;
+  const predpona = { faktura: "faktura", zalohova: "zalohova-faktura", ddpp: "danovy-doklad", dobropis: "dobropis" }[druh];
+  return `${predpona}-${cislo}`;
 }
 
 export const STAVY = {
@@ -147,12 +182,7 @@ export function dnuMezi(odIso: string, doIso: string): number {
  * který čtou všechny české bankovní aplikace.
  */
 export function qrPlatba(o: { iban: string; castka: number; vs: string; zprava?: string; splatnost?: string }): string {
-  const casti = [
-    "SPD*1.0",
-    `ACC:${o.iban.replace(/\s/g, "").toUpperCase()}`,
-    `AM:${o.castka.toFixed(2)}`,
-    "CC:CZK",
-  ];
+  const casti = ["SPD*1.0", `ACC:${o.iban.replace(/\s/g, "").toUpperCase()}`, `AM:${o.castka.toFixed(2)}`, "CC:CZK"];
   if (o.splatnost) casti.push(`DT:${o.splatnost.replace(/-/g, "")}`);
   if (o.zprava) casti.push(`MSG:${o.zprava.replace(/\*/g, " ").normalize("NFD").replace(/[̀-ͯ]/g, "").slice(0, 60)}`);
   casti.push(`X-VS:${o.vs}`);
