@@ -36,6 +36,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
       poznamka: f.note,
       uvod: f.intro_text,
       odpocet: f.advance_amount > 0 ? { cislo: n.zalohaCislo ?? "", castka: f.advance_amount, rekapitulace: f.advance_recap } : null,
+      oprava: n.oprava,
     });
     return souborKeStazeni(xml, `${nazevSouboru(f.kind, f.number)}.isdoc`, "application/xml; charset=utf-8");
   } catch (e) {

@@ -64,7 +64,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 4b | Faktury: stažení PDF, upomínky, export ISDOC a XLSX, zálohová faktura, daňový doklad k přijaté platbě, vyúčtování zálohy (hotovo); odeslání e-mailem (až bude doména) | skoro hotovo |
 | 5 | Přehled s dlaždicemi: skutečná čísla (5a) a vlastní rozložení – zapnout, vypnout, seřadit (5b) | hotovo |
 | 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
-| 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol (**7a, 7b hotovo**); 7c podpis na obrazovce, hlídání končících smluv. Cestovní příkaz přesunut do kroku 10 | rozpracováno |
+| 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol, podpis na obrazovce, hlídání končících smluv | hotovo |
 | 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | hotovo: dobropis (8a), pokladní doklady (8b) |
 | 9 | Pro: B2B rámcová, kupní a nájemní smlouva, plná moc, svěření majetku, záznam o školení BOZP, souhlas GDPR; týmový přístup (účetní, asistentka) | |
 | 10 | HR dokumenty (Pro): HPP, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, vytýkací dopis, cestovní příkaz a vyúčtování (sazby stravného) – **až po kontrole právníkem** | |
@@ -74,10 +74,15 @@ První verze pro skutečné uživatele = kroky 0–5.
 
 ### Kde jsme skončili (aktualizuje se po každém kroku)
 
-- **Hotovo naposledy:** krok 7b – vzory smlouva o službách, licenční smlouva, NDA, předávací protokol
-  (`src/lib/smlouvy/*.ts`, zapsané ve `vzory.ts` i s podtitulem podle zákona a úvodní větou).
-- **Další na řadě:** krok 7c – podpis prstem / myší na obrazovce (obrázek podpisu ke smlouvě) a dlaždice
-  Končící smlouvy na přehledu podle `contracts.valid_until`. Pak krok 8 (dobropis, pokladní doklady).
+- **Hotovo naposledy:** krok 7c – podpis na obrazovce (`contracts.signatures`, funkce `podepsat_smlouvu`,
+  `smazat_podpisy_smlouvy`, trigger `private.hlidat_podepsanou_smlouvu`) a dlaždice Končící smlouvy;
+  právní stránky `/obchodni-podminky`, `/ochrana-osobnich-udaju`, `/cookies`, `/vylouceni-odpovednosti`
+  (návrhy, údaje firmy se doplní v `src/lib/provozovatel.ts` po založení s.r.o., pak `doplneno: true`;
+  zkontroluje právník); tarif Pro označený „Brzy“ (`brzy` v `src/lib/tarify.ts`); krok 8 – dobropis
+  a pokladní doklady.
+- **Další na řadě:** krok 10 – cestovní příkaz (Basic), pak HR dokumenty (Pro, po kontrole právníkem) a krok 9
+  (týmový přístup). E-maily z aplikace, až bude doména cistaslozka.cz + Resend. Platební brána jako poslední,
+  až bude s.r.o.
 - **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
@@ -157,6 +162,14 @@ uživatelů (týmový přístup v Pro).
   Vytváří ji jen `ulozit_konecnou_fakturu(faktura, položky, záloha)`. K úhradě = `total − advance_amount`
   (QR, upomínky, seznam). V ISDOC `TaxedDeposits` + „AlreadyClaimed…“ u plátce, `NonTaxedDeposits` +
   `PaidDepositsAmount` u neplátce.
+- Dobropis (`kind = dobropis`, OD20260001, VS = VS faktury, `related_invoice_id` = opravovaná faktura):
+  opravný daňový doklad (§ 45 ZDPH), u neplátce opravný doklad. Částky jsou záporné, `correction_reason` =
+  důvod opravy. Vystavuje ho jen `vystavit_dobropis(faktura, údaje, položky, dnes)` (stránka
+  `/faktury/<id>/dobropis`): jen k platné faktuře, součet dobropisů nesmí přesáhnout částku faktury,
+  DUZP (u plátce) = datum vystavení. Dobropis nejde upravit, jen stornovat; fakturu s platným dobropisem nejde
+  upravit ani stornovat. „Uhrazeno“ u dobropisu = vypořádáno (peníze vráceny nebo započteny). Upomínka počítá
+  s odečtením dobropisů. V ISDOC DocumentType 2 s `OriginalDocumentReferences`. Na přehledu snižuje obrat,
+  DPH a (po vypořádání) příjmy.
 - `cash_documents` – pokladní doklady: `kind` `prijem` (PPD20260001) / `vydej` (VPD20260001), částka vždy
   kladná, `purpose` = účel platby, `partner` = od koho / komu, `supplier` = snímek firmy. U plátce volitelná
   sazba DPH a rozpis výpočtem shora (`vat_base`, `vat_amount`). Zapisuje jen `ulozit_pokladni_doklad(p, dnes)`

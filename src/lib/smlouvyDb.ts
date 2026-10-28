@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { Strana, Vzhled } from "./faktura";
-import { DRUHY_SMLUV, type DataSmlouvy, type DruhSmlouvy, type StavSmlouvy } from "./smlouvy";
+import { DRUHY_SMLUV, type DataSmlouvy, type DruhSmlouvy, type Podpisy, type StavSmlouvy } from "./smlouvy";
 
 export type SmlouvaRadek = {
   id: string;
@@ -18,10 +18,11 @@ export type SmlouvaRadek = {
   valid_until: string | null;
   template: Vzhled;
   status: StavSmlouvy;
+  signatures: Podpisy;
   created_at: string;
 };
 
-const SLOUPCE = "id, kind, number, client_id, we_supply, supplier, customer, title, fields, place, signed_on, valid_until, template, status, created_at";
+const SLOUPCE = "id, kind, number, client_id, we_supply, supplier, customer, title, fields, place, signed_on, valid_until, template, status, signatures, created_at";
 
 export async function seznamSmluv(organizationId: string): Promise<SmlouvaRadek[]> {
   const supabase = await createClient();
@@ -50,6 +51,7 @@ export function dataUlozeneSmlouvy(s: SmlouvaRadek): DataSmlouvy {
     datum: s.signed_on,
     vzhled: s.template,
     stav: s.status,
+    podpisy: s.signatures ?? {},
   };
 }
 

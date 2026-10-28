@@ -34,13 +34,18 @@ export default async function FakturaPage({ params, searchParams }: Props) {
   const dnes = dnesIso();
   const danovyDoklad = souvisejici.navazane.find((x) => x.kind === "ddpp" && x.status !== "stornovana") ?? null;
   const konecna = souvisejici.navazane.find((x) => x.kind === "faktura" && x.status !== "stornovana") ?? null;
+  const dobropisy = souvisejici.navazane.filter((x) => x.kind === "dobropis");
+  const platneDobropisy = dobropisy.filter((x) => x.status !== "stornovana");
+  // Kolik z faktury ještě zbývá po odečtení platných dobropisů (dobropisy mají zápornou částku)
+  const poDobropisech = f.total + platneDobropisy.reduce((s, x) => s + x.total, 0);
+  const dobropis = f.kind === "dobropis";
   // Konečnou fakturu lze vystavit k zaplacené záloze; plátce nejdřív potřebuje daňový doklad
   const lzeVyuctovat = f.kind === "zalohova" && f.status === "uhrazena" && !konecna && (!f.vat_payer || !!danovyDoklad);
   // Zálohu s daňovým dokladem a daňový doklad samotný už upravit nejde
-  const lzeUpravit = f.status !== "stornovana" && f.kind !== "ddpp" && !danovyDoklad && !konecna;
+  const lzeUpravit = f.status !== "stornovana" && f.kind !== "ddpp" && !dobropis && !danovyDoklad && !konecna && !platneDobropisy.length;
   const lzeVratit = f.status === "uhrazena" && f.kind !== "ddpp" && !danovyDoklad && !konecna;
   const lhutaDdpp = f.paid_at ? pridatDny(f.paid_at.slice(0, 10), 15) : null;
-  const poSplatnosti = f.status === "vystavena" ? -dnuMezi(dnes, f.due_date) : 0;
+  const poSplatnosti = f.status === "vystavena" && (f.kind === "faktura" || f.kind === "zalohova") ? -dnuMezi(dnes, f.due_date) : 0;
   const muzeUpominku = poSplatnosti > 0 && upominky.length < 3;
 
   return (
@@ -83,7 +88,8 @@ export default async function FakturaPage({ params, searchParams }: Props) {
 
         {p.vystaveno === "1" && (
           <Hlaska typ="info">
-            {f.kind === "zalohova" ? "Zálohová faktura je vystavená." : "Faktura je vystavená."} Stáhněte ji jako PDF a pošlete odběrateli.
+            {f.kind === "zalohova" ? "Zálohová faktura je vystavená." : dobropis ? "Dobropis je vystavený." : "Faktura je vystavená."}{" "}
+            Stáhněte {dobropis ? "ho" : "ji"} jako PDF a pošlete odběrateli.
           </Hlaska>
         )}
         {p.upraveno === "1" && <Hlaska typ="info">Změny jsou uložené.</Hlaska>}
@@ -104,8 +110,20 @@ export default async function FakturaPage({ params, searchParams }: Props) {
             <span className="font-bold text-navy">{f.customer.name}</span>
             <span className="text-muted">
               {" "}
-              · <span className="num">{castka(f.total - f.advance_amount)}</span> · splatnost {datumCz(f.due_date)}
-              {f.paid_at && <> · uhrazeno {datumCz(f.paid_at)}</>}
+              · <span className="num">{castka(f.total - f.advance_amount)}</span>
+              {platneDobropisy.length > 0 && (
+                <>
+                  {" "}
+                  (po dobropisu <span className="num">{castka(poDobropisech - f.advance_amount)}</span>)
+                </>
+              )}{" "}
+              · splatnost {datumCz(f.due_date)}
+              {f.paid_at && (
+                <>
+                  {" "}
+                  · {dobropis ? "vypořádáno" : "uhrazeno"} {datumCz(f.paid_at)}
+                </>
+              )}
             </span>
           </div>
           {lzeUpravit && (
@@ -126,11 +144,11 @@ export default async function FakturaPage({ params, searchParams }: Props) {
                 name="datum"
                 defaultValue={dnes}
                 max={dnes}
-                title="Datum, kdy vám peníze přišly"
+                title={dobropis ? "Datum, kdy jste peníze vrátili nebo započetli" : "Datum, kdy vám peníze přišly"}
                 className="num min-h-11 rounded-xl border-[1.5px] border-line bg-surface px-3 text-sm text-navy"
               />
               <button className="min-h-11 rounded-xl bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-2">
-                Označit jako uhrazenou
+                {dobropis ? "Označit jako vypořádaný" : "Označit jako uhrazenou"}
               </button>
             </form>
           )}
@@ -147,15 +165,16 @@ export default async function FakturaPage({ params, searchParams }: Props) {
             <form action={zmenitStavAkce}>
               <input type="hidden" name="id" value={f.id} />
               <input type="hidden" name="stav" value="vystavena" />
-              <button className={tlacitko}>Vrátit na neuhrazenou</button>
+              <button className={tlacitko}>{dobropis ? "Vrátit na nevypořádaný" : "Vrátit na neuhrazenou"}</button>
             </form>
           )}
-          {f.status !== "stornovana" && (
+          {f.status !== "stornovana" && !platneDobropisy.length && (
             <details className="group relative">
               <summary className={tlacitko + " cursor-pointer list-none text-red hover:border-red"}>Stornovat</summary>
               <div className="absolute right-0 z-10 mt-2 w-72 rounded-xl border border-line bg-surface p-4 text-sm shadow-lg">
                 <p className="mb-3 text-ink">
-                  Stornovaná faktura zůstane v evidenci s vodoznakem STORNO a už ji nepůjde upravit. Číslo se znovu nepoužije.
+                  {dobropis ? "Stornovaný dobropis" : "Stornovaná faktura"} zůstane v evidenci s vodoznakem STORNO a už{" "}
+                  {dobropis ? "ho" : "ji"} nepůjde upravit. Číslo se znovu nepoužije.
                 </p>
                 <form action={zmenitStavAkce}>
                   <input type="hidden" name="id" value={f.id} />
@@ -246,7 +265,7 @@ export default async function FakturaPage({ params, searchParams }: Props) {
           </section>
         )}
 
-        {f.kind === "faktura" && souvisejici.zaloha && (
+        {f.kind === "faktura" && souvisejici.zaloha?.kind === "zalohova" && (
           <p className="text-sm text-muted">
             Konečná faktura k{" "}
             <Link href={`/faktury/${souvisejici.zaloha.id}`} className="num font-semibold text-green-ink hover:underline">
@@ -263,6 +282,51 @@ export default async function FakturaPage({ params, searchParams }: Props) {
               zálohové faktuře {souvisejici.zaloha.number}
             </Link>
             . Daňový doklad nejde upravit. Když je v něm chyba, stornujte ho a vystavte nový.
+          </p>
+        )}
+
+        {f.kind === "faktura" && (f.status !== "stornovana" || dobropisy.length > 0) && (
+          <section className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4" aria-label="Dobropisy">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="text-sm">
+                <h2 className="text-base font-bold">Dobropisy</h2>
+                <p className="text-muted">
+                  {dobropisy.length
+                    ? `Po odečtení dobropisů zbývá z faktury ${castka(poDobropisech)}.`
+                    : "Když odběrateli dáte slevu, něco vrátí nebo jste fakturovali víc, vystavte dobropis. Původní faktura zůstane beze změny."}
+                </p>
+              </div>
+              {f.status !== "stornovana" && poDobropisech > 0 && (
+                <Link href={`/faktury/${f.id}/dobropis`} className={tlacitko}>
+                  Vystavit dobropis
+                </Link>
+              )}
+            </div>
+            {dobropisy.length > 0 && (
+              <ul className="divide-y divide-line rounded-xl border border-line">
+                {dobropisy.map((x) => (
+                  <li key={x.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm">
+                    <Link href={`/faktury/${x.id}`} className="num font-semibold text-green-ink hover:underline">
+                      Dobropis {x.number}
+                    </Link>
+                    <span className="num text-muted">
+                      {datumCz(x.issue_date)} · {castka(x.total)}
+                      {x.status === "stornovana" && " · stornováno"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+
+        {dobropis && souvisejici.zaloha && (
+          <p className="text-sm text-muted">
+            Opravuje{" "}
+            <Link href={`/faktury/${souvisejici.zaloha.id}`} className="num font-semibold text-green-ink hover:underline">
+              fakturu {souvisejici.zaloha.number}
+            </Link>
+            . Dobropis nejde upravit. Když je v něm chyba, stornujte ho a vystavte nový.
           </p>
         )}
 
@@ -321,7 +385,7 @@ export default async function FakturaPage({ params, searchParams }: Props) {
       <div className="tisk-oblast mx-auto w-full max-w-[860px] rounded-2xl bg-slate-200/70 p-3 sm:p-6 print:max-w-none print:rounded-none print:bg-transparent print:p-0">
         <div className="shadow-[0_18px_40px_-18px_rgba(15,37,55,0.35)] print:shadow-none">
           <Meritko>
-            <FakturaA4 d={dataUlozeneFaktury(f, n.polozky, n.zalohaCislo)} />
+            <FakturaA4 d={dataUlozeneFaktury(f, n.polozky, n.zalohaCislo, n.oprava)} />
           </Meritko>
         </div>
       </div>

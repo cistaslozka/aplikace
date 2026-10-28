@@ -90,3 +90,30 @@
     display: none !important;
   }
 }
+
+/* Právní texty (obchodní podmínky, GDPR, cookies) */
+.pravni-text h1 {
+  @apply text-3xl font-extrabold tracking-tight;
+}
+.pravni-text h2 {
+  @apply mt-4 text-xl font-bold;
+}
+.pravni-text ol {
+  @apply flex list-decimal flex-col gap-2 pl-6;
+}
+.pravni-text ul {
+  @apply flex list-disc flex-col gap-1.5 pl-6;
+}
+.pravni-text table {
+  @apply w-full border-collapse text-sm;
+}
+.pravni-text th,
+.pravni-text td {
+  @apply border border-line px-3 py-2 text-left align-top;
+}
+.pravni-text th {
+  @apply bg-slate-50 font-semibold;
+}
+.pravni-text a {
+  @apply font-semibold text-green-ink underline;
+}

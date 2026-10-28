@@ -49,7 +49,7 @@ export default async function FakturyPage({ searchParams }: Props) {
 
   const vsechny = await seznamFaktur(firma.id);
   const faktury = vsechny.filter((f) => sedi(f, filtr, dnes));
-  const neuhrazene = vsechny.filter((f) => f.status === "vystavena");
+  const neuhrazene = vsechny.filter((f) => f.status === "vystavena" && f.kind !== "dobropis");
   const poSplatnosti = neuhrazene.filter((f) => f.due_date < dnes);
   // U konečné faktury počítáme jen to, co zbývá doplatit (záloha už je zaplacená)
   const soucet = (xs: FakturaRadek[]) => xs.reduce((s, f) => s + f.total - f.advance_amount, 0);
@@ -59,7 +59,12 @@ export default async function FakturyPage({ searchParams }: Props) {
   const dlazdice = [
     { nazev: "Čeká na úhradu", hodnota: castka(soucet(neuhrazene)), pod: faktur(neuhrazene.length), cervena: false },
     { nazev: "Po splatnosti", hodnota: castka(soucet(poSplatnosti)), pod: faktur(poSplatnosti.length), cervena: poSplatnosti.length > 0 },
-    { nazev: `Uhrazené faktury ${rok}`, hodnota: castka(uhrazenoLetos.reduce((s, f) => s + f.total, 0)), pod: faktur(uhrazenoLetos.length), cervena: false },
+    {
+      nazev: `Uhrazené faktury ${rok}`,
+      hodnota: castka(uhrazenoLetos.reduce((s, f) => s + f.total, 0)),
+      pod: faktur(uhrazenoLetos.length),
+      cervena: false,
+    },
   ];
 
   return (
@@ -79,7 +84,10 @@ export default async function FakturyPage({ searchParams }: Props) {
               Přehled {rok} do Excelu
             </a>
           )}
-          <Link href="/faktury/nova" className="inline-flex min-h-12 items-center rounded-xl bg-green px-5 text-[15px] font-bold text-navy hover:brightness-95">
+          <Link
+            href="/faktury/nova"
+            className="inline-flex min-h-12 items-center rounded-xl bg-green px-5 text-[15px] font-bold text-navy hover:brightness-95"
+          >
             + Nová faktura
           </Link>
         </div>
@@ -137,6 +145,7 @@ export default async function FakturyPage({ searchParams }: Props) {
                       <div className="num text-[13px] text-muted">
                         {f.kind === "zalohova" && "Záloha · "}
                         {f.kind === "ddpp" && "Daňový doklad · "}
+                        {f.kind === "dobropis" && "Dobropis · "}
                         {f.number} · splatnost {datumCz(f.due_date)}
                       </div>
                     </div>
@@ -173,7 +182,12 @@ export default async function FakturyPage({ searchParams }: Props) {
                         <span className="mr-2 rounded-full bg-amber-tint px-2 py-0.5 text-[11.5px] font-semibold text-amber">Záloha</span>
                       )}
                       {f.kind === "ddpp" && (
-                        <span className="mr-2 rounded-full bg-green-tint px-2 py-0.5 text-[11.5px] font-semibold text-green-ink">Daňový doklad</span>
+                        <span className="mr-2 rounded-full bg-green-tint px-2 py-0.5 text-[11.5px] font-semibold text-green-ink">
+                          Daňový doklad
+                        </span>
+                      )}
+                      {f.kind === "dobropis" && (
+                        <span className="mr-2 rounded-full bg-red-tint px-2 py-0.5 text-[11.5px] font-semibold text-red">Dobropis</span>
                       )}
                       {f.customer.name}
                     </td>

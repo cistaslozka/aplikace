@@ -29,6 +29,8 @@ export type DataIsdoc = {
   uhrazeno?: boolean;
   /** Konečná faktura: odečtená záloha (u plátce podle daňového dokladu, rozpis podle sazeb) */
   odpocet?: { cislo: string; castka: number; rekapitulace: Rekapitulace[] } | null;
+  /** Dobropis: opravovaná faktura */
+  oprava?: { id?: string; cislo: string; vystaveno: string; duvod?: string | null } | null;
 };
 
 // Kód způsobu platby podle číselníku ISDOC
@@ -37,13 +39,15 @@ const KOD_PLATBY: Record<ZpusobUhrady, number> = { hotove: 10, prevod: 42, karta
 const ZEME: Record<string, string> = { CZ: "Česká republika", SK: "Slovensko", DE: "Německo", AT: "Rakousko", PL: "Polsko" };
 
 function esc(t: string | number | boolean | null | undefined): string {
-  return String(t ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    // znaky, které XML 1.0 nedovoluje
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+  return (
+    String(t ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      // znaky, které XML 1.0 nedovoluje
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
+  );
 }
 
 const el = (nazev: string, obsah: string | number | boolean | null | undefined) => `<${nazev}>${esc(obsah)}</${nazev}>`;
@@ -145,13 +149,13 @@ export function fakturaIsdoc(d: DataIsdoc): string {
         "</Details>"
       : "";
 
-  const poznamka = [d.uvod, d.poznamka].filter((x) => x && x.trim()).join("\n");
+  const poznamka = [d.oprava?.duvod ? `Důvod opravy: ${d.oprava.duvod}` : null, d.uvod, d.poznamka].filter((x) => x && x.trim()).join("\n");
 
   return (
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<Invoice xmlns="http://isdoc.cz/namespace/2013" version="6.0.2">' +
-    // 1 = faktura (daňový doklad), 4 = zálohová faktura (nedaňový zálohový list), 5 = daňový doklad k přijaté platbě
-    el("DocumentType", d.druh === "zalohova" ? 4 : d.druh === "ddpp" ? 5 : 1) +
+    // 1 = faktura (daňový doklad), 2 = dobropis, 4 = zálohová faktura (nedaňový zálohový list), 5 = daňový doklad k přijaté platbě
+    el("DocumentType", { faktura: 1, dobropis: 2, zalohova: 4, ddpp: 5 }[d.druh ?? "faktura"]) +
     el("ID", d.cislo) +
     el("UUID", d.id.toUpperCase()) +
     el("IssuingSystem", "čistásložka.cz") +
@@ -165,6 +169,12 @@ export function fakturaIsdoc(d: DataIsdoc): string {
     el("RefCurrRate", 1) +
     `<AccountingSupplierParty>${strana(d.dodavatel)}</AccountingSupplierParty>` +
     `<AccountingCustomerParty>${strana(d.odberatel)}</AccountingCustomerParty>` +
+    // Dobropis musí odkazovat na opravovanou fakturu (pravidlo ISDOC pro typ 2)
+    (d.druh === "dobropis" && d.oprava
+      ? `<OriginalDocumentReferences><OriginalDocumentReference id="puvodni">${el("ID", d.oprava.cislo)}${el("IssueDate", d.oprava.vystaveno)}${
+          d.oprava.id ? el("UUID", d.oprava.id.toUpperCase()) : ""
+        }</OriginalDocumentReference></OriginalDocumentReferences>`
+      : "") +
     `<InvoiceLines>${radky}</InvoiceLines>` +
     (zalohaNedanova > 0 && d.odpocet
       ? `<NonTaxedDeposits><NonTaxedDeposit>${el("ID", d.odpocet.cislo)}${el("VariableSymbol", "")}${el("DepositAmount", kc(zalohaNedanova))}</NonTaxedDeposit></NonTaxedDeposits>`

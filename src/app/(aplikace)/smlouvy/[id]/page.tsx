@@ -6,10 +6,11 @@ import { Hlaska } from "@/components/Formular";
 import { SmlouvaA4 } from "@/components/smlouva/SmlouvaA4";
 import { datumCz } from "@/lib/faktura";
 import { aktivniFirma } from "@/lib/firma";
-import { DRUHY_SMLUV, STAVY_SMLUV } from "@/lib/smlouvy";
+import { DRUHY_SMLUV, role, STAVY_SMLUV } from "@/lib/smlouvy";
 import { VZORY } from "@/lib/smlouvy/vzory";
 import { dataUlozeneSmlouvy, nactiSmlouvu } from "@/lib/smlouvyDb";
-import { zmenitStavSmlouvyAkce } from "../actions";
+import { smazatPodpisyAkce, zmenitStavSmlouvyAkce } from "../actions";
+import { Podepsat } from "./Podepsat";
 
 export const metadata: Metadata = { title: "Smlouva" };
 
@@ -38,6 +39,10 @@ export default async function SmlouvaPage({ params, searchParams }: Props) {
   const p = await searchParams;
   const d = dataUlozeneSmlouvy(s);
   const clanky = VZORY[s.kind]?.clanky(d) ?? [];
+  const r = role(d);
+  const podpisy = s.signatures ?? {};
+  const podepsano = !!(podpisy.my || podpisy.oni);
+  const pole = (k: string) => (typeof s.fields?.[k] === "string" ? (s.fields[k] as string).trim() : "");
 
   return (
     <>
@@ -68,9 +73,11 @@ export default async function SmlouvaPage({ params, searchParams }: Props) {
           </div>
           {s.status === "koncept" && (
             <>
-              <Link href={`/smlouvy/${s.id}/upravit`} className={tlacitko}>
-                Upravit
-              </Link>
+              {!podepsano && (
+                <Link href={`/smlouvy/${s.id}/upravit`} className={tlacitko}>
+                  Upravit
+                </Link>
+              )}
               <ZmenaStavu id={s.id} stav="uzavrena" text="Označit jako podepsanou" hlavni />
             </>
           )}
@@ -83,6 +90,43 @@ export default async function SmlouvaPage({ params, searchParams }: Props) {
           {s.status === "ukoncena" && <ZmenaStavu id={s.id} stav="uzavrena" text="Obnovit jako platnou" />}
         </div>
         {s.status !== "koncept" && <p className="text-[13px] text-muted">Podepsanou smlouvu nelze upravit. Změny se řeší dodatkem.</p>}
+
+        {s.status === "koncept" && (
+          <section className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4" aria-label="Podpisy">
+            <div>
+              <h2 className="text-base font-bold">Podpis na obrazovce</h2>
+              <p className="text-[13px] text-muted">
+                Podepište prstem nebo myší, třeba přímo u klienta. Když podepíšou obě strany, smlouva se označí jako podepsaná. Můžete ji také vytisknout a podepsat
+                na papíře.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              {(
+                [
+                  ["my", r.my, pole("zastupce_my") || ""],
+                  ["oni", r.oni, pole("zastupce_oni") || s.customer.name],
+                ] as const
+              ).map(([strana, nazevRole, jmeno]) =>
+                podpisy[strana] ? (
+                  <div key={strana} className="flex items-center gap-3 text-sm">
+                    <span className="rounded-full bg-green-tint px-2.5 py-1 text-[12.5px] font-semibold text-green-ink">Podepsáno</span>
+                    <span>
+                      {nazevRole}: <strong className="text-navy">{podpisy[strana]!.jmeno}</strong>
+                    </span>
+                  </div>
+                ) : (
+                  <Podepsat key={strana} id={s.id} strana={strana} role={nazevRole} vychoziJmeno={jmeno} />
+                ),
+              )}
+            </div>
+            {podepsano && (
+              <form action={smazatPodpisyAkce}>
+                <input type="hidden" name="id" value={s.id} />
+                <button className="text-sm font-semibold text-red hover:underline">Smazat podpisy a smlouvu upravit</button>
+              </form>
+            )}
+          </section>
+        )}
       </div>
 
       <div className="mx-auto w-full max-w-[860px] rounded-2xl bg-slate-200/70 p-3 sm:p-6">
