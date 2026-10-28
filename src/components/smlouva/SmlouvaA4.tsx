@@ -107,7 +107,7 @@ export function SmlouvaA4({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
               {x.z && <div className="text-muted">{x.z}</div>}
               {x.p && (
                 <div className="text-[10.5px] text-muted">
-                  Podepsal(a) {x.p.jmeno} na obrazovce {new Date(x.p.kdy).toLocaleString("cs-CZ", { timeZone: "Europe/Prague", dateStyle: "short", timeStyle: "short" })}
+                  Podepsal(a) {x.p.jmeno} na obrazovce {new Date(x.p.kdy).toLocaleString("cs-CZ", { timeZone: "Europe/Prague", dateStyle: "medium", timeStyle: "short" })}
                 </div>
               )}
             </div>

@@ -103,7 +103,7 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
                 {x.p ? (
                   <Text style={{ color: B.muted, fontSize: 7.9 }}>
                     Podepsal(a) {x.p.jmeno} na obrazovce{" "}
-                    {new Date(x.p.kdy).toLocaleString("cs-CZ", { timeZone: "Europe/Prague", dateStyle: "short", timeStyle: "short" })}
+                    {new Date(x.p.kdy).toLocaleString("cs-CZ", { timeZone: "Europe/Prague", dateStyle: "medium", timeStyle: "short" })}
                   </Text>
                 ) : null}
               </View>

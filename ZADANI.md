@@ -64,7 +64,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 4b | Faktury: stažení PDF, upomínky, export ISDOC a XLSX, zálohová faktura, daňový doklad k přijaté platbě, vyúčtování zálohy (hotovo); odeslání e-mailem (až bude doména) | skoro hotovo |
 | 5 | Přehled s dlaždicemi: skutečná čísla (5a) a vlastní rozložení – zapnout, vypnout, seřadit (5b) | hotovo |
 | 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
-| 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol (**7a, 7b hotovo**); 7c podpis na obrazovce, hlídání končících smluv. Cestovní příkaz přesunut do kroku 10 | rozpracováno |
+| 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol, podpis na obrazovce, hlídání končících smluv | hotovo |
 | 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | |
 | 9 | Pro: B2B rámcová, kupní a nájemní smlouva, plná moc, svěření majetku, záznam o školení BOZP, souhlas GDPR; týmový přístup (účetní, asistentka) | |
 | 10 | HR dokumenty (Pro): HPP, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, vytýkací dopis, cestovní příkaz a vyúčtování (sazby stravného) – **až po kontrole právníkem** | |
@@ -76,11 +76,11 @@ První verze pro skutečné uživatele = kroky 0–5.
 
 - **Hotovo naposledy:** krok 7b – vzory smlouva o službách, licenční smlouva, NDA, předávací protokol
   (`src/lib/smlouvy/*.ts`, zapsané ve `vzory.ts` i s podtitulem podle zákona a úvodní větou).
-- **Teď rozpracováno:** krok 7c (větev `krok-7c-podpis`): sloupec `contracts.signatures` (podpisy jako obrázek
-  PNG + jméno + čas), funkce `podepsat_smlouvu`, po podpisu obou stran stav „uzavřená“; podepsanou smlouvu nejde
-  upravit. Dlaždice Končící smlouvy (uzavřené, `valid_until` do 30 dnů). Pak krok 8.
-  - **Stav:** změna databáze je připravená v `supabase/navrhy/podpis_smlouvy.sql`, ale **ještě není nahraná**
-    (Supabase si vyžádal potvrzení a nikdo ho nestihl odkliknout). Začít jejím nahráním, pak aplikace.
+- **Hotovo naposledy:** krok 7c – podpis na obrazovce (`contracts.signatures`, funkce `podepsat_smlouvu`,
+  `smazat_podpisy_smlouvy`, trigger `private.hlidat_podepsanou_smlouvu`) a dlaždice Končící smlouvy.
+- **Další na řadě (příprava na spuštění):** obchodní podmínky, zásady ochrany osobních údajů a cookies (návrhy,
+  zkontroluje právník); e-maily z aplikace (doména cistaslozka.cz + Resend); tarif Pro označit „brzy“.
+  Pak krok 8 (dobropis, pokladní doklady). Platební brána jako poslední, až bude s.r.o.
 - **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
