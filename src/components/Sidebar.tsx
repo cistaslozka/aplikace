@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 import { odhlasitAkce } from "@/app/(auth)/actions";
-import { IconCard, IconClients, IconContract, IconDashboard, IconInvoice, IconPeople, IconPlus, IconSettings } from "./icons";
+import { IconCard, IconCash, IconClients, IconContract, IconDashboard, IconInvoice, IconPeople, IconPlus, IconSettings } from "./icons";
 
 const NAV = [
   { href: "/prehled", label: "Přehled", Icon: IconDashboard },
   { href: "/faktury", label: "Faktury", Icon: IconInvoice },
   { href: "/smlouvy", label: "Smlouvy", Icon: IconContract },
+  { href: "/pokladna", label: "Pokladna", Icon: IconCash },
   { href: "/hr", label: "HR a zaměstnanci", Icon: IconPeople, pro: true },
   { href: "/klienti", label: "Adresář klientů", Icon: IconClients },
 ];
