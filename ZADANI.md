@@ -65,7 +65,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 5 | Přehled s dlaždicemi: skutečná čísla (5a) a vlastní rozložení – zapnout, vypnout, seřadit (5b) | hotovo |
 | 6 | Placení tarifů (stránka Předplatné už je, chybí platební brána) | |
 | 7 | Smlouvy a provozní doklady: smlouva o dílo, o službách, licenční, NDA, předávací protokol (**7a, 7b hotovo**); 7c podpis na obrazovce, hlídání končících smluv. Cestovní příkaz přesunut do kroku 10 | rozpracováno |
-| 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | |
+| 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | dobropis hotový (8a), pokladní doklady další (8b) |
 | 9 | Pro: B2B rámcová, kupní a nájemní smlouva, plná moc, svěření majetku, záznam o školení BOZP, souhlas GDPR; týmový přístup (účetní, asistentka) | |
 | 10 | HR dokumenty (Pro): HPP, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, vytýkací dopis, cestovní příkaz a vyúčtování (sazby stravného) – **až po kontrole právníkem** | |
 | 11 | **Datová schránka a úřady** (Pro): příprava přihlášky zaměstnance k ČSSZ (REGZEC, JMHZ) a odeslání přes datovou schránku – **návrh viz níže, čeká na rozhodnutí** | |
@@ -157,6 +157,14 @@ uživatelů (týmový přístup v Pro).
   Vytváří ji jen `ulozit_konecnou_fakturu(faktura, položky, záloha)`. K úhradě = `total − advance_amount`
   (QR, upomínky, seznam). V ISDOC `TaxedDeposits` + „AlreadyClaimed…“ u plátce, `NonTaxedDeposits` +
   `PaidDepositsAmount` u neplátce.
+- Dobropis (`kind = dobropis`, OD20260001, VS = VS faktury, `related_invoice_id` = opravovaná faktura):
+  opravný daňový doklad (§ 45 ZDPH), u neplátce opravný doklad. Částky jsou záporné, `correction_reason` =
+  důvod opravy. Vystavuje ho jen `vystavit_dobropis(faktura, údaje, položky, dnes)` (stránka
+  `/faktury/<id>/dobropis`): jen k platné faktuře, součet dobropisů nesmí přesáhnout částku faktury,
+  DUZP (u plátce) = datum vystavení. Dobropis nejde upravit, jen stornovat; fakturu s platným dobropisem nejde
+  upravit ani stornovat. „Uhrazeno“ u dobropisu = vypořádáno (peníze vráceny nebo započteny). Upomínka počítá
+  s odečtením dobropisů. V ISDOC DocumentType 2 s `OriginalDocumentReferences`. Na přehledu snižuje obrat,
+  DPH a (po vypořádání) příjmy.
 - `invoice_reminders` – upomínky (1.–3.) k neuhrazené faktuře po splatnosti. Vytváří je jen funkce
   `vytvorit_upominku(faktura, dnes)`, nová lhůta k úhradě je 7 dní. PDF: `/faktury/<id>/upominka/<1–3>`.
 - `contracts` – smlouvy (druh, číslo S…, strany jako kopie, `fields` = vyplněný vzor, `valid_until`, stav

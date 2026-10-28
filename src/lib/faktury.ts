@@ -32,11 +32,13 @@ export type FakturaRadek = {
   /** Odečtená záloha na konečné faktuře (vč. DPH) a její rozpis podle sazeb */
   advance_amount: number;
   advance_recap: Rekapitulace[];
+  /** Dobropis: důvod opravy */
+  correction_reason: string | null;
   created_at: string;
 };
 
 const SLOUPCE =
-  "id, kind, related_invoice_id, number, variable_symbol, client_id, supplier, customer, issue_date, taxable_date, due_date, payment_method, vat_payer, template, note, intro_text, logo_position, logo_path, status, paid_at, subtotal, vat_total, total, vat_recap, advance_amount, advance_recap, created_at";
+  "id, kind, related_invoice_id, number, variable_symbol, client_id, supplier, customer, issue_date, taxable_date, due_date, payment_method, vat_payer, template, note, intro_text, logo_position, logo_path, status, paid_at, subtotal, vat_total, total, vat_recap, advance_amount, advance_recap, correction_reason, created_at";
 
 // Supabase vrací numeric jako text, převedeme na čísla.
 function cisla(f: Record<string, unknown>): FakturaRadek {
@@ -67,12 +69,7 @@ export async function seznamFaktur(organizationId: string): Promise<FakturaRadek
 
 export async function nactiFakturu(organizationId: string, id: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("invoices")
-    .select(SLOUPCE)
-    .eq("organization_id", organizationId)
-    .eq("id", id)
-    .maybeSingle();
+  const { data, error } = await supabase.from("invoices").select(SLOUPCE).eq("organization_id", organizationId).eq("id", id).maybeSingle();
   if (error) console.error("Načtení faktury selhalo:", error.message);
   if (!data) return null;
   const { data: polozky } = await supabase
@@ -80,33 +77,65 @@ export async function nactiFakturu(organizationId: string, id: string) {
     .select("description, quantity, unit, unit_price, vat_rate")
     .eq("invoice_id", id)
     .order("position");
+  // navázaný doklad: záloha u konečné faktury, opravovaná faktura u dobropisu
+  const souvisejici =
+    (data.kind === "faktura" || data.kind === "dobropis") && data.related_invoice_id
+      ? (await supabase.from("invoices").select("id, number, issue_date").eq("id", data.related_invoice_id).maybeSingle()).data
+      : null;
   return {
     faktura: cisla(data),
     // číslo zálohy, kterou konečná faktura vyúčtovává (pro řádek „Odpočet zálohy“)
-    zalohaCislo:
-      data.kind === "faktura" && data.related_invoice_id
-        ? ((await supabase.from("invoices").select("number").eq("id", data.related_invoice_id).maybeSingle()).data?.number ?? null)
+    zalohaCislo: data.kind === "faktura" ? (souvisejici?.number ?? null) : null,
+    oprava:
+      data.kind === "dobropis" && souvisejici
+        ? {
+            id: souvisejici.id as string,
+            cislo: souvisejici.number as string,
+            vystaveno: souvisejici.issue_date as string,
+            duvod: data.correction_reason as string | null,
+          }
         : null,
-    polozky: (polozky ?? []).map(
-      (p): Polozka => ({
-        description: p.description,
-        quantity: Number(p.quantity),
-        unit: p.unit ?? "",
-        unit_price: Number(p.unit_price),
-        vat_rate: Number(p.vat_rate) as SazbaDph,
-      }),
-    ),
+    polozky: (polozky ?? []).map((p): Polozka => ({
+      description: p.description,
+      quantity: Number(p.quantity),
+      unit: p.unit ?? "",
+      unit_price: Number(p.unit_price),
+      vat_rate: Number(p.vat_rate) as SazbaDph,
+    })),
   };
 }
 
 /** Údaje dodavatele pro náhled (při uložení je databáze vezme znovu z firmy). */
 export function dodavatelZFirmy(f: {
-  name: string; legal_form: string; ico: string | null; dic: string | null; street: string | null; city: string | null; zip: string | null;
-  registry_note: string | null; bank_account: string | null; iban: string | null; email: string | null; phone: string | null; web: string | null;
+  name: string;
+  legal_form: string;
+  ico: string | null;
+  dic: string | null;
+  street: string | null;
+  city: string | null;
+  zip: string | null;
+  registry_note: string | null;
+  bank_account: string | null;
+  iban: string | null;
+  email: string | null;
+  phone: string | null;
+  web: string | null;
 }): Strana {
   return {
-    name: f.name, legal_form: f.legal_form, ico: f.ico, dic: f.dic, street: f.street, city: f.city, zip: f.zip, country: "CZ",
-    registry_note: f.registry_note, bank_account: f.bank_account, iban: f.iban, email: f.email, phone: f.phone, web: f.web,
+    name: f.name,
+    legal_form: f.legal_form,
+    ico: f.ico,
+    dic: f.dic,
+    street: f.street,
+    city: f.city,
+    zip: f.zip,
+    country: "CZ",
+    registry_note: f.registry_note,
+    bank_account: f.bank_account,
+    iban: f.iban,
+    email: f.email,
+    phone: f.phone,
+    web: f.web,
   };
 }
 
@@ -114,12 +143,17 @@ export async function dalsiCisloDokladu(organizationId: string, rok: number, dru
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("dalsi_cislo_dokladu", { p_org: organizationId, p_rok: rok, p_druh: druh });
   if (error) console.error("Číslo dokladu se nenačetlo:", error.message);
-  const predpona = druh === "zalohova" ? "ZF" : druh === "ddpp" ? "DD" : "";
+  const predpona = { faktura: "", zalohova: "ZF", ddpp: "DD", dobropis: "OD" }[druh];
   return typeof data === "string" ? data : `${predpona}${rok}0001`;
 }
 
 /** Údaje pro vykreslení uložené faktury (náhled, tisk i PDF). */
-export function dataUlozeneFaktury(f: FakturaRadek, polozky: Polozka[], zalohaCislo: string | null = null): DataFaktury {
+export function dataUlozeneFaktury(
+  f: FakturaRadek,
+  polozky: Polozka[],
+  zalohaCislo: string | null = null,
+  oprava: DataFaktury["oprava"] = null,
+): DataFaktury {
   return {
     druh: f.kind,
     cislo: f.number,
@@ -144,6 +178,7 @@ export function dataUlozeneFaktury(f: FakturaRadek, polozky: Polozka[], zalohaCi
     stav: f.status,
     uhrazeno: f.paid_at,
     odpocet: f.advance_amount > 0 ? { cislo: zalohaCislo ?? "", castka: f.advance_amount, rekapitulace: f.advance_recap } : null,
+    oprava,
   };
 }
 
@@ -160,16 +195,21 @@ export async function nactiUpominky(invoiceId: string): Promise<Upominka[]> {
   return (data ?? []).map((u) => ({ ...u, amount: Number(u.amount) }));
 }
 
-export type SouvisejiciDoklad = { id: string; kind: DruhDokladu; number: string; status: StavFaktury; issue_date: string };
+export type SouvisejiciDoklad = { id: string; kind: DruhDokladu; number: string; status: StavFaktury; issue_date: string; total: number };
 
 /** Doklady navázané na zálohu (daňový doklad k platbě, později konečná faktura) a záloha, ke které doklad patří. */
-export async function nactiSouvisejici(f: Pick<FakturaRadek, "id" | "related_invoice_id">): Promise<{ navazane: SouvisejiciDoklad[]; zaloha: SouvisejiciDoklad | null }> {
+export async function nactiSouvisejici(
+  f: Pick<FakturaRadek, "id" | "related_invoice_id">,
+): Promise<{ navazane: SouvisejiciDoklad[]; zaloha: SouvisejiciDoklad | null }> {
   const supabase = await createClient();
-  const sloupce = "id, kind, number, status, issue_date";
+  const sloupce = "id, kind, number, status, issue_date, total";
   const [navazane, zaloha] = await Promise.all([
     supabase.from("invoices").select(sloupce).eq("related_invoice_id", f.id).order("created_at"),
-    f.related_invoice_id ? supabase.from("invoices").select(sloupce).eq("id", f.related_invoice_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    f.related_invoice_id
+      ? supabase.from("invoices").select(sloupce).eq("id", f.related_invoice_id).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
   ]);
   if (navazane.error) console.error("Načtení navázaných dokladů selhalo:", navazane.error.message);
-  return { navazane: (navazane.data ?? []) as SouvisejiciDoklad[], zaloha: (zaloha.data as SouvisejiciDoklad | null) ?? null };
+  const cislem = (x: Record<string, unknown>) => ({ ...x, total: Number(x.total) }) as SouvisejiciDoklad;
+  return { navazane: (navazane.data ?? []).map(cislem), zaloha: zaloha.data ? cislem(zaloha.data) : null };
 }

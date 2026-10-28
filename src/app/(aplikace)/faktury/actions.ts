@@ -169,3 +169,58 @@ export async function vytvoritUpominkuAkce(form: FormData) {
   revalidatePath(`/faktury/${id}`);
   redirect(`/faktury/${id}?upominka=${data}`);
 }
+
+export type NovyDobropis = {
+  faktura_id: string;
+  issue_date: string;
+  due_date: string;
+  correction_reason: string;
+  note: string;
+  template: Vzhled;
+  polozky: { description: string; quantity: number; unit: string; unit_price: number; vat_rate: SazbaDph }[];
+};
+
+export async function vystavitDobropisAkce(d: NovyDobropis): Promise<VysledekUlozeni> {
+  const firma = await aktivniFirma();
+  if (!firma) return { ok: false, chyba: "Nejdřív vyplňte údaje o své firmě v Nastavení." };
+  if (!/^[0-9a-f-]{36}$/i.test(d.faktura_id)) return { ok: false, chyba: "Faktura nenalezena." };
+  if (!datum(d.issue_date) || !datum(d.due_date)) return { ok: false, chyba: "Zkontrolujte data vystavení a splatnosti." };
+  if (d.due_date < d.issue_date) return { ok: false, chyba: "Splatnost nemůže být dřív než datum vystavení." };
+  if (!VZHLEDY.includes(d.template)) return { ok: false, chyba: "Vyberte vzhled dokladu." };
+
+  const polozky = d.polozky
+    .map((p) => ({ ...p, description: p.description.trim(), unit: p.unit.trim() }))
+    .filter((p) => p.description || p.unit_price);
+  if (!polozky.length) return { ok: false, chyba: "Přidejte aspoň jednu položku." };
+  for (const [i, p] of polozky.entries()) {
+    if (!p.description) return { ok: false, chyba: `Položka ${i + 1}: doplňte popis.` };
+    if (!Number.isFinite(p.quantity) || p.quantity === 0)
+      return { ok: false, chyba: `Položka ${i + 1}: množství musí být nenulové číslo.` };
+    if (!Number.isFinite(p.unit_price)) return { ok: false, chyba: `Položka ${i + 1}: zkontrolujte cenu.` };
+    if (!SAZBY_DPH.includes(p.vat_rate)) return { ok: false, chyba: `Položka ${i + 1}: vyberte sazbu DPH.` };
+  }
+
+  const supabase = await createClient();
+  const { data: id, error } = await supabase.rpc("vystavit_dobropis", {
+    p_faktura: d.faktura_id,
+    p_doklad: {
+      issue_date: d.issue_date,
+      due_date: d.due_date,
+      correction_reason: d.correction_reason.trim().slice(0, 500),
+      note: d.note.trim().slice(0, 1000),
+      template: d.template,
+    },
+    p_polozky: polozky,
+    p_dnes: dnesIso(),
+  });
+  if (error || !id) {
+    console.error("Vystavení dobropisu selhalo:", error?.code, error?.message);
+    if (error && ["P0001", "22023"].includes(error.code)) return { ok: false, chyba: error.message };
+    if (error?.code === "23514") return { ok: false, chyba: "Některý údaj nesedí. Zkontrolujte data a položky." };
+    return { ok: false, chyba: "Dobropis se nepodařilo vystavit. Zkuste to prosím znovu." };
+  }
+  revalidatePath("/faktury");
+  revalidatePath(`/faktury/${d.faktura_id}`);
+  revalidatePath("/prehled");
+  redirect(`/faktury/${id}?vystaveno=1`);
+}

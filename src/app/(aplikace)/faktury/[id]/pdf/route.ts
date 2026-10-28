@@ -16,7 +16,7 @@ async function vytvorit(params: Promise<{ id: string }>): Promise<Response> {
   if (!n) return chybaPdf("Faktura nenalezena", 404);
 
   try {
-    const pdf = await pdfFaktury(dataUlozeneFaktury(n.faktura, n.polozky, n.zalohaCislo));
+    const pdf = await pdfFaktury(dataUlozeneFaktury(n.faktura, n.polozky, n.zalohaCislo, n.oprava));
     return new Response(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",

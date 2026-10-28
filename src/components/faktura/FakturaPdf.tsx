@@ -2,7 +2,19 @@ import "server-only";
 import path from "node:path";
 import { Document, Font, Image, Page, Path, StyleSheet, Svg, Text, View, renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import QRCode from "qrcode";
-import { castka, datumCz, mnozstvi, naHalere, nadpisDokladu, NAZVY_DOKLADU, qrPlatba, zakladPolozky, ZPUSOBY_UHRADY, type Strana } from "@/lib/faktura";
+import {
+  castka,
+  datumCz,
+  mnozstvi,
+  naHalere,
+  nadpisDokladu,
+  NAZVY_DOKLADU,
+  textyDokladu,
+  qrPlatba,
+  zakladPolozky,
+  ZPUSOBY_UHRADY,
+  type Strana,
+} from "@/lib/faktura";
 import { formatujIban } from "@/lib/validace";
 import type { DataFaktury } from "./FakturaA4";
 
@@ -65,7 +77,17 @@ const s = StyleSheet.create({
 
 const V = {
   minimal: {
-    hlavicka: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", paddingHorizontal: 33, paddingTop: 33, paddingBottom: 16.5, borderBottomWidth: 0.75, borderBottomColor: B.line, color: B.navy },
+    hlavicka: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      paddingHorizontal: 33,
+      paddingTop: 33,
+      paddingBottom: 16.5,
+      borderBottomWidth: 0.75,
+      borderBottomColor: B.line,
+      color: B.navy,
+    },
     nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 25.5, lineHeight: 1, color: B.navy },
     podnadpis: { marginTop: 4.5, fontSize: 9, color: B.muted },
     stitek: { fontSize: 7.1, fontWeight: 700, letterSpacing: 0.6, color: B.muted, marginBottom: 2 },
@@ -74,22 +96,56 @@ const V = {
     celkem: { alignItems: "flex-end", color: B.navy },
   },
   corporate: {
-    hlavicka: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: B.navy, paddingHorizontal: 33, paddingVertical: 22.5, color: B.white },
+    hlavicka: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: B.navy,
+      paddingHorizontal: 33,
+      paddingVertical: 22.5,
+      color: B.white,
+    },
     nadpis: { fontFamily: "Inter", fontWeight: 700, fontSize: 18, letterSpacing: 2.2, lineHeight: 1, color: B.white },
     podnadpis: { marginTop: 6, fontSize: 9, color: B.slate300 },
     stitek: { fontSize: 7.1, fontWeight: 700, letterSpacing: 0.6, color: B.navy, marginBottom: 2 },
-    pruh: { flexDirection: "row", gap: 9, borderWidth: 0.75, borderColor: B.slate300, backgroundColor: B.slate50, paddingHorizontal: 9, paddingVertical: 7.5 },
+    pruh: {
+      flexDirection: "row",
+      gap: 9,
+      borderWidth: 0.75,
+      borderColor: B.slate300,
+      backgroundColor: B.slate50,
+      paddingHorizontal: 9,
+      paddingVertical: 7.5,
+    },
     hlavaTabulky: { backgroundColor: B.line, color: B.navy },
     celkem: { alignItems: "flex-end", backgroundColor: B.navy, color: B.white, borderRadius: 3, paddingHorizontal: 12, paddingVertical: 9 },
   },
   creative: {
-    hlavicka: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", backgroundColor: B.greenTint, borderBottomWidth: 4.5, borderBottomColor: B.green, paddingHorizontal: 33, paddingTop: 33, paddingBottom: 19.5, color: B.navy },
+    hlavicka: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      backgroundColor: B.greenTint,
+      borderBottomWidth: 4.5,
+      borderBottomColor: B.green,
+      paddingHorizontal: 33,
+      paddingTop: 33,
+      paddingBottom: 19.5,
+      color: B.navy,
+    },
     nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 31.5, lineHeight: 1, color: B.greenInk },
     podnadpis: { marginTop: 6, fontSize: 9, color: B.navy },
     stitek: { fontSize: 7.1, fontWeight: 700, letterSpacing: 0.6, color: B.greenInk, marginBottom: 2 },
     pruh: { flexDirection: "row", gap: 9, backgroundColor: B.slate50, borderRadius: 6, paddingHorizontal: 9, paddingVertical: 9 },
     hlavaTabulky: { borderBottomWidth: 1.1, borderBottomColor: B.green, color: B.greenInk },
-    celkem: { alignItems: "flex-end", backgroundColor: B.greenSoft, color: B.navy, borderRadius: 9, paddingHorizontal: 12, paddingVertical: 9 },
+    celkem: {
+      alignItems: "flex-end",
+      backgroundColor: B.greenSoft,
+      color: B.navy,
+      borderRadius: 9,
+      paddingHorizontal: 12,
+      paddingVertical: 9,
+    },
   },
 } as const;
 
@@ -140,19 +196,45 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
       : null;
   const logo = d.logo && d.logoPozice ? d.logoPozice : null;
   const druh = d.druh ?? "faktura";
-  const danovy = d.platce && druh !== "zalohova";
+  const t = textyDokladu(druh, d.platce, d.stav, !!d.odpocet);
+  const danovy = t.danovy;
   const tabSloupce = d.platce ? ["44%", "13%", "17%", "9%", "17%"] : ["50%", "15%", "17.5%", "17.5%"];
   const paticka = [d.dodavatel.registry_note, d.platce ? null : "Nejsem plátce DPH.", "Vystaveno v systému čistásložka.cz."]
     .filter(Boolean)
-    .map((t) => String(t).trim().replace(/[.\s]*$/, "."))
+    .map((t) =>
+      String(t)
+        .trim()
+        .replace(/[.\s]*$/, "."),
+    )
     .join(" ");
 
   return (
-    <Document title={`${NAZVY_DOKLADU[druh]} ${d.cislo}`} author={d.dodavatel.name} creator="čistásložka.cz" producer="čistásložka.cz" language="cs">
+    <Document
+      title={`${NAZVY_DOKLADU[druh]} ${d.cislo}`}
+      author={d.dodavatel.name}
+      creator="čistásložka.cz"
+      producer="čistásložka.cz"
+      language="cs"
+    >
       <Page size="A4" style={s.page}>
         {d.stav === "stornovana" && (
           <View fixed style={{ position: "absolute", top: 360, left: 0, right: 0, alignItems: "center" }}>
-            <Text style={{ transform: "rotate(-24deg)", fontFamily: "Jakarta", fontWeight: 800, fontSize: 66, letterSpacing: 6, color: B.red, opacity: 0.4, borderWidth: 4.5, borderColor: B.red, borderRadius: 9, paddingHorizontal: 30, paddingVertical: 6 }}>
+            <Text
+              style={{
+                transform: "rotate(-24deg)",
+                fontFamily: "Jakarta",
+                fontWeight: 800,
+                fontSize: 66,
+                letterSpacing: 6,
+                color: B.red,
+                opacity: 0.4,
+                borderWidth: 4.5,
+                borderColor: B.red,
+                borderRadius: 9,
+                paddingHorizontal: 30,
+                paddingVertical: 6,
+              }}
+            >
               STORNO
             </Text>
           </View>
@@ -162,10 +244,12 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             {logo === "vlevo" && <Logo src={d.logo!} />}
             <View>
-              <Text style={v.nadpis}>{d.vzhled === "corporate" ? nadpisDokladu(druh).nadpis.toUpperCase() : nadpisDokladu(druh).nadpis}</Text>
+              <Text style={v.nadpis}>
+                {d.vzhled === "corporate" ? nadpisDokladu(druh).nadpis.toUpperCase() : nadpisDokladu(druh).nadpis}
+              </Text>
               <Text style={v.podnadpis}>
                 {nadpisDokladu(druh).dodatek}č. {d.cislo}
-                {druh === "zalohova" ? " · není daňový doklad" : danovy ? " · daňový doklad" : ""}
+                {t.podtitul}
               </Text>
             </View>
           </View>
@@ -187,7 +271,9 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
               </Text>
               {!d.platce && <Text style={s.semi}>Nejsem plátce DPH.</Text>}
               {d.dodavatel.email || d.dodavatel.phone ? (
-                <Text style={{ marginTop: 3, fontSize: 8.25, color: B.slate600 }}>{[d.dodavatel.email, d.dodavatel.phone].filter(Boolean).join(" · ")}</Text>
+                <Text style={{ marginTop: 3, fontSize: 8.25, color: B.slate600 }}>
+                  {[d.dodavatel.email, d.dodavatel.phone].filter(Boolean).join(" · ")}
+                </Text>
               ) : null}
             </View>
             <View style={s.pul}>
@@ -210,7 +296,7 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
               <Text>{datumCz(d.vystaveno)}</Text>
             </View>
             <View style={s.pul}>
-              <Text style={v.stitek}>{danovy ? "DATUM ZDAN. PLNĚNÍ" : "VAR. SYMBOL"}</Text>
+              <Text style={v.stitek}>{danovy ? t.stitekDuzp.toUpperCase() : "VAR. SYMBOL"}</Text>
               <Text>{danovy ? datumCz(d.duzp ?? d.vystaveno) : d.vs}</Text>
             </View>
             <View style={s.pul}>
@@ -223,7 +309,27 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
             </View>
           </View>
 
-          {prevod && (d.dodavatel.bank_account || iban) ? (
+          {d.oprava ? (
+            <View
+              style={{
+                borderWidth: 0.75,
+                borderColor: B.line,
+                backgroundColor: B.slate50,
+                borderRadius: 4,
+                paddingHorizontal: 12,
+                paddingVertical: 7,
+                fontSize: 8.6,
+              }}
+            >
+              <Text>
+                {d.platce ? "Opravný daňový doklad" : "Opravný doklad"} k faktuře č.{" "}
+                <Text style={{ fontWeight: 700, color: B.navy }}>{d.oprava.cislo}</Text> ze dne {datumCz(d.oprava.vystaveno)}.
+              </Text>
+              {d.oprava.duvod ? <Text style={{ marginTop: 2 }}>Důvod opravy: {d.oprava.duvod}</Text> : null}
+            </View>
+          ) : null}
+
+          {t.ucet && prevod && (d.dodavatel.bank_account || iban) ? (
             <View style={{ fontSize: 8.6, gap: 1 }}>
               {d.dodavatel.bank_account ? (
                 <View style={s.radek}>
@@ -250,11 +356,13 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
 
           <View style={s.tab}>
             <View style={[s.radek, v.hlavaTabulky]} fixed>
-              {(d.platce ? ["Položka", "Množství", "Cena bez DPH", "DPH", "Základ"] : ["Položka", "Množství", "Cena", "Celkem"]).map((t, i) => (
-                <Text key={t} style={[s.bunka, { width: tabSloupce[i], fontWeight: 600 }, i > 0 ? s.vpravo : {}]}>
-                  {t}
-                </Text>
-              ))}
+              {(d.platce ? ["Položka", "Množství", "Cena bez DPH", "DPH", "Základ"] : ["Položka", "Množství", "Cena", "Celkem"]).map(
+                (t, i) => (
+                  <Text key={t} style={[s.bunka, { width: tabSloupce[i], fontWeight: 600 }, i > 0 ? s.vpravo : {}]}>
+                    {t}
+                  </Text>
+                ),
+              )}
             </View>
             {d.polozky.map((p, i) => {
               const bunky = [
@@ -306,9 +414,7 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
                   </Text>
                 </View>
               ) : null}
-              <Text style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: 0.6, opacity: 0.75 }}>
-                {d.stav === "uhrazena" ? "UHRAZENO" : d.odpocet ? "ZBÝVÁ UHRADIT" : "CELKEM K ÚHRADĚ"}
-              </Text>
+              <Text style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: 0.6, opacity: 0.75 }}>{t.stitekCelkem.toUpperCase()}</Text>
               <Text style={{ fontFamily: "Jakarta", fontWeight: 800, fontSize: 19.5, lineHeight: 1.2 }}>{castka(kUhrade)}</Text>
               {d.platce ? <Text style={{ fontSize: 7.9, opacity: 0.75 }}>z toho DPH {castka(d.odpocet ? dphZbyva : d.dph)}</Text> : null}
             </View>
@@ -316,7 +422,10 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
 
           {d.poznamka ? <Text style={{ fontSize: 8.6, color: B.ink }}>{d.poznamka}</Text> : null}
 
-          <View style={{ marginTop: "auto", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 18 }} wrap={false}>
+          <View
+            style={{ marginTop: "auto", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 18 }}
+            wrap={false}
+          >
             {qr ? (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
                 <Qr text={qr} velikost={78} />
@@ -330,8 +439,19 @@ function FakturaDokument({ d }: { d: DataFaktury }) {
             )}
             {logo === "dole" && <Logo src={d.logo!} vyska={36} />}
             {d.stav === "uhrazena" && d.uhrazeno ? (
-              <Text style={{ borderWidth: 1.5, borderColor: B.greenInk, borderRadius: 6, paddingHorizontal: 9, paddingVertical: 4, fontSize: 8.25, fontWeight: 700, color: B.greenInk }}>
-                UHRAZENO {datumCz(d.uhrazeno)}
+              <Text
+                style={{
+                  borderWidth: 1.5,
+                  borderColor: B.greenInk,
+                  borderRadius: 6,
+                  paddingHorizontal: 9,
+                  paddingVertical: 4,
+                  fontSize: 8.25,
+                  fontWeight: 700,
+                  color: B.greenInk,
+                }}
+              >
+                {t.razitko} {datumCz(d.uhrazeno)}
               </Text>
             ) : null}
           </View>
@@ -396,15 +516,22 @@ function UpominkaDokument({ d, u }: { d: DataFaktury; u: DataUpominky }) {
   const iban = d.dodavatel.iban ? formatujIban(d.dodavatel.iban) : null;
   const datum = new Date(u.created_at).toLocaleDateString("sv-SE", { timeZone: "Europe/Prague" });
   const poSplatnosti = Math.max(0, Math.round((Date.parse(datum) - Date.parse(d.splatnost)) / 86_400_000));
-  const qr = d.dodavatel.iban && u.amount > 0
-    ? qrPlatba({ iban: d.dodavatel.iban, castka: u.amount, vs: d.vs, splatnost: u.new_due_date, zprava: `Faktura ${d.cislo}` })
-    : null;
+  const qr =
+    d.dodavatel.iban && u.amount > 0
+      ? qrPlatba({ iban: d.dodavatel.iban, castka: u.amount, vs: d.vs, splatnost: u.new_due_date, zprava: `Faktura ${d.cislo}` })
+      : null;
   const logo = d.logo && d.logoPozice ? d.logoPozice : null;
   const text = TEXTY_UPOMINKY[u.level as 1 | 2 | 3](d.cislo, datumCz(d.vystaveno), datumCz(d.splatnost), d.druh === "zalohova");
   const nazev = `${u.level}. upomínka`;
 
   return (
-    <Document title={`${nazev} k ${d.druh === "zalohova" ? "zálohové faktuře" : "faktuře"} ${d.cislo}`} author={d.dodavatel.name} creator="čistásložka.cz" producer="čistásložka.cz" language="cs">
+    <Document
+      title={`${nazev} k ${d.druh === "zalohova" ? "zálohové faktuře" : "faktuře"} ${d.cislo}`}
+      author={d.dodavatel.name}
+      creator="čistásložka.cz"
+      producer="čistásložka.cz"
+      language="cs"
+    >
       <Page size="A4" style={s.page}>
         <View style={v.hlavicka}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -471,7 +598,9 @@ function UpominkaDokument({ d, u }: { d: DataFaktury; u: DataUpominky }) {
           <View style={{ gap: 8, fontSize: 9.75, lineHeight: 1.6 }}>
             <Text>Vážení,</Text>
             <Text>{text}</Text>
-            {u.level >= 2 ? <Text>Upozorňujeme, že za dobu prodlení jsme oprávněni účtovat úrok z prodlení podle platných právních předpisů.</Text> : null}
+            {u.level >= 2 ? (
+              <Text>Upozorňujeme, že za dobu prodlení jsme oprávněni účtovat úrok z prodlení podle platných právních předpisů.</Text>
+            ) : null}
           </View>
 
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 18 }} wrap={false}>
@@ -507,11 +636,16 @@ function UpominkaDokument({ d, u }: { d: DataFaktury; u: DataUpominky }) {
             <Text>S pozdravem</Text>
             <Text style={s.bold}>{d.dodavatel.name}</Text>
             {d.dodavatel.email || d.dodavatel.phone ? (
-              <Text style={{ fontSize: 8.25, color: B.slate600 }}>{[d.dodavatel.email, d.dodavatel.phone].filter(Boolean).join(" · ")}</Text>
+              <Text style={{ fontSize: 8.25, color: B.slate600 }}>
+                {[d.dodavatel.email, d.dodavatel.phone].filter(Boolean).join(" · ")}
+              </Text>
             ) : null}
           </View>
 
-          <View style={{ marginTop: "auto", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 18 }} wrap={false}>
+          <View
+            style={{ marginTop: "auto", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 18 }}
+            wrap={false}
+          >
             {qr ? (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
                 <Qr text={qr} velikost={78} />
@@ -528,7 +662,14 @@ function UpominkaDokument({ d, u }: { d: DataFaktury; u: DataUpominky }) {
         </View>
 
         <Text style={s.paticka} fixed>
-          {[d.dodavatel.registry_note, "Vystaveno v systému čistásložka.cz."].filter(Boolean).map((t) => String(t).trim().replace(/[.\s]*$/, ".")).join(" ")}
+          {[d.dodavatel.registry_note, "Vystaveno v systému čistásložka.cz."]
+            .filter(Boolean)
+            .map((t) =>
+              String(t)
+                .trim()
+                .replace(/[.\s]*$/, "."),
+            )
+            .join(" ")}
         </Text>
       </Page>
     </Document>

@@ -41,15 +41,15 @@ export function spocitejPrehled(doklady: DokladPrehledu[], dnes: string) {
   const mesic = dnes.slice(0, 7);
   const platne = doklady.filter((f) => f.status !== "stornovana");
 
-  // Čeká na úhradu: faktury a zálohy (daňový doklad je vždy uhrazený)
-  const neuhrazene = platne.filter((f) => f.status === "vystavena" && f.kind !== "ddpp");
+  // Čeká na úhradu: faktury a zálohy (daňový doklad je vždy uhrazený, dobropis platíme my)
+  const neuhrazene = platne.filter((f) => f.status === "vystavena" && (f.kind === "faktura" || f.kind === "zalohova"));
   const poSplatnosti = neuhrazene.filter((f) => f.due_date < dnes);
   const nejblizsi = neuhrazene
     .filter((f) => f.due_date >= dnes)
     .map((f) => f.due_date)
     .sort()[0];
 
-  // Příjmy po měsících (posledních 6 včetně aktuálního)
+  // Příjmy po měsících (posledních 6 včetně aktuálního). Vypořádaný dobropis příjem snižuje.
   const [r, m] = dnes.split("-").map(Number);
   const mesice = Array.from({ length: 6 }, (_, i) => {
     const d = new Date(Date.UTC(r, m - 1 - (5 - i), 1));
@@ -63,12 +63,14 @@ export function spocitejPrehled(doklady: DokladPrehledu[], dnes: string) {
   }
 
   // Obrat za rok (pro neplátce: hlídání limitu DPH)
-  const obrat = naHalere(platne.filter((f) => f.kind === "faktura" && f.issue_date.startsWith(rok)).reduce((s, f) => s + f.total, 0));
+  const obrat = naHalere(
+    platne.filter((f) => (f.kind === "faktura" || f.kind === "dobropis") && f.issue_date.startsWith(rok)).reduce((s, f) => s + f.total, 0),
+  );
 
   // DPH na výstupu za aktuální měsíc (pro plátce)
   const dph = naHalere(
     platne
-      .filter((f) => (f.kind === "faktura" || f.kind === "ddpp") && (f.taxable_date ?? f.issue_date).startsWith(mesic))
+      .filter((f) => f.kind !== "zalohova" && (f.taxable_date ?? f.issue_date).startsWith(mesic))
       .reduce((s, f) => s + f.vat_total - f.advance_recap.reduce((a, x) => a + x.vat, 0), 0),
   );
 
