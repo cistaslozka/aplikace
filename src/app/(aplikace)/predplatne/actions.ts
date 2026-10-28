@@ -4,11 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { aktivniFirma } from "@/lib/firma";
 import { createClient } from "@/lib/supabase/server";
+import { TARIFY } from "@/lib/tarify";
 
 export async function zmenitTarifAkce(form: FormData) {
   const firma = await aktivniFirma();
   const tarif = String(form.get("tarif") ?? "");
-  if (!firma || (tarif !== "basic" && tarif !== "pro")) redirect("/predplatne");
+  if (!firma || (tarif !== "basic" && tarif !== "pro") || TARIFY[tarif].brzy) redirect("/predplatne");
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("zmenit_tarif", { p_org: firma.id, p_plan: tarif });

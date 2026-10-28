@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 import { odhlasitAkce } from "@/app/(auth)/actions";
-import { IconCard, IconClients, IconContract, IconDashboard, IconInvoice, IconPeople, IconPlus, IconSettings } from "./icons";
+import { IconCard, IconCash, IconClients, IconContract, IconDashboard, IconInvoice, IconPeople, IconPlus, IconSettings } from "./icons";
 
 const NAV = [
   { href: "/prehled", label: "Přehled", Icon: IconDashboard },
   { href: "/faktury", label: "Faktury", Icon: IconInvoice },
   { href: "/smlouvy", label: "Smlouvy", Icon: IconContract },
+  { href: "/pokladna", label: "Pokladna", Icon: IconCash },
   { href: "/hr", label: "HR a zaměstnanci", Icon: IconPeople, pro: true },
   { href: "/klienti", label: "Adresář klientů", Icon: IconClients },
 ];
@@ -96,6 +97,17 @@ export function Sidebar({ email, firma }: { email: string; firma: string | null 
           <NavLink href="/predplatne" label="Předplatné" Icon={IconCard} />
         </nav>
         <Odhlasit email={email} firma={firma} />
+        <div className="flex flex-wrap gap-x-3 gap-y-1 px-1 text-[12px] text-slate-400">
+          <Link href="/obchodni-podminky" className="hover:text-white">
+            Podmínky
+          </Link>
+          <Link href="/ochrana-osobnich-udaju" className="hover:text-white">
+            Osobní údaje
+          </Link>
+          <Link href="/cookies" className="hover:text-white">
+            Cookies
+          </Link>
+        </div>
       </div>
     </aside>
   );
