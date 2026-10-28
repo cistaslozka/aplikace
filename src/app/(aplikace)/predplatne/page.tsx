@@ -16,9 +16,26 @@ const CHYBY: Record<string, string> = {
 
 type Props = { searchParams: Promise<{ zmeneno?: string; chyba?: string }> };
 
+function Brzy() {
+  return (
+    <span className="ml-2 inline-block rounded-full bg-amber-tint px-2 py-0.5 align-middle text-[11px] font-bold text-amber">Brzy</span>
+  );
+}
+
 function Fajfka() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="mt-0.5 shrink-0 text-green-ink">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="mt-0.5 shrink-0 text-green-ink"
+    >
       <polyline points="20 6 9 17 4 12" />
     </svg>
   );
@@ -65,7 +82,11 @@ export default async function PredplatnePage({ searchParams }: Props) {
               <div className="h-full rounded-full bg-green" style={{ width: `${procento}%` }} />
             </div>
             <p className="num text-[15px] text-slate-300">
-              Zbývá <strong className="text-white">{zbyva} {dny(zbyva)}</strong>, do {konec}. Do té doby neplatíte nic a tarif můžete libovolně měnit.
+              Zbývá{" "}
+              <strong className="text-white">
+                {zbyva} {dny(zbyva)}
+              </strong>
+              , do {konec}. Do té doby neplatíte nic a tarif můžete libovolně měnit.
             </p>
           </>
         ) : (
@@ -90,7 +111,13 @@ export default async function PredplatnePage({ searchParams }: Props) {
                   <h2 className="text-xl font-extrabold">{t.nazev}</h2>
                   <p className="mt-1 text-[14px] text-muted">{t.popis}</p>
                 </div>
-                {aktivni && <span className="shrink-0 rounded-full bg-green-tint px-3 py-1 text-[13px] font-bold text-green-ink">Váš tarif</span>}
+                {aktivni ? (
+                  <span className="shrink-0 rounded-full bg-green-tint px-3 py-1 text-[13px] font-bold text-green-ink">Váš tarif</span>
+                ) : (
+                  t.brzy && (
+                    <span className="shrink-0 rounded-full bg-amber-tint px-3 py-1 text-[13px] font-bold text-amber">Připravujeme</span>
+                  )
+                )}
               </div>
               <div className="num">
                 <span className="font-display text-4xl font-extrabold text-navy">{t.cena} Kč</span>
@@ -98,9 +125,12 @@ export default async function PredplatnePage({ searchParams }: Props) {
               </div>
               <ul className="flex flex-col gap-2 text-[14.5px]">
                 {t.funkce.map((f) => (
-                  <li key={f} className="flex gap-2.5">
+                  <li key={f.t} className={"flex gap-2.5" + (f.brzy ? " text-muted" : "")}>
                     <Fajfka />
-                    {f}
+                    <span>
+                      {f.t}
+                      {f.brzy && <Brzy />}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -109,13 +139,19 @@ export default async function PredplatnePage({ searchParams }: Props) {
                   <div className="flex min-h-12 items-center justify-center rounded-xl bg-slate-100 text-[15px] font-semibold text-muted">
                     Tento tarif máte
                   </div>
+                ) : t.brzy ? (
+                  <div className="flex min-h-12 items-center justify-center rounded-xl border-[1.5px] border-dashed border-slate-300 px-3 text-center text-[14px] text-muted">
+                    Tarif {t.nazev} spustíme brzy
+                  </div>
                 ) : zkusebni ? (
                   <form action={zmenitTarifAkce}>
                     <input type="hidden" name="tarif" value={k} />
                     <button
                       className={
                         "min-h-12 w-full rounded-xl text-[15px] font-bold transition " +
-                        (k === "pro" ? "bg-green text-navy hover:brightness-95" : "border-[1.5px] border-line bg-surface text-navy hover:border-muted")
+                        (k === "pro"
+                          ? "bg-green text-navy hover:brightness-95"
+                          : "border-[1.5px] border-line bg-surface text-navy hover:border-muted")
                       }
                     >
                       Přejít na {t.nazev}
