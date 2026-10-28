@@ -1,5 +1,3 @@
--- ⚠️ ZATÍM NENAHRÁNO DO SUPABASE (krok 7c). Nahrát přes apply_migration pod názvem podpis_smlouvy,
--- pak přesunout do supabase/migrations/ s číslem verze, které Supabase přidělí.
 -- Podpis smlouvy na obrazovce (prostý elektronický podpis): obrázek PNG, jméno podepisujícího a čas.
 -- {"my": {"obrazek": "data:image/png;base64,…", "jmeno": "Jan Novák", "kdy": "…"}, "oni": {…}}
 alter table public.contracts

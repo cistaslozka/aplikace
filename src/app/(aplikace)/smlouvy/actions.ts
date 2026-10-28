@@ -82,3 +82,29 @@ export async function zmenitStavSmlouvyAkce(form: FormData) {
   revalidatePath(`/smlouvy/${id}`);
   redirect(`/smlouvy/${id}`);
 }
+
+export async function podepsatSmlouvuAkce(id: string, strana: "my" | "oni", obrazek: string, jmeno: string): Promise<{ ok: true; stav: string } | { ok: false; chyba: string }> {
+  const firma = await aktivniFirma();
+  if (!firma || !/^[0-9a-f-]{36}$/i.test(id)) return { ok: false, chyba: "Smlouva nenalezena." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("podepsat_smlouvu", { p_smlouva: id, p_strana: strana, p_obrazek: obrazek, p_jmeno: jmeno });
+  if (error) {
+    console.error("Podpis smlouvy selhal:", error.code, error.message);
+    return { ok: false, chyba: ["P0001", "22023"].includes(error.code) ? error.message : "Podpis se nepodařilo uložit. Zkuste to prosím znovu." };
+  }
+  revalidatePath("/smlouvy");
+  revalidatePath(`/smlouvy/${id}`);
+  revalidatePath("/prehled");
+  return { ok: true, stav: String(data) };
+}
+
+export async function smazatPodpisyAkce(form: FormData) {
+  const firma = await aktivniFirma();
+  const id = String(form.get("id") ?? "");
+  if (!firma || !/^[0-9a-f-]{36}$/i.test(id)) return;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("smazat_podpisy_smlouvy", { p_smlouva: id });
+  if (error) console.error("Smazání podpisů selhalo:", error.message);
+  revalidatePath(`/smlouvy/${id}`);
+  redirect(`/smlouvy/${id}`);
+}

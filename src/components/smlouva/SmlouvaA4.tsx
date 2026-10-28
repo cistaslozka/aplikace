@@ -39,12 +39,12 @@ export function SmlouvaA4({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
   // strana, která dodává (zhotovitel), je v záhlaví vždy první
   const strany = d.myDodavame
     ? [
-        { s: d.my, r: r.my, z: zastupce("zastupce_my") },
-        { s: d.oni, r: r.oni, z: zastupce("zastupce_oni") },
+        { s: d.my, r: r.my, z: zastupce("zastupce_my"), p: d.podpisy?.my },
+        { s: d.oni, r: r.oni, z: zastupce("zastupce_oni"), p: d.podpisy?.oni },
       ]
     : [
-        { s: d.oni, r: r.oni, z: zastupce("zastupce_oni") },
-        { s: d.my, r: r.my, z: zastupce("zastupce_my") },
+        { s: d.oni, r: r.oni, z: zastupce("zastupce_oni"), p: d.podpisy?.oni },
+        { s: d.my, r: r.my, z: zastupce("zastupce_my"), p: d.podpisy?.my },
       ];
 
   return (
@@ -95,10 +95,21 @@ export function SmlouvaA4({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
             <div>
               V {d.misto || "…………………"} dne {d.datum ? datumCz(d.datum) : "…………………"}
             </div>
-            <div className="mt-14 border-t border-slate-400 pt-1.5">
+            <div className="flex h-14 items-end">
+              {x.p && (
+                // eslint-disable-next-line @next/next/no-img-element -- podpis jako obrázek z plátna
+                <img src={x.p.obrazek} alt={`Podpis: ${x.p.jmeno}`} className="max-h-14 max-w-[220px] object-contain" />
+              )}
+            </div>
+            <div className="border-t border-slate-400 pt-1.5">
               <div className="font-semibold text-navy">{x.r}</div>
               <div className="text-muted">{x.s?.name ?? ""}</div>
               {x.z && <div className="text-muted">{x.z}</div>}
+              {x.p && (
+                <div className="text-[10.5px] text-muted">
+                  Podepsal(a) {x.p.jmeno} na obrazovce {new Date(x.p.kdy).toLocaleString("cs-CZ", { timeZone: "Europe/Prague", dateStyle: "short", timeStyle: "short" })}
+                </div>
+              )}
             </div>
           </div>
         ))}

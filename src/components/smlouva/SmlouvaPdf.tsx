@@ -1,5 +1,5 @@
 import "server-only";
-import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Image, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
 import { B, registrovatPisma } from "@/components/faktura/FakturaPdf";
 import { datumCz } from "@/lib/faktura";
 import { DRUHY_SMLUV, malym, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
@@ -28,12 +28,12 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
   const z = (k: string) => (typeof d.pole[k] === "string" ? (d.pole[k] as string).trim() : "");
   const strany = d.myDodavame
     ? [
-        { s: d.my, r: r.my, z: z("zastupce_my") },
-        { s: d.oni, r: r.oni, z: z("zastupce_oni") },
+        { s: d.my, r: r.my, z: z("zastupce_my"), p: d.podpisy?.my },
+        { s: d.oni, r: r.oni, z: z("zastupce_oni"), p: d.podpisy?.oni },
       ]
     : [
-        { s: d.oni, r: r.oni, z: z("zastupce_oni") },
-        { s: d.my, r: r.my, z: z("zastupce_my") },
+        { s: d.oni, r: r.oni, z: z("zastupce_oni"), p: d.podpisy?.oni },
+        { s: d.my, r: r.my, z: z("zastupce_my"), p: d.podpisy?.my },
       ];
 
   return (
@@ -92,10 +92,20 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
               <Text>
                 V {d.misto || "…………………"} dne {d.datum ? datumCz(d.datum) : "…………………"}
               </Text>
-              <View style={{ marginTop: 42, borderTopWidth: 0.75, borderTopColor: B.slate300, paddingTop: 4 }}>
+              <View style={{ height: 42, justifyContent: "flex-end" }}>
+                {/* eslint-disable-next-line jsx-a11y/alt-text -- obrázek v PDF nemá alt */}
+                {x.p ? <Image src={x.p.obrazek} style={{ maxHeight: 40, maxWidth: 165, objectFit: "contain" }} /> : null}
+              </View>
+              <View style={{ borderTopWidth: 0.75, borderTopColor: B.slate300, paddingTop: 4 }}>
                 <Text style={{ fontWeight: 600, color: B.navy }}>{x.r}</Text>
                 <Text style={{ color: B.muted }}>{x.s?.name ?? ""}</Text>
                 {x.z ? <Text style={{ color: B.muted }}>{x.z}</Text> : null}
+                {x.p ? (
+                  <Text style={{ color: B.muted, fontSize: 7.9 }}>
+                    Podepsal(a) {x.p.jmeno} na obrazovce{" "}
+                    {new Date(x.p.kdy).toLocaleString("cs-CZ", { timeZone: "Europe/Prague", dateStyle: "short", timeStyle: "short" })}
+                  </Text>
+                ) : null}
               </View>
             </View>
           ))}
