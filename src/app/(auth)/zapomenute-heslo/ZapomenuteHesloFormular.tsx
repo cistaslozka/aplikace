@@ -16,7 +16,14 @@ export function ZapomenuteHesloFormular() {
         </Hlaska>
       ) : (
         <form action={akce} className="flex flex-col gap-5">
-          <Pole id="email" label="E-mailová adresa" type="email" autoComplete="email" placeholder="vase@firma.cz" defaultValue={stav.email} />
+          <Pole
+            id="email"
+            label="E-mailová adresa"
+            type="email"
+            autoComplete="email"
+            placeholder="vase@firma.cz"
+            defaultValue={stav.email}
+          />
           <Odeslat odesilam="Odesílám…">Poslat odkaz</Odeslat>
         </form>
       )}

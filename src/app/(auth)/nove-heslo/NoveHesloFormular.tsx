@@ -13,8 +13,22 @@ export function NoveHesloFormular() {
     <Karta nadpis="Nastavte si nové heslo" popis="Potom vás pustíme rovnou do aplikace.">
       {stav.chyba && <Hlaska typ="chyba">{stav.chyba}</Hlaska>}
       <form action={akce} className="flex flex-col gap-5">
-        <Pole id="password" label="Nové heslo" type="password" autoComplete="new-password" minLength={MIN_DELKA_HESLA} placeholder={`Aspoň ${MIN_DELKA_HESLA} znaků`} />
-        <Pole id="password_confirm" label="Nové heslo znovu" type="password" autoComplete="new-password" minLength={MIN_DELKA_HESLA} placeholder="Pro kontrolu" />
+        <Pole
+          id="password"
+          label="Nové heslo"
+          type="password"
+          autoComplete="new-password"
+          minLength={MIN_DELKA_HESLA}
+          placeholder={`Aspoň ${MIN_DELKA_HESLA} znaků`}
+        />
+        <Pole
+          id="password_confirm"
+          label="Nové heslo znovu"
+          type="password"
+          autoComplete="new-password"
+          minLength={MIN_DELKA_HESLA}
+          placeholder="Pro kontrolu"
+        />
         <Odeslat odesilam="Ukládám…">Uložit nové heslo</Odeslat>
       </form>
     </Karta>

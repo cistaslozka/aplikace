@@ -8,12 +8,5 @@ type Props = { searchParams: Promise<{ chyba?: string; email?: string; dalsi?: s
 
 export default async function PrihlaseniPage({ searchParams }: Props) {
   const p = await searchParams;
-  return (
-    <PrihlaseniFormular
-      chybaZAdresy={zprava(p.chyba)}
-      email={p.email}
-      dalsi={p.dalsi}
-      odhlaseno={p.odhlaseno === "1"}
-    />
-  );
+  return <PrihlaseniFormular chybaZAdresy={zprava(p.chyba)} email={p.email} dalsi={p.dalsi} odhlaseno={p.odhlaseno === "1"} />;
 }
