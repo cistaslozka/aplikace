@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 import { odhlasitAkce } from "@/app/(auth)/actions";
+import { prepnoutFirmuAkce } from "@/app/(aplikace)/nastaveni/tym/actions";
 import {
   IconCar,
   IconCard,
@@ -29,7 +30,7 @@ const NAV = [
 
 function NavLink({ href, label, Icon, pro }: (typeof NAV)[number]) {
   const path = usePathname();
-  const active = path === href || path.startsWith(href + "/");
+  const active = path === href || (href !== "/nastaveni" && path.startsWith(href + "/"));
   return (
     <Link
       href={href}
@@ -68,6 +69,9 @@ function Odhlasit({ email, firma }: { email: string; firma: string | null }) {
           <Link href="/predplatne" className="text-[13px] font-semibold text-green-soft hover:text-white md:hidden">
             Předplatné
           </Link>
+          <Link href="/nastaveni/tym" className="text-[13px] font-semibold text-green-soft hover:text-white md:hidden">
+            Tým
+          </Link>
           <button type="submit" className="text-[13px] font-semibold text-green-soft hover:text-white">
             Odhlásit se
           </button>
@@ -77,7 +81,45 @@ function Odhlasit({ email, firma }: { email: string; firma: string | null }) {
   );
 }
 
-export function Sidebar({ email, firma }: { email: string; firma: string | null }) {
+/** Přepínač firem: zobrazí se, jen když je uživatel ve víc firmách (vlastní + pozvánky). */
+function PrepinacFirem({ firmy, aktivni }: { firmy: { id: string; name: string }[]; aktivni: string | null }) {
+  if (firmy.length < 2) return null;
+  return (
+    <form action={prepnoutFirmuAkce} className="flex flex-col gap-1">
+      <label htmlFor="prepinac-firem" className="px-1 text-[12px] font-semibold text-slate-400">
+        Pracujete za firmu
+      </label>
+      <select
+        id="prepinac-firem"
+        name="firma"
+        defaultValue={aktivni ?? undefined}
+        onChange={(e) => e.currentTarget.form?.requestSubmit()}
+        className="min-h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-semibold text-white"
+      >
+        {firmy.map((f) => (
+          <option key={f.id} value={f.id} className="text-navy">
+            {f.name}
+          </option>
+        ))}
+      </select>
+      <noscript>
+        <button className="text-[13px] font-semibold text-green-soft">Přepnout</button>
+      </noscript>
+    </form>
+  );
+}
+
+export function Sidebar({
+  email,
+  firma,
+  firmy = [],
+  aktivniId = null,
+}: {
+  email: string;
+  firma: string | null;
+  firmy?: { id: string; name: string }[];
+  aktivniId?: string | null;
+}) {
   return (
     <aside className="flex flex-col gap-6 bg-navy px-4 py-5 text-slate-300 md:sticky md:top-0 md:h-screen md:w-62 md:shrink-0 md:py-6">
       <div className="flex items-center justify-between gap-3">
@@ -107,7 +149,9 @@ export function Sidebar({ email, firma }: { email: string; firma: string | null 
         <nav aria-label="Účet" className="hidden md:block">
           <NavLink href="/nastaveni" label="Nastavení firmy" Icon={IconSettings} />
           <NavLink href="/predplatne" label="Předplatné" Icon={IconCard} />
+          <NavLink href="/nastaveni/tym" label="Tým" Icon={IconPeople} />
         </nav>
+        <PrepinacFirem firmy={firmy} aktivni={aktivniId} />
         <Odhlasit email={email} firma={firma} />
         <div className="flex flex-wrap gap-x-3 gap-y-1 px-1 text-[12px] text-slate-400">
           <Link href="/obchodni-podminky" className="hover:text-white">

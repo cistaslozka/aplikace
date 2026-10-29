@@ -7,9 +7,9 @@ import { Hlaska, Karta, Odeslat, Pole, Prepinac } from "@/components/auth/Formul
 
 const MIN_DELKA_HESLA = 8;
 
-type Props = { chybaZAdresy?: string; email?: string; odeslano: boolean };
+type Props = { chybaZAdresy?: string; email?: string; odeslano: boolean; dalsi?: string };
 
-export function RegistraceFormular({ chybaZAdresy, email, odeslano }: Props) {
+export function RegistraceFormular({ chybaZAdresy, email, odeslano, dalsi }: Props) {
   const [stav, akce] = useActionState<StavFormulare, FormData>(registrovatAkce, {
     chyba: chybaZAdresy,
     email,
@@ -33,6 +33,7 @@ export function RegistraceFormular({ chybaZAdresy, email, odeslano }: Props) {
       {stav.chyba && <Hlaska typ="chyba">{stav.chyba}</Hlaska>}
 
       <form action={akce} className="flex flex-col gap-5">
+        {dalsi && <input type="hidden" name="dalsi" value={dalsi} />}
         <Pole id="email" label="E-mailová adresa" type="email" autoComplete="email" placeholder="vase@firma.cz" defaultValue={stav.email} />
         <Pole
           id="password"
@@ -64,7 +65,11 @@ export function RegistraceFormular({ chybaZAdresy, email, odeslano }: Props) {
         </p>
       </form>
 
-      <Prepinac text="Máte už u nás účet?" odkaz="Přihlásit se" href="/prihlaseni" />
+      <Prepinac
+        text="Máte už u nás účet?"
+        odkaz="Přihlásit se"
+        href={dalsi ? `/prihlaseni?dalsi=${encodeURIComponent(dalsi)}` : "/prihlaseni"}
+      />
     </Karta>
   );
 }

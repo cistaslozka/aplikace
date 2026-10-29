@@ -68,7 +68,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | hotovo: dobropis (8a), pokladní doklady (8b) |
 | 9 | Pro: B2B rámcová, kupní a nájemní smlouva, plná moc, svěření majetku, záznam o školení BOZP, souhlas GDPR; týmový přístup (účetní, asistentka) | |
 | 10 | HR dokumenty (Pro): HPP, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, vytýkací dopis, cestovní příkaz a vyúčtování (sazby stravného) – **až po kontrole právníkem** | |
-| 11 | **Datová schránka a úřady** (Pro): příprava přihlášky zaměstnance k ČSSZ (REGZEC, JMHZ) a odeslání přes datovou schránku – **návrh viz níže, čeká na rozhodnutí** | |
+| 11 | **Datová schránka a úřady** (Pro): 11a úřední pomocník – co a do kdy poslat (JMHZ, zdravotní pojišťovny, FÚ), údaje připravené k vyplnění, odškrtávání (**hotovo, čeká na nasazení**); 11b napojení na datovou schránku (čtení zpráv, odesílání) – **rozhodne se později** | 11a hotovo |
 
 První verze pro skutečné uživatele = kroky 0–5.
 
@@ -83,6 +83,9 @@ První verze pro skutečné uživatele = kroky 0–5.
 - **Další na řadě:** krok 10 – cestovní příkaz (Basic), pak HR dokumenty (Pro, po kontrole právníkem) a krok 9
   (týmový přístup). E-maily z aplikace, až bude doména cistaslozka.cz + Resend. Platební brána jako poslední,
   až bude s.r.o.
+- **Hotovo naposledy (29. 10.):** tým (pozvánky odkazem, přepínač firem), smlouvy Pro (kupní, rámcová, nájemní,
+  plná moc), HR dokumenty (`src/lib/smlouvy/hr.ts`, stránka `/hr`), Úřady a lhůty (`/hr/urady`, `src/lib/urady.ts`),
+  migrace `20261029225100_tymovy_pristup_a_smlouvy_pro`. Další krok: celková kontrola aplikace.
 - **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“

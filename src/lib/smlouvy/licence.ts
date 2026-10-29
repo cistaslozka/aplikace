@@ -38,7 +38,12 @@ export function clankyLicence(d: DataSmlouvy): Clanek[] {
   const p = d.pole;
   const odmena = cislo(p, "odmena");
   const dph = text(p, "cena_typ");
-  const dphText = dph === "bez_dph" ? " bez DPH. K odměně bude připočtena daň z přidané hodnoty v zákonné sazbě" : dph === "vcetne_dph" ? " včetně DPH" : "";
+  const dphText =
+    dph === "bez_dph"
+      ? " bez DPH. K odměně bude připočtena daň z přidané hodnoty v zákonné sazbě"
+      : dph === "vcetne_dph"
+        ? " včetně DPH"
+        : "";
   const vyhradni = text(p, "vyhrada") === "vyhradni";
 
   return vycistit([
@@ -105,17 +110,47 @@ export const FORMULAR_LICENCE: SekceFormulare[] = [
   {
     nadpis: "Dílo",
     pole: [
-      { k: "dilo", label: "Jaké dílo", typ: "textarea", placeholder: "Např. sada 20 fotografií produktů z focení dne 15. 10. 2026", sirka: "cela" },
+      {
+        k: "dilo",
+        label: "Jaké dílo",
+        typ: "textarea",
+        placeholder: "Např. sada 20 fotografií produktů z focení dne 15. 10. 2026",
+        sirka: "cela",
+      },
       { k: "autor", label: "Autor (nepovinné)", typ: "text", placeholder: "Jméno autora, pokud to není poskytovatel", sirka: "cela" },
     ],
   },
   {
     nadpis: "Rozsah licence",
     pole: [
-      { k: "vyhrada", label: "Licence je", typ: "select", moznosti: [["nevyhradni", "nevýhradní"], ["vyhradni", "výhradní"]], sirka: "tretina" },
-      { k: "doba", label: "Na dobu", typ: "select", moznosti: [["po_celou", "trvání autorských práv"], ["do", "do určitého data"]], sirka: "tretina" },
+      {
+        k: "vyhrada",
+        label: "Licence je",
+        typ: "select",
+        moznosti: [
+          ["nevyhradni", "nevýhradní"],
+          ["vyhradni", "výhradní"],
+        ],
+        sirka: "tretina",
+      },
+      {
+        k: "doba",
+        label: "Na dobu",
+        typ: "select",
+        moznosti: [
+          ["po_celou", "trvání autorských práv"],
+          ["do", "do určitého data"],
+        ],
+        sirka: "tretina",
+      },
       { k: "doba_do", label: "Platí do (nepovinné)", typ: "date", sirka: "tretina" },
-      { k: "zpusob", label: "Způsoby užití (nepovinné)", typ: "text", placeholder: "Prázdné = všechny způsoby. Např. na webu a v tištěných materiálech", sirka: "cela" },
+      {
+        k: "zpusob",
+        label: "Způsoby užití (nepovinné)",
+        typ: "text",
+        placeholder: "Prázdné = všechny způsoby. Např. na webu a v tištěných materiálech",
+        sirka: "cela",
+      },
       { k: "uzemi", label: "Území", typ: "text", sirka: "tretina" },
       { k: "upravy", label: "Smí dílo upravovat", typ: "select", moznosti: ANO_NE, sirka: "tretina" },
       { k: "podlicence", label: "Smí dát podlicenci", typ: "select", moznosti: ANO_NE, sirka: "tretina" },
@@ -125,7 +160,17 @@ export const FORMULAR_LICENCE: SekceFormulare[] = [
     nadpis: "Odměna",
     pole: [
       { k: "odmena", label: "Odměna (prázdné = zdarma)", typ: "kc", placeholder: "0", sirka: "tretina" },
-      { k: "cena_typ", label: "Odměna je", typ: "select", moznosti: [["bez_dph", "bez DPH"], ["vcetne_dph", "včetně DPH"], ["neplatce", "poskytovatel není plátce DPH"]], sirka: "tretina" },
+      {
+        k: "cena_typ",
+        label: "Odměna je",
+        typ: "select",
+        moznosti: [
+          ["bez_dph", "bez DPH"],
+          ["vcetne_dph", "včetně DPH"],
+          ["neplatce", "poskytovatel není plátce DPH"],
+        ],
+        sirka: "tretina",
+      },
       { k: "splatnost", label: "Splatnost (dní)", typ: "cislo", sirka: "tretina" },
     ],
   },
@@ -135,7 +180,16 @@ export const FORMULAR_LICENCE: SekceFormulare[] = [
       { k: "ostatni", label: "Další ujednání (nepovinné)", typ: "textarea", placeholder: "Každý odstavec na nový řádek", sirka: "cela" },
       { k: "zastupce_my", label: "Za nás jedná (nepovinné)", typ: "text", sirka: "pul" },
       { k: "zastupce_oni", label: "Za druhou stranu jedná (nepovinné)", typ: "text", sirka: "pul" },
-      { k: "vyhotoveni", label: "Vyhotovení", typ: "select", moznosti: [["dva", "dva papírové stejnopisy"], ["elektronicky", "elektronicky"]], sirka: "pul" },
+      {
+        k: "vyhotoveni",
+        label: "Vyhotovení",
+        typ: "select",
+        moznosti: [
+          ["dva", "dva papírové stejnopisy"],
+          ["elektronicky", "elektronicky"],
+        ],
+        sirka: "pul",
+      },
     ],
   },
 ];

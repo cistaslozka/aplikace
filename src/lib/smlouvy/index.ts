@@ -6,14 +6,44 @@ import { castka, datumCz, type Strana, type Vzhled } from "../faktura";
   Texty vzorů musí před spuštěním zkontrolovat právník (viz CLAUDE.md, bod 7).
 */
 
-export type DruhSmlouvy = "dilo" | "sluzby" | "licence" | "nda" | "predavaci" | "cestovni";
+export type DruhSmlouvy =
+  | "dilo"
+  | "sluzby"
+  | "licence"
+  | "nda"
+  | "predavaci"
+  | "kupni"
+  | "ramcova"
+  | "najem"
+  | "plna_moc"
+  | "hpp"
+  | "dpp"
+  | "dpc"
+  | "mzdovy_vymer"
+  | "dohoda_skonceni"
+  | "vypoved"
+  | "vytka"
+  | "svereni"
+  | "cestovni";
 
-export const DRUHY_SMLUV: Record<DruhSmlouvy, { nazev: string; my: string; oni: string }> = {
+export const DRUHY_SMLUV: Record<DruhSmlouvy, { nazev: string; my: string; oni: string; pro?: boolean; hr?: boolean }> = {
   dilo: { nazev: "Smlouva o dílo", my: "Zhotovitel", oni: "Objednatel" },
   sluzby: { nazev: "Smlouva o poskytování služeb", my: "Poskytovatel", oni: "Objednatel" },
   licence: { nazev: "Licenční smlouva", my: "Poskytovatel", oni: "Nabyvatel" },
   nda: { nazev: "Dohoda o mlčenlivosti", my: "Strana A", oni: "Strana B" },
   predavaci: { nazev: "Předávací protokol", my: "Předávající", oni: "Přebírající" },
+  kupni: { nazev: "Kupní smlouva", my: "Prodávající", oni: "Kupující", pro: true },
+  ramcova: { nazev: "Rámcová smlouva o spolupráci", my: "Dodavatel", oni: "Odběratel", pro: true },
+  najem: { nazev: "Nájemní smlouva", my: "Pronajímatel", oni: "Nájemce", pro: true },
+  plna_moc: { nazev: "Plná moc", my: "Zmocnitel", oni: "Zmocněnec", pro: true },
+  hpp: { nazev: "Pracovní smlouva", my: "Zaměstnavatel", oni: "Zaměstnanec", pro: true, hr: true },
+  dpp: { nazev: "Dohoda o provedení práce", my: "Zaměstnavatel", oni: "Zaměstnanec", pro: true, hr: true },
+  dpc: { nazev: "Dohoda o pracovní činnosti", my: "Zaměstnavatel", oni: "Zaměstnanec", pro: true, hr: true },
+  mzdovy_vymer: { nazev: "Mzdový výměr", my: "Zaměstnavatel", oni: "Zaměstnanec", pro: true, hr: true },
+  dohoda_skonceni: { nazev: "Dohoda o rozvázání pracovního poměru", my: "Zaměstnavatel", oni: "Zaměstnanec", pro: true, hr: true },
+  vypoved: { nazev: "Výpověď z pracovního poměru", my: "Zaměstnavatel", oni: "Zaměstnanec", pro: true, hr: true },
+  vytka: { nazev: "Upozornění na porušení povinností", my: "Zaměstnavatel", oni: "Zaměstnanec", pro: true, hr: true },
+  svereni: { nazev: "Potvrzení o svěření předmětů", my: "Zaměstnavatel", oni: "Zaměstnanec", pro: true, hr: true },
   cestovni: { nazev: "Cestovní příkaz", my: "Zaměstnavatel", oni: "Zaměstnanec" },
 };
 
@@ -75,8 +105,15 @@ export function vycistit(clanky: (Clanek | null)[]): Clanek[] {
     .filter((c) => c.odstavce.length > 0);
 }
 
-/** Popis strany do záhlaví smlouvy: název, sídlo, IČO, DIČ, zápis v rejstříku. */
-export function popisStrany(s: Strana): string[] {
+/** Zaměstnanec v HR dokumentu se bere z vyplněných polí (jméno, datum narození, bydliště). */
+export function zamestnanec(pole: Record<string, unknown>): Strana | null {
+  const jmeno = text(pole, "zam_jmeno");
+  return jmeno ? { name: jmeno, street: text(pole, "bydliste") || null } : null;
+}
+
+/** Popis strany do záhlaví smlouvy: název, sídlo, IČO, DIČ, zápis v rejstříku. U fyzické osoby (zaměstnance) jméno, narození, bydliště. */
+export function popisStrany(s: Strana, osoba?: { narozeni?: string }): string[] {
+  if (osoba) return [s.name, osoba.narozeni ? `nar. ${osoba.narozeni}` : "", s.street ? `bytem ${s.street}` : ""].filter(Boolean);
   const obec = [s.zip, s.city].filter(Boolean).join(" ");
   return [
     s.name,

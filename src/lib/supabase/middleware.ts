@@ -7,7 +7,7 @@ const VEREJNE = ["/", "/navrh", "/obchodni-podminky", "/ochrana-osobnich-udaju",
 const PRIHLASOVACI = ["/prihlaseni", "/registrace", "/zapomenute-heslo"];
 
 function jeVerejna(cesta: string) {
-  return VEREJNE.includes(cesta) || cesta.startsWith("/auth/");
+  return VEREJNE.includes(cesta) || cesta.startsWith("/auth/") || cesta.startsWith("/pozvanka/");
 }
 
 // Obnoví přihlášení (cookies) při každém požadavku a hlídá přístup ke stránkám.

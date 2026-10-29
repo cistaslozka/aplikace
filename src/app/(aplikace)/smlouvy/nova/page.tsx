@@ -17,5 +17,12 @@ export default async function NovaSmlouvaPage({ searchParams }: { searchParams: 
   if (!(druh in VZORY)) redirect("/smlouvy");
   const dnes = dnesIso();
   const cislo = await dalsiCisloSmlouvy(firma.id, Number(dnes.slice(0, 4)));
-  return <SmlouvaEditor druh={druh as DruhSmlouvy} my={{ ...dodavatelZFirmy(firma), vat_payer: firma.vat_payer }} dalsiCislo={cislo} dnes={dnes} />;
+  return (
+    <SmlouvaEditor
+      druh={druh as DruhSmlouvy}
+      my={{ ...dodavatelZFirmy(firma), vat_payer: firma.vat_payer }}
+      dalsiCislo={cislo}
+      dnes={dnes}
+    />
+  );
 }

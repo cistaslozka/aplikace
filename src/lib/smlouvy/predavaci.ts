@@ -45,7 +45,9 @@ export function clankyPredavaci(d: DataSmlouvy): Clanek[] {
       odstavce: sVadami
         ? [
             `Přebírající přebírá předmět předání s výhradami. Zjištěné vady: ${veta(text(p, "vady"))}`,
-            datum(p, "odstraneni") ? `Předávající zjištěné vady odstraní nejpozději do ${datum(p, "odstraneni")}.` : "Termín odstranění vad si strany dohodnou.",
+            datum(p, "odstraneni")
+              ? `Předávající zjištěné vady odstraní nejpozději do ${datum(p, "odstraneni")}.`
+              : "Termín odstranění vad si strany dohodnou.",
           ]
         : ["Přebírající přebírá předmět předání bez výhrad. Při předání nebyly zjištěny žádné vady."],
     },
@@ -64,16 +66,43 @@ export const FORMULAR_PREDAVACI: SekceFormulare[] = [
   {
     nadpis: "Co se předává",
     pole: [
-      { k: "souvisi", label: "Ke smlouvě nebo objednávce (nepovinné)", typ: "text", placeholder: "Např. smlouva o dílo č. S20260001", sirka: "cela" },
-      { k: "predmet", label: "Předmět předání", typ: "textarea", placeholder: "Např. hotové webové stránky včetně přístupů do administrace", sirka: "cela" },
+      {
+        k: "souvisi",
+        label: "Ke smlouvě nebo objednávce (nepovinné)",
+        typ: "text",
+        placeholder: "Např. smlouva o dílo č. S20260001",
+        sirka: "cela",
+      },
+      {
+        k: "predmet",
+        label: "Předmět předání",
+        typ: "textarea",
+        placeholder: "Např. hotové webové stránky včetně přístupů do administrace",
+        sirka: "cela",
+      },
       { k: "datum_predani", label: "Datum předání", typ: "date", sirka: "pul" },
-      { k: "prilohy", label: "Předané doklady a přílohy (nepovinné)", typ: "text", placeholder: "Např. návod, záruční list, klíče 2×", sirka: "pul" },
+      {
+        k: "prilohy",
+        label: "Předané doklady a přílohy (nepovinné)",
+        typ: "text",
+        placeholder: "Např. návod, záruční list, klíče 2×",
+        sirka: "pul",
+      },
     ],
   },
   {
     nadpis: "Stav",
     pole: [
-      { k: "stav", label: "Předáno", typ: "select", moznosti: [["bez_vad", "bez vad"], ["s_vadami", "s vadami (výhradami)"]], sirka: "pul" },
+      {
+        k: "stav",
+        label: "Předáno",
+        typ: "select",
+        moznosti: [
+          ["bez_vad", "bez vad"],
+          ["s_vadami", "s vadami (výhradami)"],
+        ],
+        sirka: "pul",
+      },
       { k: "odstraneni", label: "Vady odstranit do (nepovinné)", typ: "date", sirka: "pul" },
       { k: "vady", label: "Zjištěné vady", typ: "textarea", placeholder: "Vyplňte jen při předání s vadami", sirka: "cela" },
       { k: "poznamky", label: "Poznámky (nepovinné)", typ: "textarea", sirka: "cela" },

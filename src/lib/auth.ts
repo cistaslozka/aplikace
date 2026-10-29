@@ -60,7 +60,7 @@ export async function prihlasit(email: string, heslo: string): Promise<VysledekP
   return { ok: true };
 }
 
-export async function registrovat(email: string, heslo: string, heslo2: string): Promise<VysledekRegistrace> {
+export async function registrovat(email: string, heslo: string, heslo2: string, dalsi?: string): Promise<VysledekRegistrace> {
   if (!email || !heslo) return chyba("prazdne");
   if (heslo.length < MIN_DELKA_HESLA) return chyba("kratke");
   if (heslo !== heslo2) return chyba("hesla");
@@ -69,7 +69,7 @@ export async function registrovat(email: string, heslo: string, heslo2: string):
   const { data, error } = await supabase.auth.signUp({
     email,
     password: heslo,
-    options: { emailRedirectTo: `${await adresaWebu()}/auth/callback?next=/prehled` },
+    options: { emailRedirectTo: `${await adresaWebu()}/auth/callback?next=${encodeURIComponent(bezpecnyCil(dalsi))}` },
   });
   if (error) return chyba(error.code, error.message);
   // Když je v Supabase zapnuté potvrzování e-mailu, přihlášení vznikne až po kliknutí na odkaz.

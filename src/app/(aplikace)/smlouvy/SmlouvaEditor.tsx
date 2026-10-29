@@ -8,7 +8,7 @@ import { SmlouvaA4 } from "@/components/smlouva/SmlouvaA4";
 import { VyberKlienta } from "@/components/VyberKlienta";
 import type { Strana, Vzhled } from "@/lib/faktura";
 import type { KlientNavrh } from "@/lib/klienti";
-import { DRUHY_SMLUV, malym, role, type DataSmlouvy, type DruhSmlouvy, type PoleFormulare } from "@/lib/smlouvy";
+import { DRUHY_SMLUV, malym, role, zamestnanec, type DataSmlouvy, type DruhSmlouvy, type PoleFormulare } from "@/lib/smlouvy";
 import { VZORY } from "@/lib/smlouvy/vzory";
 import { ulozitSmlouvuAkce, type NovaSmlouva } from "./actions";
 
@@ -36,8 +36,13 @@ export function SmlouvaEditor({
   vychozi?: VychoziSmlouva;
 }) {
   const vzor = VZORY[druh]!;
-  const [myDodavame, setMyDodavame] = useState(vychozi?.we_supply ?? true);
-  const [oni, setOni] = useState<{ id: string | null; s: Strana } | null>(vychozi?.customer ? { id: vychozi.client_id, s: vychozi.customer } : null);
+  // HR dokument: zaměstnanec se vyplňuje ve formuláři, zaměstnavatel je vždy naše firma
+  const hr = !!DRUHY_SMLUV[druh].hr;
+  const [myDodavameVolba, setMyDodavame] = useState(vychozi?.we_supply ?? true);
+  const myDodavame = hr || myDodavameVolba;
+  const [oniVolba, setOni] = useState<{ id: string | null; s: Strana } | null>(
+    vychozi?.customer ? { id: vychozi.client_id, s: vychozi.customer } : null,
+  );
   const [nazev, setNazev] = useState(vychozi?.title ?? DRUHY_SMLUV[druh].nazev);
   const [pole, setPole] = useState<Record<string, unknown>>(() => ({ ...vzor.vychozi(!!my.vat_payer), ...(vychozi?.fields ?? {}) }));
   const [misto, setMisto] = useState(vychozi?.place ?? my.city ?? "");
@@ -46,19 +51,36 @@ export function SmlouvaEditor({
   const [chyba, setChyba] = useState<string | null>(null);
   const [ukladam, start] = useTransition();
   const r = role({ druh, myDodavame });
+  const oni = hr ? (zamestnanec(pole) ? { id: null, s: zamestnanec(pole)! } : null) : oniVolba;
 
-  const data: DataSmlouvy = { druh, cislo: vychozi?.cislo ?? dalsiCislo, nazev, myDodavame, my, oni: oni?.s ?? null, pole, misto, datum, vzhled };
+  const data: DataSmlouvy = {
+    druh,
+    cislo: vychozi?.cislo ?? dalsiCislo,
+    nazev,
+    myDodavame,
+    my,
+    oni: oni?.s ?? null,
+    pole,
+    misto,
+    datum,
+    vzhled,
+  };
   const clanky = vzor.clanky(data);
 
   const nastav = (k: string, v: string) => setPole((p) => ({ ...p, [k]: v }));
 
   function vybrat(k: KlientNavrh) {
-    setOni({ id: k.id, s: { name: k.name, ico: k.ico, dic: k.dic, street: k.street, city: k.city, zip: k.zip, country: k.country, email: k.email } });
+    setOni({
+      id: k.id,
+      s: { name: k.name, ico: k.ico, dic: k.dic, street: k.street, city: k.city, zip: k.zip, country: k.country, email: k.email },
+    });
     setChyba(null);
   }
 
   function ulozit() {
     setChyba(null);
+    const c0 = hr ? vzor.chyby(pole) : null;
+    if (c0) return setChyba(c0);
     if (!oni) return setChyba("Vyberte druhou smluvní stranu.");
     const c = vzor.chyby(pole);
     if (c) return setChyba(c);
@@ -87,7 +109,16 @@ export function SmlouvaEditor({
     const id = `pole-${p.k}`;
     const hodnota = typeof pole[p.k] === "string" || typeof pole[p.k] === "number" ? String(pole[p.k]) : "";
     if (p.typ === "textarea")
-      return <textarea id={id} rows={3} value={hodnota} placeholder={p.placeholder} onChange={(e) => nastav(p.k, e.target.value)} className={tridyVstupu()} />;
+      return (
+        <textarea
+          id={id}
+          rows={3}
+          value={hodnota}
+          placeholder={p.placeholder}
+          onChange={(e) => nastav(p.k, e.target.value)}
+          className={tridyVstupu()}
+        />
+      );
     if (p.typ === "select")
       return (
         <select id={id} value={hodnota} onChange={(e) => nastav(p.k, e.target.value)} className={tridyVstupu()}>
@@ -139,26 +170,36 @@ export function SmlouvaEditor({
         <div className="flex min-w-0 flex-col gap-5">
           <section className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5">
             <h2 className="text-base font-bold">Smluvní strany</h2>
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Vaše role ve smlouvě">
-              <button type="button" aria-pressed={myDodavame} onClick={() => setMyDodavame(true)} className={volba(myDodavame)}>
-                Jsem {malym(DRUHY_SMLUV[druh].my)}
-              </button>
-              <button type="button" aria-pressed={!myDodavame} onClick={() => setMyDodavame(false)} className={volba(!myDodavame)}>
-                Jsem {malym(DRUHY_SMLUV[druh].oni)}
-              </button>
-            </div>
+            {!hr && (
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Vaše role ve smlouvě">
+                <button type="button" aria-pressed={myDodavame} onClick={() => setMyDodavame(true)} className={volba(myDodavame)}>
+                  Jsem {malym(DRUHY_SMLUV[druh].my)}
+                </button>
+                <button type="button" aria-pressed={!myDodavame} onClick={() => setMyDodavame(false)} className={volba(!myDodavame)}>
+                  Jsem {malym(DRUHY_SMLUV[druh].oni)}
+                </button>
+              </div>
+            )}
             <p className="text-sm">
               <span className="text-muted">{r.my}:</span> <strong className="text-navy">{my.name}</strong>
             </p>
-            {oni ? (
+            {hr ? (
+              <p className="text-[13px] text-muted">Zaměstnance vyplňte níže v části Zaměstnanec.</p>
+            ) : oni ? (
               <div className="flex items-start justify-between gap-4 rounded-xl border border-line bg-slate-50 p-4">
                 <div className="min-w-0 text-sm">
                   <div className="text-[12px] font-semibold text-muted">{r.oni}</div>
                   <div className="font-bold text-navy">{oni.s.name}</div>
-                  <div className="text-muted">{[oni.s.street, [oni.s.zip, oni.s.city].filter(Boolean).join(" ")].filter(Boolean).join(", ")}</div>
+                  <div className="text-muted">
+                    {[oni.s.street, [oni.s.zip, oni.s.city].filter(Boolean).join(" ")].filter(Boolean).join(", ")}
+                  </div>
                   <div className="num text-[13px] text-muted">{oni.s.ico && `IČO ${oni.s.ico}`}</div>
                 </div>
-                <button type="button" onClick={() => setOni(null)} className="shrink-0 text-sm font-semibold text-green-ink hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setOni(null)}
+                  className="shrink-0 text-sm font-semibold text-green-ink hover:underline"
+                >
                   Změnit
                 </button>
               </div>
@@ -192,12 +233,24 @@ export function SmlouvaEditor({
               </div>
               <div className="sm:col-span-3">
                 <Pole id="misto" label="Místo podpisu">
-                  <input id="misto" value={misto} onChange={(e) => setMisto(e.target.value)} placeholder="Např. Brno" className={tridyVstupu()} />
+                  <input
+                    id="misto"
+                    value={misto}
+                    onChange={(e) => setMisto(e.target.value)}
+                    placeholder="Např. Brno"
+                    className={tridyVstupu()}
+                  />
                 </Pole>
               </div>
               <div className="sm:col-span-3">
                 <Pole id="datum" label="Datum podpisu">
-                  <input id="datum" type="date" value={datum} onChange={(e) => setDatum(e.target.value)} className={tridyVstupu() + " num"} />
+                  <input
+                    id="datum"
+                    type="date"
+                    value={datum}
+                    onChange={(e) => setDatum(e.target.value)}
+                    className={tridyVstupu() + " num"}
+                  />
                 </Pole>
               </div>
             </div>
@@ -214,7 +267,10 @@ export function SmlouvaEditor({
                   type="button"
                   aria-pressed={vzhled === k}
                   onClick={() => setVzhled(k)}
-                  className={"min-h-9 rounded-lg px-3 text-[13px] font-semibold " + (vzhled === k ? "bg-surface text-navy shadow-sm" : "text-slate-600")}
+                  className={
+                    "min-h-9 rounded-lg px-3 text-[13px] font-semibold " +
+                    (vzhled === k ? "bg-surface text-navy shadow-sm" : "text-slate-600")
+                  }
                 >
                   {t}
                 </button>

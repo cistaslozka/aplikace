@@ -14,9 +14,10 @@ export async function prihlasitAkce(_: StavFormulare, form: FormData): Promise<S
 
 export async function registrovatAkce(_: StavFormulare, form: FormData): Promise<StavFormulare> {
   const email = text(form, "email");
-  const v = await registrovat(email, heslo(form, "password"), heslo(form, "password_confirm"));
+  const dalsi = bezpecnyCil(text(form, "dalsi"));
+  const v = await registrovat(email, heslo(form, "password"), heslo(form, "password_confirm"), dalsi);
   if (!v.ok) return { chyba: v.chyba, email };
-  if (v.stav === "prihlasen") redirect("/prehled");
+  if (v.stav === "prihlasen") redirect(dalsi);
   return { hotovo: true, email };
 }
 

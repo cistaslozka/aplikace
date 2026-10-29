@@ -122,10 +122,19 @@ export function Podepsat({ id, strana, role, vychoziJmeno }: { id: string; stran
         </p>
       )}
       <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={ulozit} disabled={ukladam} className="min-h-11 rounded-xl bg-green px-5 text-sm font-bold text-navy hover:brightness-95 disabled:opacity-60">
+        <button
+          type="button"
+          onClick={ulozit}
+          disabled={ukladam}
+          className="min-h-11 rounded-xl bg-green px-5 text-sm font-bold text-navy hover:brightness-95 disabled:opacity-60"
+        >
           {ukladam ? "Ukládám…" : "Uložit podpis"}
         </button>
-        <button type="button" onClick={smazat} className="min-h-11 rounded-xl border-[1.5px] border-line bg-surface px-4 text-sm font-semibold text-navy hover:border-muted">
+        <button
+          type="button"
+          onClick={smazat}
+          className="min-h-11 rounded-xl border-[1.5px] border-line bg-surface px-4 text-sm font-semibold text-navy hover:border-muted"
+        >
           Smazat a znovu
         </button>
         <button type="button" onClick={() => setOtevreno(false)} className="min-h-11 px-2 text-sm font-semibold text-muted hover:text-navy">

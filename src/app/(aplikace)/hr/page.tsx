@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Pripravujeme } from "@/components/Pripravujeme";
+import { StrankaSmluv } from "../smlouvy/StrankaSmluv";
 
 export const metadata: Metadata = { title: "HR a zaměstnanci" };
 
-export default function Page() {
-  return <Pripravujeme title="HR a zaměstnanci" krok={10} popis="Pracovní smlouvy, DPP, DPČ a další HR dokumenty v tarifu PRO. Před spuštěním je zkontroluje právník." />;
+// HR dokumenty jsou vzory smluv s příznakem `hr` (src/lib/smlouvy/hr.ts), ukládají se mezi smlouvy.
+export default function HrPage() {
+  return <StrankaSmluv hr />;
 }
