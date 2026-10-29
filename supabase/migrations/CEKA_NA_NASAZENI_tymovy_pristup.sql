@@ -178,3 +178,22 @@ alter table public.contracts drop constraint contracts_kind_check;
 alter table public.contracts add constraint contracts_kind_check
   check (kind in ('dilo', 'sluzby', 'licence', 'nda', 'predavaci', 'kupni', 'ramcova', 'najem', 'plna_moc',
     'hpp', 'dpp', 'dpc', 'mzdovy_vymer', 'dohoda_skonceni', 'vypoved', 'vytka', 'svereni', 'cestovni'));
+
+-- Úřady a lhůty: odškrtnuté povinnosti (klíč povinnosti spočítá aplikace, viz src/lib/urady.ts)
+create table public.office_tasks (
+  organization_id uuid not null references public.organizations (id) on delete cascade,
+  task_key text not null check (char_length(task_key) between 1 and 120),
+  done_at timestamptz not null default now(),
+  done_by uuid references auth.users (id) on delete set null default auth.uid(),
+  primary key (organization_id, task_key)
+);
+create index office_tasks_done_by_idx on public.office_tasks (done_by);
+alter table public.office_tasks enable row level security;
+create policy "Clenove vidi splnene povinnosti" on public.office_tasks
+  for select to authenticated using (private.je_clen(organization_id));
+create policy "Clenove odskrtavaji povinnosti" on public.office_tasks
+  for insert to authenticated with check (private.je_clen(organization_id));
+create policy "Clenove rusi odskrtnuti" on public.office_tasks
+  for delete to authenticated using (private.je_clen(organization_id));
+revoke update on public.office_tasks from anon, authenticated;
+revoke all on public.office_tasks from anon;

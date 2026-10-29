@@ -43,7 +43,17 @@ export async function StrankaSmluv({ hr }: { hr: boolean }) {
   return (
     <>
       <section>
-        <h1 className="text-3xl font-extrabold tracking-tight">{hr ? "HR a zaměstnanci" : "Smlouvy"}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-3xl font-extrabold tracking-tight">{hr ? "HR a zaměstnanci" : "Smlouvy"}</h1>
+          {hr && (
+            <Link
+              href="/hr/urady"
+              className="inline-flex min-h-11 items-center rounded-xl bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-2"
+            >
+              Úřady a lhůty →
+            </Link>
+          )}
+        </div>
         <p className="mt-1 text-[15px] text-muted">
           {hr
             ? "Pracovní smlouvy, dohody a další dokumenty pro zaměstnance podle zákoníku práce. Vyplňte údaje a dokument stáhněte jako PDF."

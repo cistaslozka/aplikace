@@ -68,7 +68,7 @@ Až bude hotové skutečné přihlášení (krok 1), nahradí tyto HTML stránky
 | 8 | Účetní doklady: dobropis (opravný daňový doklad), pokladní doklady (příjmový / výdajový), export pro účetní (ISDOC, XLSX) | hotovo: dobropis (8a), pokladní doklady (8b) |
 | 9 | Pro: B2B rámcová, kupní a nájemní smlouva, plná moc, svěření majetku, záznam o školení BOZP, souhlas GDPR; týmový přístup (účetní, asistentka) | |
 | 10 | HR dokumenty (Pro): HPP, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, vytýkací dopis, cestovní příkaz a vyúčtování (sazby stravného) – **až po kontrole právníkem** | |
-| 11 | **Datová schránka a úřady** (Pro): příprava přihlášky zaměstnance k ČSSZ (REGZEC, JMHZ) a odeslání přes datovou schránku – **návrh viz níže, čeká na rozhodnutí** | |
+| 11 | **Datová schránka a úřady** (Pro): 11a úřední pomocník – co a do kdy poslat (JMHZ, zdravotní pojišťovny, FÚ), údaje připravené k vyplnění, odškrtávání (**hotovo, čeká na nasazení**); 11b napojení na datovou schránku (čtení zpráv, odesílání) – **rozhodne se později** | 11a hotovo |
 
 První verze pro skutečné uživatele = kroky 0–5.
 
@@ -84,9 +84,9 @@ První verze pro skutečné uživatele = kroky 0–5.
   (týmový přístup). E-maily z aplikace, až bude doména cistaslozka.cz + Resend. Platební brána jako poslední,
   až bude s.r.o.
 - **⚠️ ČEKÁ NA MICHAELA (připomenout hned na začátku dalšího chatu):** potvrdit (Povolit) změnu databáze
-  `tymovy_pristup_a_smlouvy_pro` (tým, smlouvy Pro a HR dokumenty) – SQL je ve větvi `krok-9a-tym` v `supabase/migrations/CEKA_NA_NASAZENI_tymovy_pristup.sql`
+  `tymovy_pristup_a_smlouvy_pro` (tým, smlouvy Pro, HR dokumenty, úřady a lhůty) – SQL je ve větvi `krok-9a-tym` v `supabase/migrations/CEKA_NA_NASAZENI_tymovy_pristup.sql`
   (po nasazení soubor přejmenovat podle verze ze `supabase_migrations.schema_migrations`), pak otestovat tým a otevřít PR.
-  Sloučit PR #23 → #26 → #28. HR dokumenty (pracovní smlouva, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, upozornění na porušení povinností, svěření předmětů) jsou ve stejné větvi (`src/lib/smlouvy/hr.ts`, stránka `/hr`). Další krok: celková kontrola aplikace.
+  Sloučit PR #23 → #26 → #28. Úřady a lhůty (`/hr/urady`, `src/lib/urady.ts`, tabulka `office_tasks`) – krok 11a datové schránky bez napojení. HR dokumenty (pracovní smlouva, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, upozornění na porušení povinností, svěření předmětů) jsou ve stejné větvi (`src/lib/smlouvy/hr.ts`, stránka `/hr`). Další krok: celková kontrola aplikace.
 - **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“
