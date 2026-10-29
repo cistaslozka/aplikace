@@ -84,9 +84,9 @@ První verze pro skutečné uživatele = kroky 0–5.
   (týmový přístup). E-maily z aplikace, až bude doména cistaslozka.cz + Resend. Platební brána jako poslední,
   až bude s.r.o.
 - **⚠️ ČEKÁ NA MICHAELA (připomenout hned na začátku dalšího chatu):** potvrdit (Povolit) změnu databáze
-  `tymovy_pristup_a_smlouvy_pro` – SQL je ve větvi `krok-9a-tym` v `supabase/migrations/CEKA_NA_NASAZENI_tymovy_pristup.sql`
+  `tymovy_pristup_a_smlouvy_pro` (tým, smlouvy Pro a HR dokumenty) – SQL je ve větvi `krok-9a-tym` v `supabase/migrations/CEKA_NA_NASAZENI_tymovy_pristup.sql`
   (po nasazení soubor přejmenovat podle verze ze `supabase_migrations.schema_migrations`), pak otestovat tým a otevřít PR.
-  Sloučit PR #23 → #26 → #28. Další krok: HR (zaměstnanci a dokumenty, nová migrace).
+  Sloučit PR #23 → #26 → #28. HR dokumenty (pracovní smlouva, DPP, DPČ, mzdový výměr, dohoda o rozvázání, výpověď, upozornění na porušení povinností, svěření předmětů) jsou ve stejné větvi (`src/lib/smlouvy/hr.ts`, stránka `/hr`). Další krok: celková kontrola aplikace.
 - **Čeká na rozhodnutí:** krok 6 – platební brána (Stripe / GoPay / Comgate), účet zakládají Michael a Omar.
   Odeslání e-mailem z kroku 4b přijde, až bude doména a služba Resend.
 - Jak pokračovat v novém chatu: „Přečti ZADANI.md a pokračuj tam, kde jsme skončili.“

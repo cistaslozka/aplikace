@@ -8,7 +8,7 @@ import { SmlouvaA4 } from "@/components/smlouva/SmlouvaA4";
 import { VyberKlienta } from "@/components/VyberKlienta";
 import type { Strana, Vzhled } from "@/lib/faktura";
 import type { KlientNavrh } from "@/lib/klienti";
-import { DRUHY_SMLUV, malym, role, type DataSmlouvy, type DruhSmlouvy, type PoleFormulare } from "@/lib/smlouvy";
+import { DRUHY_SMLUV, malym, role, zamestnanec, type DataSmlouvy, type DruhSmlouvy, type PoleFormulare } from "@/lib/smlouvy";
 import { VZORY } from "@/lib/smlouvy/vzory";
 import { ulozitSmlouvuAkce, type NovaSmlouva } from "./actions";
 
@@ -36,8 +36,11 @@ export function SmlouvaEditor({
   vychozi?: VychoziSmlouva;
 }) {
   const vzor = VZORY[druh]!;
-  const [myDodavame, setMyDodavame] = useState(vychozi?.we_supply ?? true);
-  const [oni, setOni] = useState<{ id: string | null; s: Strana } | null>(
+  // HR dokument: zaměstnanec se vyplňuje ve formuláři, zaměstnavatel je vždy naše firma
+  const hr = !!DRUHY_SMLUV[druh].hr;
+  const [myDodavameVolba, setMyDodavame] = useState(vychozi?.we_supply ?? true);
+  const myDodavame = hr || myDodavameVolba;
+  const [oniVolba, setOni] = useState<{ id: string | null; s: Strana } | null>(
     vychozi?.customer ? { id: vychozi.client_id, s: vychozi.customer } : null,
   );
   const [nazev, setNazev] = useState(vychozi?.title ?? DRUHY_SMLUV[druh].nazev);
@@ -48,6 +51,7 @@ export function SmlouvaEditor({
   const [chyba, setChyba] = useState<string | null>(null);
   const [ukladam, start] = useTransition();
   const r = role({ druh, myDodavame });
+  const oni = hr ? (zamestnanec(pole) ? { id: null, s: zamestnanec(pole)! } : null) : oniVolba;
 
   const data: DataSmlouvy = {
     druh,
@@ -75,6 +79,8 @@ export function SmlouvaEditor({
 
   function ulozit() {
     setChyba(null);
+    const c0 = hr ? vzor.chyby(pole) : null;
+    if (c0) return setChyba(c0);
     if (!oni) return setChyba("Vyberte druhou smluvní stranu.");
     const c = vzor.chyby(pole);
     if (c) return setChyba(c);
@@ -164,18 +170,22 @@ export function SmlouvaEditor({
         <div className="flex min-w-0 flex-col gap-5">
           <section className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5">
             <h2 className="text-base font-bold">Smluvní strany</h2>
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Vaše role ve smlouvě">
-              <button type="button" aria-pressed={myDodavame} onClick={() => setMyDodavame(true)} className={volba(myDodavame)}>
-                Jsem {malym(DRUHY_SMLUV[druh].my)}
-              </button>
-              <button type="button" aria-pressed={!myDodavame} onClick={() => setMyDodavame(false)} className={volba(!myDodavame)}>
-                Jsem {malym(DRUHY_SMLUV[druh].oni)}
-              </button>
-            </div>
+            {!hr && (
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Vaše role ve smlouvě">
+                <button type="button" aria-pressed={myDodavame} onClick={() => setMyDodavame(true)} className={volba(myDodavame)}>
+                  Jsem {malym(DRUHY_SMLUV[druh].my)}
+                </button>
+                <button type="button" aria-pressed={!myDodavame} onClick={() => setMyDodavame(false)} className={volba(!myDodavame)}>
+                  Jsem {malym(DRUHY_SMLUV[druh].oni)}
+                </button>
+              </div>
+            )}
             <p className="text-sm">
               <span className="text-muted">{r.my}:</span> <strong className="text-navy">{my.name}</strong>
             </p>
-            {oni ? (
+            {hr ? (
+              <p className="text-[13px] text-muted">Zaměstnance vyplňte níže v části Zaměstnanec.</p>
+            ) : oni ? (
               <div className="flex items-start justify-between gap-4 rounded-xl border border-line bg-slate-50 p-4">
                 <div className="min-w-0 text-sm">
                   <div className="text-[12px] font-semibold text-muted">{r.oni}</div>

@@ -172,3 +172,9 @@ grant execute on function public.odebrat_clena(uuid, uuid) to authenticated;
 alter table public.contracts drop constraint contracts_kind_check;
 alter table public.contracts add constraint contracts_kind_check
   check (kind in ('dilo', 'sluzby', 'licence', 'nda', 'predavaci', 'kupni', 'ramcova', 'najem', 'plna_moc', 'cestovni'));
+
+-- HR dokumenty (tarif Pro): ukládají se mezi smlouvy, zaměstnanec je v `customer` (jméno, bydliště)
+alter table public.contracts drop constraint contracts_kind_check;
+alter table public.contracts add constraint contracts_kind_check
+  check (kind in ('dilo', 'sluzby', 'licence', 'nda', 'predavaci', 'kupni', 'ramcova', 'najem', 'plna_moc',
+    'hpp', 'dpp', 'dpc', 'mzdovy_vymer', 'dohoda_skonceni', 'vypoved', 'vytka', 'svereni', 'cestovni'));

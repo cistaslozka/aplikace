@@ -1,6 +1,9 @@
 import { datumCz } from "@/lib/faktura";
-import { DRUHY_SMLUV, malym, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
+import { datum as datumPole, DRUHY_SMLUV, malym, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
 import { VZORY } from "@/lib/smlouvy/vzory";
+
+// Dokumenty, které nejsou dvoustranná smlouva: v záhlaví „Strany“ místo „Smluvní strany“
+const JEN_STRANY = new Set(["predavaci", "plna_moc", "mzdovy_vymer", "vypoved", "vytka", "svereni"]);
 
 /*
   Smlouva na obrazovce (náhled v editoru a detail). Šířka A4, výška podle obsahu.
@@ -27,11 +30,11 @@ const V = {
   },
 } as const;
 
-function Strana({ s, role: r }: { s: DataSmlouvy["my"] | null; role: string }) {
+function Strana({ s, role: r, narozeni }: { s: DataSmlouvy["my"] | null; role: string; narozeni?: string }) {
   return (
     <div className="flex flex-col gap-0.5">
       {s ? (
-        popisStrany(s).map((radek, i) => (
+        popisStrany(s, narozeni !== undefined ? { narozeni } : undefined).map((radek, i) => (
           <div key={i} className={i === 0 ? "text-[13px] font-bold text-navy" : ""}>
             {radek}
           </div>
@@ -47,6 +50,7 @@ function Strana({ s, role: r }: { s: DataSmlouvy["my"] | null; role: string }) {
 export function SmlouvaA4({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
   const v = V[d.vzhled];
   const r = role(d);
+  const hr = !!DRUHY_SMLUV[d.druh].hr;
   const zastupce = (k: string) => (typeof d.pole[k] === "string" ? (d.pole[k] as string).trim() : "");
   // strana, která dodává (zhotovitel), je v záhlaví vždy první
   const strany = d.myDodavame
@@ -74,18 +78,18 @@ export function SmlouvaA4({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
 
       <section className="mt-6 flex flex-col gap-4">
         <div className={"text-[11px] font-bold tracking-[0.08em] uppercase " + v.clanek}>
-          {d.druh === "predavaci" || d.druh === "plna_moc" ? "Strany" : "Smluvní strany"}
+          {JEN_STRANY.has(d.druh) ? "Strany" : "Smluvní strany"}
         </div>
         {strany.map((x, i) => (
           <div key={i} className="grid grid-cols-[110px_1fr] gap-3">
             <div className="font-semibold text-navy">{x.r}</div>
             <div>
-              <Strana s={x.s} role={x.r} />
+              <Strana s={x.s} role={x.r} narozeni={hr && x.s === d.oni ? datumPole(d.pole, "narozeni") : undefined} />
               {x.z && <div className="mt-0.5">zastoupen(a): {x.z}</div>}
             </div>
           </div>
         ))}
-        <p>{VZORY[d.druh]?.uvod ?? "uzavírají tuto smlouvu:"}</p>
+        {VZORY[d.druh]?.uvod !== "" && <p>{VZORY[d.druh]?.uvod ?? "uzavírají tuto smlouvu:"}</p>}
       </section>
 
       {clanky.map((c, i) => (

@@ -42,7 +42,7 @@ export function clankyRamcova(d: DataSmlouvy): Clanek[] {
     {
       nadpis: "Předmět smlouvy",
       odstavce: [
-        `Předmětem této smlouvy je úprava podmínek dlouhodobé spolupráce smluvních stran v této oblasti: ${veta(text(p, "predmet") || "…")}`,
+        `Předmětem této smlouvy je úprava podmínek dlouhodobé spolupráce smluvních stran v této oblasti: ${text(p, "predmet") ? veta(text(p, "predmet")) : "…"}`,
         "Jednotlivá plnění (dodávky zboží, služeb nebo děl) budou sjednávána samostatnými objednávkami odběratele a jejich potvrzením dodavatelem. Pro každé takové plnění platí tato smlouva, pokud se strany v objednávce výslovně nedohodnou jinak.",
         "Tato smlouva nezakládá povinnost odběratele objednávat ani povinnost dodavatele každou objednávku přijmout.",
       ],

@@ -25,7 +25,7 @@ export function clankyPlnaMoc(d: DataSmlouvy): Clanek[] {
         (text(p, "druh") === "generalni"
           ? "Zmocnitel tímto zmocňuje zmocněnce, aby jej zastupoval ve všech záležitostech a činil jeho jménem veškeré právní jednání, k nimž není podle zákona třeba zvláštní plné moci, a to zejména v této oblasti: "
           : "Zmocnitel tímto zmocňuje zmocněnce, aby jej zastupoval a jednal jeho jménem v této záležitosti: ") +
-          veta(text(p, "rozsah") || "…"),
+          (text(p, "rozsah") ? veta(text(p, "rozsah")) : "…"),
         "Zmocněnec je oprávněn zejména podávat a přijímat písemnosti, činit návrhy, vzdávat se jich, uzavírat dohody a přijímat plnění, vše v rozsahu tohoto zmocnění.",
       ],
     },

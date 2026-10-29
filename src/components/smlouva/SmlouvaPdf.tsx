@@ -2,8 +2,11 @@ import "server-only";
 import { Document, Image, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
 import { B, registrovatPisma } from "@/components/faktura/FakturaPdf";
 import { datumCz } from "@/lib/faktura";
-import { DRUHY_SMLUV, malym, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
+import { datum as datumPole, DRUHY_SMLUV, malym, popisStrany, role, type Clanek, type DataSmlouvy } from "@/lib/smlouvy";
 import { VZORY } from "@/lib/smlouvy/vzory";
+
+// Dokumenty, které nejsou dvoustranná smlouva: v záhlaví „Strany“ místo „Smluvní strany“
+const JEN_STRANY = new Set(["predavaci", "plna_moc", "mzdovy_vymer", "vypoved", "vytka", "svereni"]);
 
 // PDF smlouvy (víc stran). Rozvržení odpovídá SmlouvaA4.tsx – když měníš jedno, uprav i druhé.
 
@@ -67,6 +70,7 @@ const HLAVA = {
 function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
   const h = HLAVA[d.vzhled];
   const r = role(d);
+  const hr = !!DRUHY_SMLUV[d.druh].hr;
   const z = (k: string) => (typeof d.pole[k] === "string" ? (d.pole[k] as string).trim() : "");
   const strany = d.myDodavame
     ? [
@@ -90,24 +94,24 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
         </View>
 
         <View style={{ marginTop: 18 }}>
-          <Text style={[s.stitek, { color: h.akcent }]}>
-            {d.druh === "predavaci" || d.druh === "plna_moc" ? "STRANY" : "SMLUVNÍ STRANY"}
-          </Text>
+          <Text style={[s.stitek, { color: h.akcent }]}>{JEN_STRANY.has(d.druh) ? "STRANY" : "SMLUVNÍ STRANY"}</Text>
           {strany.map((x, i) => (
             <View key={i} style={{ flexDirection: "row", marginBottom: 8 }} wrap={false}>
               <Text style={{ width: 84, fontWeight: 600, color: B.navy }}>{x.r}</Text>
               <View style={{ flex: 1 }}>
-                {(x.s ? popisStrany(x.s) : ["…"]).map((radek, j) => (
-                  <Text key={j} style={j === 0 ? { fontWeight: 700, color: B.navy, fontSize: 9.8 } : {}}>
-                    {radek}
-                  </Text>
-                ))}
+                {(x.s ? popisStrany(x.s, hr && x.s === d.oni ? { narozeni: datumPole(d.pole, "narozeni") } : undefined) : ["…"]).map(
+                  (radek, j) => (
+                    <Text key={j} style={j === 0 ? { fontWeight: 700, color: B.navy, fontSize: 9.8 } : {}}>
+                      {radek}
+                    </Text>
+                  ),
+                )}
                 {x.z ? <Text>zastoupen(a): {x.z}</Text> : null}
                 <Text style={{ color: B.muted }}>(dále jen „{malym(x.r)}“)</Text>
               </View>
             </View>
           ))}
-          <Text>{VZORY[d.druh]?.uvod ?? "uzavírají tuto smlouvu:"}</Text>
+          {VZORY[d.druh]?.uvod !== "" ? <Text>{VZORY[d.druh]?.uvod ?? "uzavírají tuto smlouvu:"}</Text> : null}
         </View>
 
         {clanky.map((c, i) => (
