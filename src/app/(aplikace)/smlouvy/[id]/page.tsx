@@ -14,8 +14,13 @@ import { Podepsat } from "./Podepsat";
 
 export const metadata: Metadata = { title: "Smlouva" };
 
-const tlacitko = "inline-flex min-h-11 items-center rounded-xl border-[1.5px] border-line bg-surface px-4 text-sm font-semibold text-navy hover:border-muted";
-const BARVA = { koncept: "bg-slate-100 text-slate-600", uzavrena: "bg-green-tint text-green-ink", ukoncena: "bg-amber-tint text-amber" } as const;
+const tlacitko =
+  "inline-flex min-h-11 items-center rounded-xl border-[1.5px] border-line bg-surface px-4 text-sm font-semibold text-navy hover:border-muted";
+const BARVA = {
+  koncept: "bg-slate-100 text-slate-600",
+  uzavrena: "bg-green-tint text-green-ink",
+  ukoncena: "bg-amber-tint text-amber",
+} as const;
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ vytvoreno?: string; upraveno?: string }> };
 
@@ -24,7 +29,9 @@ function ZmenaStavu({ id, stav, text, hlavni = false }: { id: string; stav: stri
     <form action={zmenitStavSmlouvyAkce}>
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="stav" value={stav} />
-      <button className={hlavni ? "min-h-11 rounded-xl bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-2" : tlacitko}>{text}</button>
+      <button className={hlavni ? "min-h-11 rounded-xl bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-2" : tlacitko}>
+        {text}
+      </button>
     </form>
   );
 }
@@ -57,12 +64,17 @@ export default async function SmlouvaPage({ params, searchParams }: Props) {
             </h1>
             <span className={"rounded-full px-2.5 py-1 text-[12.5px] font-semibold " + BARVA[s.status]}>{STAVY_SMLUV[s.status]}</span>
           </div>
-          <a href={`/smlouvy/${s.id}/pdf`} className="inline-flex min-h-11 items-center rounded-xl bg-green px-5 text-sm font-bold text-navy hover:brightness-95">
+          <a
+            href={`/smlouvy/${s.id}/pdf`}
+            className="inline-flex min-h-11 items-center rounded-xl bg-green px-5 text-sm font-bold text-navy hover:brightness-95"
+          >
             Stáhnout PDF
           </a>
         </div>
 
-        {p.vytvoreno === "1" && <Hlaska typ="info">Smlouva je vytvořená jako koncept. Stáhněte PDF, nechte ji podepsat a pak ji označte jako uzavřenou.</Hlaska>}
+        {p.vytvoreno === "1" && (
+          <Hlaska typ="info">Smlouva je vytvořená jako koncept. Stáhněte PDF, nechte ji podepsat a pak ji označte jako uzavřenou.</Hlaska>
+        )}
         {p.upraveno === "1" && <Hlaska typ="info">Změny jsou uložené.</Hlaska>}
 
         <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface p-4">
@@ -96,8 +108,8 @@ export default async function SmlouvaPage({ params, searchParams }: Props) {
             <div>
               <h2 className="text-base font-bold">Podpis na obrazovce</h2>
               <p className="text-[13px] text-muted">
-                Podepište prstem nebo myší, třeba přímo u klienta. Když podepíšou obě strany, smlouva se označí jako podepsaná. Můžete ji také vytisknout a podepsat
-                na papíře.
+                Podepište prstem nebo myší, třeba přímo u klienta. Když podepíšou obě strany, smlouva se označí jako podepsaná. Můžete ji
+                také vytisknout a podepsat na papíře.
               </p>
             </div>
             <div className="flex flex-col gap-3">

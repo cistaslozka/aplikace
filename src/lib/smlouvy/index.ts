@@ -6,14 +6,18 @@ import { castka, datumCz, type Strana, type Vzhled } from "../faktura";
   Texty vzorů musí před spuštěním zkontrolovat právník (viz CLAUDE.md, bod 7).
 */
 
-export type DruhSmlouvy = "dilo" | "sluzby" | "licence" | "nda" | "predavaci" | "cestovni";
+export type DruhSmlouvy = "dilo" | "sluzby" | "licence" | "nda" | "predavaci" | "kupni" | "ramcova" | "najem" | "plna_moc" | "cestovni";
 
-export const DRUHY_SMLUV: Record<DruhSmlouvy, { nazev: string; my: string; oni: string }> = {
+export const DRUHY_SMLUV: Record<DruhSmlouvy, { nazev: string; my: string; oni: string; pro?: boolean }> = {
   dilo: { nazev: "Smlouva o dílo", my: "Zhotovitel", oni: "Objednatel" },
   sluzby: { nazev: "Smlouva o poskytování služeb", my: "Poskytovatel", oni: "Objednatel" },
   licence: { nazev: "Licenční smlouva", my: "Poskytovatel", oni: "Nabyvatel" },
   nda: { nazev: "Dohoda o mlčenlivosti", my: "Strana A", oni: "Strana B" },
   predavaci: { nazev: "Předávací protokol", my: "Předávající", oni: "Přebírající" },
+  kupni: { nazev: "Kupní smlouva", my: "Prodávající", oni: "Kupující", pro: true },
+  ramcova: { nazev: "Rámcová smlouva o spolupráci", my: "Dodavatel", oni: "Odběratel", pro: true },
+  najem: { nazev: "Nájemní smlouva", my: "Pronajímatel", oni: "Nájemce", pro: true },
+  plna_moc: { nazev: "Plná moc", my: "Zmocnitel", oni: "Zmocněnec", pro: true },
   cestovni: { nazev: "Cestovní příkaz", my: "Zaměstnavatel", oni: "Zaměstnanec" },
 };
 

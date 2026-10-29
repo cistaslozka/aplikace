@@ -37,7 +37,9 @@ export function SmlouvaEditor({
 }) {
   const vzor = VZORY[druh]!;
   const [myDodavame, setMyDodavame] = useState(vychozi?.we_supply ?? true);
-  const [oni, setOni] = useState<{ id: string | null; s: Strana } | null>(vychozi?.customer ? { id: vychozi.client_id, s: vychozi.customer } : null);
+  const [oni, setOni] = useState<{ id: string | null; s: Strana } | null>(
+    vychozi?.customer ? { id: vychozi.client_id, s: vychozi.customer } : null,
+  );
   const [nazev, setNazev] = useState(vychozi?.title ?? DRUHY_SMLUV[druh].nazev);
   const [pole, setPole] = useState<Record<string, unknown>>(() => ({ ...vzor.vychozi(!!my.vat_payer), ...(vychozi?.fields ?? {}) }));
   const [misto, setMisto] = useState(vychozi?.place ?? my.city ?? "");
@@ -47,13 +49,27 @@ export function SmlouvaEditor({
   const [ukladam, start] = useTransition();
   const r = role({ druh, myDodavame });
 
-  const data: DataSmlouvy = { druh, cislo: vychozi?.cislo ?? dalsiCislo, nazev, myDodavame, my, oni: oni?.s ?? null, pole, misto, datum, vzhled };
+  const data: DataSmlouvy = {
+    druh,
+    cislo: vychozi?.cislo ?? dalsiCislo,
+    nazev,
+    myDodavame,
+    my,
+    oni: oni?.s ?? null,
+    pole,
+    misto,
+    datum,
+    vzhled,
+  };
   const clanky = vzor.clanky(data);
 
   const nastav = (k: string, v: string) => setPole((p) => ({ ...p, [k]: v }));
 
   function vybrat(k: KlientNavrh) {
-    setOni({ id: k.id, s: { name: k.name, ico: k.ico, dic: k.dic, street: k.street, city: k.city, zip: k.zip, country: k.country, email: k.email } });
+    setOni({
+      id: k.id,
+      s: { name: k.name, ico: k.ico, dic: k.dic, street: k.street, city: k.city, zip: k.zip, country: k.country, email: k.email },
+    });
     setChyba(null);
   }
 
@@ -87,7 +103,16 @@ export function SmlouvaEditor({
     const id = `pole-${p.k}`;
     const hodnota = typeof pole[p.k] === "string" || typeof pole[p.k] === "number" ? String(pole[p.k]) : "";
     if (p.typ === "textarea")
-      return <textarea id={id} rows={3} value={hodnota} placeholder={p.placeholder} onChange={(e) => nastav(p.k, e.target.value)} className={tridyVstupu()} />;
+      return (
+        <textarea
+          id={id}
+          rows={3}
+          value={hodnota}
+          placeholder={p.placeholder}
+          onChange={(e) => nastav(p.k, e.target.value)}
+          className={tridyVstupu()}
+        />
+      );
     if (p.typ === "select")
       return (
         <select id={id} value={hodnota} onChange={(e) => nastav(p.k, e.target.value)} className={tridyVstupu()}>
@@ -155,10 +180,16 @@ export function SmlouvaEditor({
                 <div className="min-w-0 text-sm">
                   <div className="text-[12px] font-semibold text-muted">{r.oni}</div>
                   <div className="font-bold text-navy">{oni.s.name}</div>
-                  <div className="text-muted">{[oni.s.street, [oni.s.zip, oni.s.city].filter(Boolean).join(" ")].filter(Boolean).join(", ")}</div>
+                  <div className="text-muted">
+                    {[oni.s.street, [oni.s.zip, oni.s.city].filter(Boolean).join(" ")].filter(Boolean).join(", ")}
+                  </div>
                   <div className="num text-[13px] text-muted">{oni.s.ico && `IČO ${oni.s.ico}`}</div>
                 </div>
-                <button type="button" onClick={() => setOni(null)} className="shrink-0 text-sm font-semibold text-green-ink hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setOni(null)}
+                  className="shrink-0 text-sm font-semibold text-green-ink hover:underline"
+                >
                   Změnit
                 </button>
               </div>
@@ -192,12 +223,24 @@ export function SmlouvaEditor({
               </div>
               <div className="sm:col-span-3">
                 <Pole id="misto" label="Místo podpisu">
-                  <input id="misto" value={misto} onChange={(e) => setMisto(e.target.value)} placeholder="Např. Brno" className={tridyVstupu()} />
+                  <input
+                    id="misto"
+                    value={misto}
+                    onChange={(e) => setMisto(e.target.value)}
+                    placeholder="Např. Brno"
+                    className={tridyVstupu()}
+                  />
                 </Pole>
               </div>
               <div className="sm:col-span-3">
                 <Pole id="datum" label="Datum podpisu">
-                  <input id="datum" type="date" value={datum} onChange={(e) => setDatum(e.target.value)} className={tridyVstupu() + " num"} />
+                  <input
+                    id="datum"
+                    type="date"
+                    value={datum}
+                    onChange={(e) => setDatum(e.target.value)}
+                    className={tridyVstupu() + " num"}
+                  />
                 </Pole>
               </div>
             </div>
@@ -214,7 +257,10 @@ export function SmlouvaEditor({
                   type="button"
                   aria-pressed={vzhled === k}
                   onClick={() => setVzhled(k)}
-                  className={"min-h-9 rounded-lg px-3 text-[13px] font-semibold " + (vzhled === k ? "bg-surface text-navy shadow-sm" : "text-slate-600")}
+                  className={
+                    "min-h-9 rounded-lg px-3 text-[13px] font-semibold " +
+                    (vzhled === k ? "bg-surface text-navy shadow-sm" : "text-slate-600")
+                  }
                 >
                   {t}
                 </button>

@@ -1,5 +1,9 @@
 import { chybyDilo, clankyDilo, FORMULAR_DILO, vychoziDilo } from "./dilo";
 import type { Clanek, DataSmlouvy, DruhSmlouvy, SekceFormulare } from "./index";
+import { chybyKupni, clankyKupni, FORMULAR_KUPNI, vychoziKupni } from "./kupni";
+import { chybyNajem, clankyNajem, FORMULAR_NAJEM, vychoziNajem } from "./najem";
+import { chybyPlnaMoc, clankyPlnaMoc, FORMULAR_PLNA_MOC, vychoziPlnaMoc } from "./plnaMoc";
+import { chybyRamcova, clankyRamcova, FORMULAR_RAMCOVA, vychoziRamcova } from "./ramcova";
 import { chybyLicence, clankyLicence, FORMULAR_LICENCE, vychoziLicence } from "./licence";
 import { chybyNda, clankyNda, FORMULAR_NDA, vychoziNda } from "./nda";
 import { chybyPredavaci, clankyPredavaci, FORMULAR_PREDAVACI, vychoziPredavaci } from "./predavaci";
@@ -63,6 +67,41 @@ export const VZORY: Partial<Record<DruhSmlouvy, Vzor>> = {
     vychozi: vychoziPredavaci,
     formular: FORMULAR_PREDAVACI,
     uvod: "sepisují tento protokol o předání a převzetí:",
+  },
+  kupni: {
+    clanky: clankyKupni,
+    chyby: chybyKupni,
+    vychozi: vychoziKupni,
+    formular: FORMULAR_KUPNI,
+    podtitul: "uzavřená podle § 2079 a násl. zákona č. 89/2012 Sb., občanský zákoník",
+    uvod: UVOD_SMLOUVY,
+  },
+  ramcova: {
+    clanky: clankyRamcova,
+    chyby: chybyRamcova,
+    vychozi: vychoziRamcova,
+    formular: FORMULAR_RAMCOVA,
+    konec: "doba_do",
+    podtitul: "uzavřená podle § 1746 odst. 2 zákona č. 89/2012 Sb., občanský zákoník",
+    uvod: UVOD_SMLOUVY,
+  },
+  najem: {
+    clanky: clankyNajem,
+    chyby: chybyNajem,
+    vychozi: vychoziNajem,
+    formular: FORMULAR_NAJEM,
+    konec: "doba_do",
+    podtitul: "uzavřená podle § 2201 a násl. zákona č. 89/2012 Sb., občanský zákoník",
+    uvod: UVOD_SMLOUVY,
+  },
+  plna_moc: {
+    clanky: clankyPlnaMoc,
+    chyby: chybyPlnaMoc,
+    vychozi: () => vychoziPlnaMoc(),
+    formular: FORMULAR_PLNA_MOC,
+    konec: "platnost_do",
+    podtitul: "udělená podle § 441 a násl. zákona č. 89/2012 Sb., občanský zákoník",
+    uvod: "Zmocnitel uděluje zmocněnci níže uvedeného dne tuto plnou moc:",
   },
 };
 

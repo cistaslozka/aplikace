@@ -30,12 +30,7 @@ export function clankyNda(d: DataSmlouvy): Clanek[] {
   const p = d.pole;
   const smer = text(p, "smer");
   // kdo informace poskytuje a kdo je chrání
-  const kdo =
-    smer === "my"
-      ? { pos: "Strana A", prij: "Strana B" }
-      : smer === "oni"
-        ? { pos: "Strana B", prij: "Strana A" }
-        : null;
+  const kdo = smer === "my" ? { pos: "Strana A", prij: "Strana B" } : smer === "oni" ? { pos: "Strana B", prij: "Strana A" } : null;
   // Strana A = ta, kdo je ve smlouvě první (podle volby „Jsem strana A“)
   const roky = cislo(p, "doba") ?? 5;
   const pokuta = cislo(p, "pokuta");
@@ -111,8 +106,20 @@ export const FORMULAR_NDA: SekceFormulare[] = [
         ],
         sirka: "cela",
       },
-      { k: "ucel", label: "Účel spolupráce", typ: "textarea", placeholder: "Např. příprava společného e-shopu a cenové nabídky", sirka: "cela" },
-      { k: "informace", label: "Co hlavně chránit (nepovinné)", typ: "textarea", placeholder: "Např. ceníky, seznam zákazníků, zdrojové kódy", sirka: "cela" },
+      {
+        k: "ucel",
+        label: "Účel spolupráce",
+        typ: "textarea",
+        placeholder: "Např. příprava společného e-shopu a cenové nabídky",
+        sirka: "cela",
+      },
+      {
+        k: "informace",
+        label: "Co hlavně chránit (nepovinné)",
+        typ: "textarea",
+        placeholder: "Např. ceníky, seznam zákazníků, zdrojové kódy",
+        sirka: "cela",
+      },
     ],
   },
   {
@@ -128,7 +135,16 @@ export const FORMULAR_NDA: SekceFormulare[] = [
       { k: "ostatni", label: "Další ujednání (nepovinné)", typ: "textarea", placeholder: "Každý odstavec na nový řádek", sirka: "cela" },
       { k: "zastupce_my", label: "Za nás jedná (nepovinné)", typ: "text", sirka: "pul" },
       { k: "zastupce_oni", label: "Za druhou stranu jedná (nepovinné)", typ: "text", sirka: "pul" },
-      { k: "vyhotoveni", label: "Vyhotovení", typ: "select", moznosti: [["dva", "dva papírové stejnopisy"], ["elektronicky", "elektronicky"]], sirka: "pul" },
+      {
+        k: "vyhotoveni",
+        label: "Vyhotovení",
+        typ: "select",
+        moznosti: [
+          ["dva", "dva papírové stejnopisy"],
+          ["elektronicky", "elektronicky"],
+        ],
+        sirka: "pul",
+      },
     ],
   },
 ];

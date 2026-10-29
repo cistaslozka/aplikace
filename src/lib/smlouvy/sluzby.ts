@@ -33,7 +33,11 @@ export function chybySluzby(p: Record<string, unknown>): string | null {
   return null;
 }
 
-const ODMENA_TYP: Record<string, string> = { mesicne: "za každý kalendářní měsíc", hodinove: "za každou započatou hodinu poskytování služeb", jednorazove: "jednorázově" };
+const ODMENA_TYP: Record<string, string> = {
+  mesicne: "za každý kalendářní měsíc",
+  hodinove: "za každou započatou hodinu poskytování služeb",
+  jednorazove: "jednorázově",
+};
 
 export function clankySluzby(d: DataSmlouvy): Clanek[] {
   const p = d.pole;
@@ -114,8 +118,20 @@ export const FORMULAR_SLUZBY: SekceFormulare[] = [
   {
     nadpis: "Služby",
     pole: [
-      { k: "predmet", label: "Jaké služby", typ: "textarea", placeholder: "Např. správa a aktualizace webu, správa sociálních sítí", sirka: "cela" },
-      { k: "rozsah", label: "Rozsah a podrobnosti (nepovinné)", typ: "textarea", placeholder: "Např. do 10 hodin měsíčně, reakce do 2 pracovních dnů", sirka: "cela" },
+      {
+        k: "predmet",
+        label: "Jaké služby",
+        typ: "textarea",
+        placeholder: "Např. správa a aktualizace webu, správa sociálních sítí",
+        sirka: "cela",
+      },
+      {
+        k: "rozsah",
+        label: "Rozsah a podrobnosti (nepovinné)",
+        typ: "textarea",
+        placeholder: "Např. do 10 hodin měsíčně, reakce do 2 pracovních dnů",
+        sirka: "cela",
+      },
       { k: "misto_plneni", label: "Místo (nepovinné)", typ: "text", placeholder: "Např. na dálku", sirka: "cela" },
     ],
   },
@@ -123,7 +139,16 @@ export const FORMULAR_SLUZBY: SekceFormulare[] = [
     nadpis: "Doba trvání",
     pole: [
       { k: "zahajeni", label: "Zahájení (nepovinné)", typ: "date", sirka: "tretina" },
-      { k: "doba", label: "Smlouva je", typ: "select", moznosti: [["neurcita", "na dobu neurčitou"], ["urcita", "na dobu určitou"]], sirka: "tretina" },
+      {
+        k: "doba",
+        label: "Smlouva je",
+        typ: "select",
+        moznosti: [
+          ["neurcita", "na dobu neurčitou"],
+          ["urcita", "na dobu určitou"],
+        ],
+        sirka: "tretina",
+      },
       { k: "doba_do", label: "Platí do (u doby určité)", typ: "date", sirka: "tretina" },
       { k: "vypoved", label: "Výpovědní doba (měsíců)", typ: "cislo", sirka: "tretina" },
     ],
@@ -132,8 +157,28 @@ export const FORMULAR_SLUZBY: SekceFormulare[] = [
     nadpis: "Odměna",
     pole: [
       { k: "odmena", label: "Odměna", typ: "kc", placeholder: "0", sirka: "tretina" },
-      { k: "odmena_typ", label: "Účtuje se", typ: "select", moznosti: [["mesicne", "měsíčně"], ["hodinove", "za hodinu"], ["jednorazove", "jednorázově"]], sirka: "tretina" },
-      { k: "cena_typ", label: "Odměna je", typ: "select", moznosti: [["bez_dph", "bez DPH"], ["vcetne_dph", "včetně DPH"], ["neplatce", "poskytovatel není plátce DPH"]], sirka: "tretina" },
+      {
+        k: "odmena_typ",
+        label: "Účtuje se",
+        typ: "select",
+        moznosti: [
+          ["mesicne", "měsíčně"],
+          ["hodinove", "za hodinu"],
+          ["jednorazove", "jednorázově"],
+        ],
+        sirka: "tretina",
+      },
+      {
+        k: "cena_typ",
+        label: "Odměna je",
+        typ: "select",
+        moznosti: [
+          ["bez_dph", "bez DPH"],
+          ["vcetne_dph", "včetně DPH"],
+          ["neplatce", "poskytovatel není plátce DPH"],
+        ],
+        sirka: "tretina",
+      },
       { k: "splatnost", label: "Splatnost faktury (dní)", typ: "cislo", sirka: "tretina" },
     ],
   },
@@ -143,7 +188,16 @@ export const FORMULAR_SLUZBY: SekceFormulare[] = [
       { k: "ostatni", label: "Další ujednání (nepovinné)", typ: "textarea", placeholder: "Každý odstavec na nový řádek", sirka: "cela" },
       { k: "zastupce_my", label: "Za nás jedná (nepovinné)", typ: "text", placeholder: "Jméno a funkce", sirka: "pul" },
       { k: "zastupce_oni", label: "Za druhou stranu jedná (nepovinné)", typ: "text", placeholder: "Jméno a funkce", sirka: "pul" },
-      { k: "vyhotoveni", label: "Vyhotovení", typ: "select", moznosti: [["dva", "dva papírové stejnopisy"], ["elektronicky", "elektronicky"]], sirka: "pul" },
+      {
+        k: "vyhotoveni",
+        label: "Vyhotovení",
+        typ: "select",
+        moznosti: [
+          ["dva", "dva papírové stejnopisy"],
+          ["elektronicky", "elektronicky"],
+        ],
+        sirka: "pul",
+      },
     ],
   },
 ];

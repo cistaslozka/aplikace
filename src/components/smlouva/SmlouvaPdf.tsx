@@ -10,16 +10,58 @@ import { VZORY } from "@/lib/smlouvy/vzory";
 const RIMSKA = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
 const s = StyleSheet.create({
-  page: { fontFamily: "Inter", fontSize: 9.4, lineHeight: 1.6, color: B.slate800, paddingHorizontal: 42, paddingTop: 42, paddingBottom: 54 },
+  page: {
+    fontFamily: "Inter",
+    fontSize: 9.4,
+    lineHeight: 1.6,
+    color: B.slate800,
+    paddingHorizontal: 42,
+    paddingTop: 42,
+    paddingBottom: 54,
+  },
   stitek: { fontSize: 8, fontWeight: 700, letterSpacing: 0.6, marginBottom: 6 },
   clanekNadpis: { textAlign: "center", fontSize: 9.8, fontWeight: 700, marginTop: 16, marginBottom: 5 },
-  paticka: { position: "absolute", left: 42, right: 42, bottom: 22, fontSize: 7.1, color: B.muted, borderTopWidth: 0.75, borderTopColor: B.line, paddingTop: 6 },
+  paticka: {
+    position: "absolute",
+    left: 42,
+    right: 42,
+    bottom: 22,
+    fontSize: 7.1,
+    color: B.muted,
+    borderTopWidth: 0.75,
+    borderTopColor: B.line,
+    paddingTop: 6,
+  },
 });
 
 const HLAVA = {
-  minimal: { box: { borderBottomWidth: 0.75, borderBottomColor: B.line, paddingBottom: 14 }, nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 22.5, lineHeight: 1.2, color: B.navy }, pod: { color: B.muted }, akcent: B.navy },
-  corporate: { box: { backgroundColor: B.navy, marginHorizontal: -42, marginTop: -42, paddingHorizontal: 42, paddingTop: 33, paddingBottom: 22 }, nadpis: { fontWeight: 700, fontSize: 16.5, lineHeight: 1.2, letterSpacing: 2, color: B.white }, pod: { color: B.slate300 }, akcent: B.navy },
-  creative: { box: { backgroundColor: B.greenTint, borderBottomWidth: 4.5, borderBottomColor: B.green, marginHorizontal: -42, marginTop: -42, paddingHorizontal: 42, paddingTop: 36, paddingBottom: 21 }, nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 25.5, lineHeight: 1.2, color: B.greenInk }, pod: { color: B.navy }, akcent: B.greenInk },
+  minimal: {
+    box: { borderBottomWidth: 0.75, borderBottomColor: B.line, paddingBottom: 14 },
+    nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 22.5, lineHeight: 1.2, color: B.navy },
+    pod: { color: B.muted },
+    akcent: B.navy,
+  },
+  corporate: {
+    box: { backgroundColor: B.navy, marginHorizontal: -42, marginTop: -42, paddingHorizontal: 42, paddingTop: 33, paddingBottom: 22 },
+    nadpis: { fontWeight: 700, fontSize: 16.5, lineHeight: 1.2, letterSpacing: 2, color: B.white },
+    pod: { color: B.slate300 },
+    akcent: B.navy,
+  },
+  creative: {
+    box: {
+      backgroundColor: B.greenTint,
+      borderBottomWidth: 4.5,
+      borderBottomColor: B.green,
+      marginHorizontal: -42,
+      marginTop: -42,
+      paddingHorizontal: 42,
+      paddingTop: 36,
+      paddingBottom: 21,
+    },
+    nadpis: { fontFamily: "Jakarta", fontWeight: 800, fontSize: 25.5, lineHeight: 1.2, color: B.greenInk },
+    pod: { color: B.navy },
+    akcent: B.greenInk,
+  },
 } as const;
 
 function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
@@ -48,7 +90,9 @@ function SmlouvaDokument({ d, clanky }: { d: DataSmlouvy; clanky: Clanek[] }) {
         </View>
 
         <View style={{ marginTop: 18 }}>
-          <Text style={[s.stitek, { color: h.akcent }]}>{d.druh === "predavaci" ? "STRANY" : "SMLUVNÍ STRANY"}</Text>
+          <Text style={[s.stitek, { color: h.akcent }]}>
+            {d.druh === "predavaci" || d.druh === "plna_moc" ? "STRANY" : "SMLUVNÍ STRANY"}
+          </Text>
           {strany.map((x, i) => (
             <View key={i} style={{ flexDirection: "row", marginBottom: 8 }} wrap={false}>
               <Text style={{ width: 84, fontWeight: 600, color: B.navy }}>{x.r}</Text>

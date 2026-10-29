@@ -9,13 +9,21 @@ import { seznamSmluv } from "@/lib/smlouvyDb";
 
 export const metadata: Metadata = { title: "Smlouvy" };
 
-const BARVA = { koncept: "bg-slate-100 text-slate-600", uzavrena: "bg-green-tint text-green-ink", ukoncena: "bg-amber-tint text-amber" } as const;
+const BARVA = {
+  koncept: "bg-slate-100 text-slate-600",
+  uzavrena: "bg-green-tint text-green-ink",
+  ukoncena: "bg-amber-tint text-amber",
+} as const;
 const POPISY: Record<DruhSmlouvy, string> = {
   dilo: "Web, grafika, stavba, výroba – výsledek s termínem a cenou.",
   sluzby: "Pravidelná nebo opakovaná služba (správa, účetnictví, marketing).",
   licence: "Svolení k užití vašeho díla (fotky, texty, software).",
   nda: "Ochrana důvěrných informací a know-how.",
   predavaci: "Potvrzení o předání díla nebo věci.",
+  kupni: "Prodej věci jiné firmě – cena, předání, vlastnictví.",
+  ramcova: "Dlouhodobá spolupráce, jednotlivé zakázky přes objednávky.",
+  najem: "Pronájem kanceláře, skladu nebo stroje.",
+  plna_moc: "Oprávnění, aby za vás jednal někdo jiný.",
   cestovni: "Pracovní cesta a vyúčtování náhrad.",
 };
 
@@ -34,9 +42,16 @@ export default async function SmlouvyPage() {
 
       <section aria-label="Nová smlouva" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {(Object.keys(DRUHY_SMLUV) as DruhSmlouvy[]).map((k) =>
-          VZORY[k] ? (
-            <Link key={k} href={`/smlouvy/nova?druh=${k}`} className="group flex flex-col gap-1.5 rounded-2xl border-[1.5px] border-line bg-surface p-5 hover:border-green-ink">
-              <span className="text-base font-bold text-navy group-hover:text-green-ink">+ {DRUHY_SMLUV[k].nazev}</span>
+          VZORY[k] || k === "cestovni" ? (
+            <Link
+              key={k}
+              href={k === "cestovni" ? "/cestovni-prikazy/novy" : `/smlouvy/nova?druh=${k}`}
+              className="group flex flex-col gap-1.5 rounded-2xl border-[1.5px] border-line bg-surface p-5 hover:border-green-ink"
+            >
+              <span className="flex items-center gap-2 text-base font-bold text-navy group-hover:text-green-ink">
+                + {DRUHY_SMLUV[k].nazev}
+                {DRUHY_SMLUV[k].pro && <span className="rounded-full bg-green-soft px-2 py-0.5 text-[11px] font-bold text-navy">PRO</span>}
+              </span>
               <span className="text-[13px] text-muted">{POPISY[k]}</span>
             </Link>
           ) : (
@@ -64,7 +79,10 @@ export default async function SmlouvyPage() {
               const zbyva = s.valid_until && s.status === "uzavrena" ? dnuMezi(dnes, s.valid_until) : null;
               return (
                 <li key={s.id}>
-                  <Link href={`/smlouvy/${s.id}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3.5 hover:bg-slate-50">
+                  <Link
+                    href={`/smlouvy/${s.id}`}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3.5 hover:bg-slate-50"
+                  >
                     <span className="min-w-0">
                       <span className="font-semibold text-navy">{s.title}</span>
                       <span className="text-muted"> · {s.customer.name}</span>
@@ -74,7 +92,9 @@ export default async function SmlouvyPage() {
                         {zbyva !== null && zbyva >= 0 && zbyva <= 30 && <span className="font-semibold text-amber"> · za {zbyva} dní</span>}
                       </span>
                     </span>
-                    <span className={"rounded-full px-2.5 py-1 text-[12.5px] font-semibold " + BARVA[s.status]}>{STAVY_SMLUV[s.status]}</span>
+                    <span className={"rounded-full px-2.5 py-1 text-[12.5px] font-semibold " + BARVA[s.status]}>
+                      {STAVY_SMLUV[s.status]}
+                    </span>
                   </Link>
                 </li>
               );

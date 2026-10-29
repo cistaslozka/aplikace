@@ -52,7 +52,16 @@ export async function ulozitSmlouvuAkce(s: NovaSmlouva): Promise<{ ok: false; ch
       kind: s.kind,
       client_id: s.client_id,
       we_supply: s.we_supply,
-      customer: { name: c.name.trim(), ico: c.ico || null, dic: c.dic || null, street: c.street || null, city: c.city || null, zip: c.zip || null, country: c.country || "CZ", email: c.email || null },
+      customer: {
+        name: c.name.trim(),
+        ico: c.ico || null,
+        dic: c.dic || null,
+        street: c.street || null,
+        city: c.city || null,
+        zip: c.zip || null,
+        country: c.country || "CZ",
+        email: c.email || null,
+      },
       title: s.title.trim().slice(0, 200),
       fields,
       place: s.place.trim().slice(0, 100),
@@ -63,7 +72,10 @@ export async function ulozitSmlouvuAkce(s: NovaSmlouva): Promise<{ ok: false; ch
   });
   if (error || !id) {
     console.error("Uložení smlouvy selhalo:", error?.code, error?.message);
-    return { ok: false, chyba: error?.code === "P0001" || error?.code === "22023" ? error.message : "Smlouvu se nepodařilo uložit. Zkuste to prosím znovu." };
+    return {
+      ok: false,
+      chyba: error?.code === "P0001" || error?.code === "22023" ? error.message : "Smlouvu se nepodařilo uložit. Zkuste to prosím znovu.",
+    };
   }
   revalidatePath("/smlouvy");
   revalidatePath("/prehled");
@@ -83,14 +95,22 @@ export async function zmenitStavSmlouvyAkce(form: FormData) {
   redirect(`/smlouvy/${id}`);
 }
 
-export async function podepsatSmlouvuAkce(id: string, strana: "my" | "oni", obrazek: string, jmeno: string): Promise<{ ok: true; stav: string } | { ok: false; chyba: string }> {
+export async function podepsatSmlouvuAkce(
+  id: string,
+  strana: "my" | "oni",
+  obrazek: string,
+  jmeno: string,
+): Promise<{ ok: true; stav: string } | { ok: false; chyba: string }> {
   const firma = await aktivniFirma();
   if (!firma || !/^[0-9a-f-]{36}$/i.test(id)) return { ok: false, chyba: "Smlouva nenalezena." };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("podepsat_smlouvu", { p_smlouva: id, p_strana: strana, p_obrazek: obrazek, p_jmeno: jmeno });
   if (error) {
     console.error("Podpis smlouvy selhal:", error.code, error.message);
-    return { ok: false, chyba: ["P0001", "22023"].includes(error.code) ? error.message : "Podpis se nepodařilo uložit. Zkuste to prosím znovu." };
+    return {
+      ok: false,
+      chyba: ["P0001", "22023"].includes(error.code) ? error.message : "Podpis se nepodařilo uložit. Zkuste to prosím znovu.",
+    };
   }
   revalidatePath("/smlouvy");
   revalidatePath(`/smlouvy/${id}`);
