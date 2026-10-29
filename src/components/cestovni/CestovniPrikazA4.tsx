@@ -136,7 +136,8 @@ export function CestovniPrikazA4({ d }: { d: DataCesty }) {
             </span>
             <span className="text-right">{castka(v.jizdne.zakladni)}</span>
             <span>
-              Pohonné hmoty: {mnozstvi(d.vstup.km)} km × {mnozstvi(d.vstup.spotreba)} {palivo.jednotka}/100 km × {castka(d.vstup.cenaPaliva)}/{palivo.jednotka}
+              Pohonné hmoty: {mnozstvi(d.vstup.km)} km × {mnozstvi(d.vstup.spotreba)} {palivo.jednotka}/100 km ×{" "}
+              {castka(d.vstup.cenaPaliva)}/{palivo.jednotka}
             </span>
             <span className="text-right">{castka(v.jizdne.palivo)}</span>
           </>
@@ -172,7 +173,7 @@ export function CestovniPrikazA4({ d }: { d: DataCesty }) {
         ))}
       </div>
       <footer className="pt-3 text-[9px] text-muted">
-        Sazby stravného a náhrad podle zákoníku práce a {v.sazby.predpis} Vystaveno v systému čistásložka.cz.
+        Sazby stravného a náhrad: zákoník práce, {v.sazby.predpis} Vystaveno v systému čistásložka.cz.
       </footer>
     </article>
   );

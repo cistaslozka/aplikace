@@ -169,6 +169,13 @@ uživatelů (týmový přístup v Pro).
   neuhrazené faktury – faktura se označí jako uhrazená (způsob úhrady hotově), storno dokladu ji vrátí.
   Stránky `/pokladna` (zůstatek, příjmy a výdaje za rok), `/pokladna/nova`, `/pokladna/<id>` a PDF A5 na šířku.
   Upozornění na limit hotovosti 270 000 Kč.
+- `travel_orders` – cestovní příkazy s vyúčtováním tuzemské cesty (CP20260001). Vstupy v `trip` (`vstup` =
+  odjezd, příjezd, doprava, km, spotřeba, palivo, cena paliva, jídla zdarma po dnech, výdaje, záloha; `vozidlo`),
+  součty (`meal_allowance`, `vehicle_allowance`, `expenses`, `advance`, `total`) počítá server funkcí
+  `vyuctovat` ze `src/lib/cestovni.ts` (stejná jako náhled). Sazby 2026 v `SAZBY` (vyhl. 573/2025 Sb.,
+  novely 78/2026 – nafta od 1. 6., 175/2026 – benzín 95 od 1. 10.); **každý rok a při změně cen PHM doplnit
+  řádek**. Stravné po kalendářních dnech: 5–12 h, nad 12 do 18 h, nad 18 h; krácení 70/35/25 % za jídlo zdarma.
+  Zapisuje jen `ulozit_cestovni_prikaz(p)`, storno `stornovat_cestovni_prikaz(id)`. Zahraniční cesty zatím ne.
 - `invoice_reminders` – upomínky (1.–3.) k neuhrazené faktuře po splatnosti. Vytváří je jen funkce
   `vytvorit_upominku(faktura, dnes)`, nová lhůta k úhradě je 7 dní. PDF: `/faktury/<id>/upominka/<1–3>`.
 - `contracts` – smlouvy (druh, číslo S…, strany jako kopie, `fields` = vyplněný vzor, `valid_until`, stav
