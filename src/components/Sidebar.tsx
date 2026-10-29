@@ -5,13 +5,25 @@ import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 import { odhlasitAkce } from "@/app/(auth)/actions";
 import { prepnoutFirmuAkce } from "@/app/(aplikace)/nastaveni/tym/actions";
-import { IconCard, IconCash, IconClients, IconContract, IconDashboard, IconInvoice, IconPeople, IconPlus, IconSettings } from "./icons";
+import {
+  IconCar,
+  IconCard,
+  IconCash,
+  IconClients,
+  IconContract,
+  IconDashboard,
+  IconInvoice,
+  IconPeople,
+  IconPlus,
+  IconSettings,
+} from "./icons";
 
 const NAV = [
   { href: "/prehled", label: "Přehled", Icon: IconDashboard },
   { href: "/faktury", label: "Faktury", Icon: IconInvoice },
   { href: "/smlouvy", label: "Smlouvy", Icon: IconContract },
   { href: "/pokladna", label: "Pokladna", Icon: IconCash },
+  { href: "/cestovni-prikazy", label: "Cestovní příkazy", Icon: IconCar },
   { href: "/hr", label: "HR a zaměstnanci", Icon: IconPeople, pro: true },
   { href: "/klienti", label: "Adresář klientů", Icon: IconClients },
 ];
