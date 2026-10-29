@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
     "/faktury/[id]/upominka/[cislo]": SOUBORY_PRO_PDF,
     "/smlouvy/[id]/pdf": SOUBORY_PRO_PDF,
     "/pokladna/[id]/pdf": SOUBORY_PRO_PDF,
+    "/cestovni-prikazy/[id]/pdf": SOUBORY_PRO_PDF,
   },
   serverExternalPackages: ["@react-pdf/renderer"],
   async rewrites() {

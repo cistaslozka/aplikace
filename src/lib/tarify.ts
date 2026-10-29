@@ -16,7 +16,7 @@ export const TARIFY: Record<Tarif, { nazev: string; cena: number; popis: string;
       { t: "Smlouvy o dílo a o službách, licenční smlouva, NDA" },
       { t: "Předávací protokoly a podpis na obrazovce" },
       { t: "Adresář klientů s načtením z ARES" },
-      { t: "Cestovní příkazy", brzy: true },
+      { t: "Cestovní příkazy s vyúčtováním" },
     ],
   },
   pro: {

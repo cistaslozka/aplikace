@@ -69,6 +69,15 @@ export const IconCash = (p: P) => (
   </svg>
 );
 
+export const IconCar = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M5 17H3v-5l2-5h14l2 5v5h-2" />
+    <path d="M3 12h18" />
+    <circle cx="7.5" cy="17" r="2" />
+    <circle cx="16.5" cy="17" r="2" />
+  </svg>
+);
+
 export const IconCard = (p: P) => (
   <svg {...base} {...p}>
     <rect x="2" y="5" width="20" height="14" rx="2" />
