@@ -168,12 +168,7 @@ $$;
 revoke all on function public.odebrat_clena(uuid, uuid) from public, anon;
 grant execute on function public.odebrat_clena(uuid, uuid) to authenticated;
 
--- Nové vzory smluv (tarif Pro): kupní, rámcová, nájemní smlouva a plná moc
-alter table public.contracts drop constraint contracts_kind_check;
-alter table public.contracts add constraint contracts_kind_check
-  check (kind in ('dilo', 'sluzby', 'licence', 'nda', 'predavaci', 'kupni', 'ramcova', 'najem', 'plna_moc', 'cestovni'));
-
--- HR dokumenty (tarif Pro): ukládají se mezi smlouvy, zaměstnanec je v `customer` (jméno, bydliště)
+-- Nové vzory smluv (Pro) a HR dokumenty
 alter table public.contracts drop constraint contracts_kind_check;
 alter table public.contracts add constraint contracts_kind_check
   check (kind in ('dilo', 'sluzby', 'licence', 'nda', 'predavaci', 'kupni', 'ramcova', 'najem', 'plna_moc',
