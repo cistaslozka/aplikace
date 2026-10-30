@@ -30,44 +30,56 @@ const SLOUPCE =
 /** Cookie s id firmy, kterou si uživatel vybral (když je členem víc firem). */
 export const COOKIE_FIRMA = "firma";
 
-/** Firmy, do kterých má uživatel přístup (vlastní i ty, kam byl pozván). */
-export const mojeFirmy = cache(async (): Promise<{ id: string; name: string; role: "owner" | "member" }[]> => {
+type ClenstviFirmy = { role: "owner" | "member"; firma: Firma };
+
+/**
+ * Přihlášený uživatel. `cache()` = v rámci jednoho požadavku se getUser() zavolá jen jednou,
+ * i když ho potřebuje víc míst (layout, načtení firem). Ušetří to dotazy na server.
+ */
+export const prihlasenyUzivatel = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  return user;
+});
+
+/**
+ * Firmy, do kterých má uživatel přístup, i s jejich úplnými údaji. Jeden dotaz s napojením
+ * na organizace (RLS je pustí jen vlastní firmy), takže se nemusí načítat firma zvlášť.
+ */
+const clenstvi = cache(async (): Promise<ClenstviFirmy[]> => {
+  const user = await prihlasenyUzivatel();
   if (!user) return [];
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("memberships")
-    .select("role, created_at, organizations (id, name)")
+    .select(`role, created_at, organizations (${SLOUPCE})`)
     .eq("user_id", user.id)
     .order("created_at", { ascending: true });
   if (error) console.error("Načtení firem selhalo:", error.message);
   return (data ?? []).flatMap((m) => {
-    const o = m.organizations as unknown as { id: string; name: string } | null;
-    return o ? [{ id: o.id, name: o.name, role: m.role as "owner" | "member" }] : [];
+    const o = m.organizations as unknown as Firma | null;
+    return o ? [{ role: m.role as "owner" | "member", firma: o }] : [];
   });
+});
+
+/** Seznam firem pro přepínač (jen id, název a role). */
+export const mojeFirmy = cache(async (): Promise<{ id: string; name: string; role: "owner" | "member" }[]> => {
+  return (await clenstvi()).map((c) => ({ id: c.firma.id, name: c.firma.name, role: c.role }));
 });
 
 /**
  * Firma, se kterou uživatel právě pracuje: vybraná v přepínači (cookie), jinak první, do které patří.
- * cache() = v rámci jednoho požadavku se dotaz pošle jen jednou.
  */
 export const aktivniFirma = cache(async (): Promise<Firma | null> => {
-  const [firmy, c] = await Promise.all([mojeFirmy(), cookies()]);
+  const [firmy, c] = await Promise.all([clenstvi(), cookies()]);
   if (!firmy.length) return null;
   const vybrana = c.get(COOKIE_FIRMA)?.value;
-  const id = firmy.find((f) => f.id === vybrana)?.id ?? firmy[0].id;
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("organizations").select(SLOUPCE).eq("id", id).maybeSingle();
-  if (error) {
-    console.error("Načtení firmy selhalo:", error.message);
-    return null;
-  }
-  return data as Firma | null;
+  return (firmy.find((f) => f.firma.id === vybrana) ?? firmy[0]).firma;
 });
 
 /** Role přihlášeného uživatele v aktivní firmě. */
 export async function mojeRole(organizationId: string): Promise<"owner" | "member" | null> {
-  return (await mojeFirmy()).find((f) => f.id === organizationId)?.role ?? null;
+  return (await clenstvi()).find((c) => c.firma.id === organizationId)?.role ?? null;
 }

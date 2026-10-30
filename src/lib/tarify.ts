@@ -23,15 +23,14 @@ export const TARIFY: Record<Tarif, { nazev: string; cena: number; popis: string;
     nazev: "Pro",
     cena: 449,
     popis: "Pro firmy se zaměstnanci a týmem.",
-    // Funkce navíc se teprve připravují (ZADANI.md, kroky 8–10). Až budou hotové, smazat `brzy`.
-    brzy: true,
     funkce: [
       { t: "Vše z tarifu Basic" },
-      { t: "HR dokumenty: HPP, DPP, DPČ, mzdové výměry, ukončení poměru", brzy: true },
-      { t: "Firemní procesy: svěření majetku, BOZP, GDPR", brzy: true },
-      { t: "Pokladní doklady a dobropisy", brzy: true },
-      { t: "B2B smlouvy a plné moci", brzy: true },
-      { t: "Týmový přístup: víc uživatelů v jedné firmě", brzy: true },
+      { t: "HR dokumenty: pracovní smlouva, DPP, DPČ, mzdový výměr, výpověď" },
+      { t: "Dohoda o rozvázání, upozornění na porušení povinností, svěření předmětů" },
+      { t: "Úřady a lhůty: co a do kdy poslat na ČSSZ, pojišťovnu a finanční úřad" },
+      { t: "B2B smlouvy: kupní, rámcová, nájemní a plná moc" },
+      { t: "Pokladní doklady a dobropisy" },
+      { t: "Týmový přístup: víc uživatelů v jedné firmě" },
     ],
   },
 };
