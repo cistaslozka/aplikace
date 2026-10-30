@@ -1,19 +1,13 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
-import { aktivniFirma, mojeFirmy } from "@/lib/firma";
-import { createClient } from "@/lib/supabase/server";
+import { aktivniFirma, mojeFirmy, prihlasenyUzivatel } from "@/lib/firma";
 
 // Rozvržení všech stránek po přihlášení: boční menu + obsah.
 // Na mobilu je menu nahoře a dá se posouvat do strany.
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   // Pojistka navíc k middleware: bez přihlášení se aplikace nevykreslí.
+  const [user, firma, firmy] = await Promise.all([prihlasenyUzivatel(), aktivniFirma(), mojeFirmy()]);
   if (!user) redirect("/prihlaseni");
-  const [firma, firmy] = await Promise.all([aktivniFirma(), mojeFirmy()]);
 
   return (
     <div className="min-h-screen md:flex">
